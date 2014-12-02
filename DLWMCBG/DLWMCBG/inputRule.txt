@@ -1,0 +1,26 @@
+1 insert an X
+2 delete an X
+3 insert a Y
+4 delete a Y
+5 query an X's status
+6 query an X's mate
+7 query a Y's status
+8 query a Y's mate
+
+format of command 
+flag X/Y
+
+format of X
+id begin end
+
+format of Y
+id
+
+example
+1 1 1 8 3	means an X with id 1, begin 1, end 8, and weight 3 is to be inserted
+//8 16 		means need to query the mate of the Y with id 16 
+//6 10 3 9	means need to query the mate of the X with id 10, begin 3 and end 9
+
+Note
+//only command 1 with 4 params
+//the format of X in query command should contain all info.
