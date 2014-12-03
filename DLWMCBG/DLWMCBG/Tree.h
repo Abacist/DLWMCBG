@@ -9,16 +9,29 @@ public:
 	vector<X> _Z;
 	vector<X> _I;
 	vector<X> _T;
-	//ZL,ZR tbd
+	vector<X> _ZR;	// corresponds to _matched2 in FAW	
+	//ZL tbd
+
 	TreeNode* _left;
 	TreeNode *_right;
 	TreeNode *_parent;
 	
 	//process to be implemented
-	Msg insertXinNode(X x);
-	TreeNode();//params tbd;
-	void splitTreeNode(X x);//include maintain the sets
+	TreeNode(vector<Y>);	//init, params tbd;
+
+	Y getIntervalStart();
+
+	void splitDSNode(X);
+	void updateAuxSet4Split();
+
+	
+	Msg insertXinNode(X x);	
+	
 	//calculate Replaceable Set and Compensable Set tbd
+	Y findjInES(vector<Y>*, Y);		// return the least tight piont greater than y in ES 
+	Y findlInEE(vector<Y>*, Y);		// return the greatest tight piont less than y in ES 
+
+
 };
 
 class Tree
@@ -29,9 +42,10 @@ public:
 	
 	
 	//process to be implemented
-	TreeNode* locateLeaf(X x);//include split
-	TreeNode* locateLeaf(Y y);
-	Tree();
+	Tree(vector<Y>);	// init
+
+	TreeNode* locateLeaf(X x);	//include split
+	TreeNode* locateLeaf(Y y);	
 	bool insertXinTree(X x);
 	
 };

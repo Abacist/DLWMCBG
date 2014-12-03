@@ -9,44 +9,50 @@
 
 using namespace std;
 
+// structure of a y vertex
 struct Y
 {
-	double _y;
+	int _id;	// id of x, assuming distinctive
+	// Notes: the y vertex with _id=-1 denotes the empty y, which is used in msg transmission.
+
 	bool operator<(const Y& y)
 	{
-		return this->_y < y._y;
+		return this->_id < y._id;
 	}
 	bool operator<=(const Y& y)
 	{
-		return this->_y <= y._y;
+		return this->_id <= y._id;
 	}
 	bool operator>(const Y& y)
 	{
-		return this->_y > y._y;
+		return this->_id > y._id;
 	}
 	bool operator>=(const Y& y)
 	{
-		return this->_y >= y._y;
+		return this->_id >= y._id;
 	}
 	bool operator==(const Y& y)
 	{
-		return this->_y == y._y;
+		return this->_id == y._id;
 	}
 	bool operator!=(const Y& y)
 	{
-		return this->_y != y._y;
+		return this->_id != y._id;
 	}
 
 };
 
 ostream& operator<<(ostream& os, const Y& rhs);
 
+// structure of an x vertex
 struct X
 {
-	int _id;
-	Y _begin;
-	Y _end;
-	int _w;	// weight, assume it is positive
+	int _id;	// id of x, assuming distinctive
+	// Notes: the x vertex with _id=-1 denotes the empty x, which is used in msg transmission.
+
+	Y _s;	// the start of the interval of the neighbour of the x
+	Y _e;	// the end of the interval of the neighbour of the x
+	int _w;	// the weight of the x, assuming it is positive
 	bool operator==(const X& x)
 	{
 		return this->_id == x._id;
@@ -55,7 +61,34 @@ struct X
 
 ostream& operator<<(ostream& os, const X& rhs);
 
-struct Msg
+// change Msg from structure to class to include various methods for Msg
+class Msg
 {
-	//tbd	
+public:
+	// (a_Z,b_Z;a_T,b_T;a_I,b_I;a_X,b_X;a_Y,b_Y ); 
+	// if in a itme x.id=-1 or y.id=-1, that means the itme is empty.
+	X _aZ;
+	X _bZ;
+	X _aT;
+	X _bT;
+	X _aI;
+	X _bI;
+	X _aX;
+	X _bX;
+	Y _aY;
+	Y _bY;
+
+	//// the FAW's format 
+	//bool _aEmpty; //true: _a is empty
+	//X _a;
+	//bool _bEmpty;
+	//X _b;
+	//int _c; //c==0, null; c==1, transferred; c==2, infeasible
+
+	// processes
+	Msg();
+	int flagInsertX();	
 };
+
+bool cmpY(Y y1, Y y2);			// in the increasing y._id ording
+bool cmpXEndInc(X x1, X x2);	// in the increasing x._e ording
