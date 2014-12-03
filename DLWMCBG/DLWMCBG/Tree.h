@@ -28,8 +28,12 @@ public:
 	Msg insertXinNode(X x);	
 	
 	//calculate Replaceable Set and Compensable Set tbd
-	Y findjInES(vector<Y>*, Y);		// return the least tight piont greater than y in ES 
-	Y findlInEE(vector<Y>*, Y);		// return the greatest tight piont less than y in ES 
+	X findjInES(vector<Y>*, Y);		// return x where x.e is the least tight piont greater than y in ES 
+	X findlInEE(vector<Y>*, Y);		// return x where x.s is the greatest tight piont less than y in EE
+
+	X replaceMinWeightX(Msg);	// compute the replaceable set in this node and do the repalcement
+	X determineMinWeightX(X, X, TreeNode*&);
+	TreeNode * pullBackATransferredXInWeightProcess(TreeNode *, X, Msg, bool&, X&);
 
 
 };
