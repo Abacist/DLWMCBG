@@ -1,14 +1,12 @@
 //implemention of Tree
-#include"Tree.h"
+
 #include<algorithm>
+#include"Tree.h"
 
 // Methods in TreeNode
 TreeNode::TreeNode(vector<Y> vecY)
 {
-	Y start;
-	start._id = 0;
-	_Y.push_back(start);
-	sort(vecY.begin(), vecY.end(), cmpY);
+	sort(vecY.begin(), vecY.end(), cmpYInc);
 	if (vecY[0]._id <= 0)
 	{
 		__debugbreak();
@@ -17,9 +15,9 @@ TreeNode::TreeNode(vector<Y> vecY)
 	{
 		_Y.push_back(vecY[i]);
 	}
-	_left = NULL;
-	_right = NULL;
-	_parent = NULL;
+	_leftChild = NULL;
+	_rightChild = NULL;
+	_parentNode = NULL;
 }
 
 Y TreeNode::getIntervalStart()
@@ -51,16 +49,16 @@ void TreeNode::splitDSNode(X x)
 
 	leftChild->_X = _X;	// copy the variables from the parent
 
-	_left = leftChild;
-	_right = rightChild;
-	leftChild->_parent = this;
-	rightChild->_parent = this;
+	_leftChild = leftChild;
+	_rightChild = rightChild;
+	leftChild->_parentNode = this;
+	rightChild->_parentNode = this;
 }
 
 // adjust the sets in the process of splitting
 void TreeNode::updateAuxSet4Split()
 {
-	TreeNode* leftChild = _left;
+	TreeNode* leftChild = _leftChild;
 	Msg msg;
 	X tmpX;
 	vector<X> tempMatched = _Z;
@@ -97,10 +95,10 @@ void TreeNode::updateAuxSet4Split()
 }
 
 // return the least tight piont greater than y in ES 
-X TreeNode::findjInES(vector<Y>* pESY, Y y)
+/*X TreeNode::findjInES(vector<Y>* pESY, Y y)
 {
 	// assume y is between Y.s and Y.e
-	sort((*pESY).begin(), (*pESY).end(), cmpY);
+	sort((*pESY).begin(), (*pESY).end(), cmpYInc);
 	sort(_ZR.begin(), _ZR.end(), cmpXEndInc);
 	//ZR must be no more greater than pESY
 	for (int i = 0; i < (int)_ZR.size(); i++)//why 1, not 0
@@ -122,30 +120,52 @@ X TreeNode::findjInES(vector<Y>* pESY, Y y)
 	X x1;
 	x1._id = -1;
 	return x1;	// there is no tight point after y
+}*/
+
+void TreeNode::determineReachableSetinES(X x, vector<X>& R, bool& isTight)
+{
+	vector<Y>* pESY;
+	if (_rightChild == NULL)
+	{
+		pESY = &_Y;
+	}
+	else
+	{
+		pESY = &_rightChild->_Y;
+	}
+	sort((*pESY).begin(), (*pESY).end(), cmpYInc);
+	sort(_ZR.begin(), _ZR.end(), cmpXEndInc);
+	for (int i = 0; i < _ZR.size(); i++)
+	{
+		R.push_back(_ZR[i]);
+		if (_ZR[i]._e == _Y[i] && _Y[i] >= x._e)
+		{
+			isTight = true;
+			return;
+		}
+	}
+	if (_ZR.size() == _Y.size())
+	{
+		isTight = true;
+	}
+	else
+	{
+		isTight = false;
+	}
 }
+
+	
+
 
 // insert x in the tree node
 Msg TreeNode::insertXintoESinNode(X x)
 {
 	Msg msg;
 	msg._aX = x;
-	
-	vector<Y>* pESValues;
-	if (_right != NULL)
-	{
-		//in internal node
-		pESValues = &_right->_Y;
-	}
-	else
-	{
-		//in leaf
-		pESValues = &_Y;
-	}
-	
-	Y tmpY = (x._e > _Y[_Y.size() - 1]) ? _Y[_Y.size() - 1] : x._e;	
-	X jTP = findjInES(pESValues, tmpY);
-	
-	if (jTP._id == -1)	// insert Z successfully
+	vector<X> R;
+	bool isTight;
+	determineReachableSetinES(x, R, isTight);
+	if (isTight == false)	// insert Z successfully
 	{
 		_Z.push_back(x);
 		_ZR.push_back(x);	
@@ -157,21 +177,21 @@ Msg TreeNode::insertXintoESinNode(X x)
 	{
 		//insert fail
 		//transfer
-		if (jTP._e > (*pESValues)[pESValues->size() - 1] || x._e > (*pESValues)[pESValues->size() - 1])
+		if (R[R.size() - 1]._e > _Y[_Y.size() - 1] || x._e >_Y[_Y.size() - 1])//R is sorted by end inc
 		{
-			if (jTP._e > x._e)
+			if (R[R.size() - 1]._e > x._e)
 			{
-				//jTP into T
-				vector<X>::iterator it = find(_ZR.begin(), _ZR.end(), jTP);
+				//R[R.size() - 1] into T
+				vector<X>::iterator it = find(_ZR.begin(), _ZR.end(), R[R.size() - 1]);
 				_ZR.erase(it);
-				it = find(_Z.begin(), _Z.end(), jTP);
+				it = find(_Z.begin(), _Z.end(), R[R.size() - 1]);
 				_Z.erase(it);
 				_ZR.push_back(x);
 				_Z.push_back(x);
-				_T.push_back(jTP);
+				_T.push_back(R[R.size() - 1]);
 				msg._aZ = x;
-				msg._bZ = jTP;
-				msg._aT = jTP;
+				msg._bZ = R[R.size() - 1];
+				msg._aT = R[R.size() - 1];
 			}
 			else
 			{
@@ -182,7 +202,12 @@ Msg TreeNode::insertXintoESinNode(X x)
 		}
 		else
 		{
+			
 			//infeasible
+			X r = replaceMinWeightX(x);
+			msg._aZ = x;
+			msg._bZ = r;
+			msg._aI = r;
 		}
 	}
 	/*
@@ -207,12 +232,37 @@ Msg TreeNode::insertXintoESinNode(X x)
 	return msg;
 }
 
-// insertedX is the x vertex added into the node P
-X TreeNode::replaceMinWeightX(Msg msg)
+
+X TreeNode::replaceMinWeightX(X x)
 {
-	X x;
-	x._id = -1;
-	return x;
+	vector<X> R;
+	X r;
+	determineReachableSetinES(x, R, *new bool);
+	R.push_back(x);
+	if (_rightChild == NULL)
+	{
+		//a leaf
+		r = R[0];
+		for (int i = 0; i < R.size(); i++)
+		{
+			if (cmpXWeightIDInc(R[i], r))
+			{
+				r = R[i];
+			}
+		}
+		_Z.push_back(x);
+		_ZR.push_back(x);
+		vector<X>::iterator it = find(_Z.begin(), _Z.end(), r);
+		_Z.erase(it);
+		it = find(_ZR.begin(), _ZR.end(), r);
+		_ZR.erase(it);
+	}
+	else
+	{
+		//internal node
+		//tbd
+	}
+	return r;
 }
 
 
@@ -230,19 +280,19 @@ bool Tree::insertXinTree(X x)
 	Msg msg = nodeP->insertXintoESinNode(x);		// insert the x into the leaf
 	if (msg.flagInsertX() == 2)
 	{
-		msg._bZ = msg._aI = nodeP->replaceMinWeightX(msg);		// call replaceable algorithm		
+		//msg._bZ = msg._aI = nodeP->replaceMinWeightX(msg);		// call replaceable algorithm		
 	}
 	TreeNode* child = nodeP;
-	nodeP = nodeP->_parent;
+	nodeP = nodeP->_parentNode;
 
 	while (nodeP != NULL)	//send msg until the root, the msg is from a node to its parent
 	{
 		// leaf is the current node; the msg comes from its own ES-Tree insert operation
-		if (child == nodeP->_left)	// the node is the left child
+		if (child == nodeP->_leftChild)	// the node is the left child
 		{
 			if (msg._aT._id == -1 && msg._aI._id == -1)	// msg._c == 0 // 1.success in L
 			{
-				nodeP->_parent->_Z.push_back(msg._aZ);	// msg._a
+				nodeP->_parentNode->_Z.push_back(msg._aZ);	// msg._a
 			}
 			else if (msg._aZ._id == -1 || msg._aZ == msg._bZ)	// msg._a == msg._b 	// 2.non-sucessful, a = b
 			{
@@ -255,7 +305,7 @@ bool Tree::insertXinTree(X x)
 					Msg tempMsg = nodeP->insertXintoESinNode(msg._aT);	//msg._b = msg._aT
 					if (tempMsg._aI._id != -1)
 					{
-						tempMsg._aI = nodeP->replaceMinWeightX(tempMsg);		// call replacement algorithm
+						//tempMsg._aI = nodeP->replaceMinWeightX(tempMsg);		// call replacement algorithm
 					}
 					// msg._b = tempMsg._b; msg._bEmpty = tempMsg._bEmpty; msg._c = tempMsg._c;
 					msg._bZ = tempMsg._bZ;
@@ -269,11 +319,11 @@ bool Tree::insertXinTree(X x)
 
 			if (msg.flagInsertX() == 2)	// msg._c == 2 // infeasible
 			{
-				nodeP->_parent->_I.push_back(msg._bZ);	// msg._b; assertion: msg._bZ == msg._aI
+				nodeP->_parentNode->_I.push_back(msg._bZ);	// msg._b; assertion: msg._bZ == msg._aI
 			}
 			else if (msg.flagInsertX() == 1)	// msg._c == 1 // transferred
 			{
-				Msg tempMsg = nodeP->_parent->insertXintoESinNode(msg._bZ);	// msg._b; // if tempMsg._b <> msg._b, then msg._b remains in the matched set of the parent
+				Msg tempMsg = nodeP->_parentNode->insertXintoESinNode(msg._bZ);	// msg._b; // if tempMsg._b <> msg._b, then msg._b remains in the matched set of the parent
 				//msg._b = tempMsg._b; msg._bEmpty = tempMsg._bEmpty; msg._c = tempMsg._c;
 				msg._bZ = tempMsg._bZ;	
 				msg._aT = tempMsg._aT;
@@ -281,7 +331,7 @@ bool Tree::insertXinTree(X x)
 				
 				if (tempMsg.flagInsertX() == 2)	// tempMsg._c == 2
 				{
-					msg._bZ = msg._aI = nodeP->_parent->replaceMinWeightX(tempMsg);		//msg._b // call replaceable algorithm
+					//msg._bZ = msg._aI = nodeP->_parent->replaceMinWeightX(tempMsg);		//msg._b // call replaceable algorithm
 				}
 			}
 		}
@@ -291,7 +341,7 @@ bool Tree::insertXinTree(X x)
 
 		}
 		child = nodeP;
-		nodeP = nodeP->_parent;
+		nodeP = nodeP->_parentNode;
 	}
 
 
@@ -307,34 +357,34 @@ TreeNode* Tree::locateLeaf(X x)
 	// if there is no such node, i.e., reaching a leaf which its start is not equal to the x.begin, split the leaf into two leaf.
 	while (x._s._id != node->getIntervalStart()._id)
 	{
-		if (node->_right != NULL)
+		if (node->_rightChild != NULL)
 		{
-			if (x._s._id >= ((TreeNode*)node->_right)->getIntervalStart()._id)
+			if (x._s._id >= ((TreeNode*)node->_rightChild)->getIntervalStart()._id)
 			{
-				node = (TreeNode*)node->_right;
+				node = (TreeNode*)node->_rightChild;
 			}
 			else
 			{
-				node = (TreeNode*)node->_left;
+				node = (TreeNode*)node->_leftChild;
 			}
 		}
 		else // assert there is no case that right child is NULL and left child is not NULL.
 		{
 			node->splitDSNode(x);
 			node->updateAuxSet4Split();
-			node = (TreeNode*)node->_right;
+			node = (TreeNode*)node->_rightChild;
 		}
 	}
-	while (node->_left != NULL) // to leaf
+	while (node->_leftChild != NULL) // to leaf
 	{
-		node = node->_left;
+		node = node->_leftChild;
 	}
 
 	TreeNode* tmp = node;
 	while (tmp != NULL)
 	{
 		tmp->_X.push_back(x);
-		tmp = tmp->_parent;
+		tmp = tmp->_parentNode;
 	}
 	return node;
 }

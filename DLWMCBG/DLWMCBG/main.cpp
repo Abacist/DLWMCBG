@@ -5,11 +5,11 @@
 
 using namespace std;
 
-
+void generator(char* fileName = "input.txt", int MaxY=100, int UpdateRange = 300);
 
 int main()
 {
-	//generator("input.txt"); generator need to be fit the format
+	generator(); //generator need to be fit the format
 	ifstream in("input.txt");
 	ofstream out("output.txt");
 
@@ -21,7 +21,7 @@ int main()
 	//get the range of Y
 	int rangeOfY;
 	in >> rangeOfY;
-	cout << rangeOfY << endl;
+	//cout << rangeOfY << endl;
 
 	// init Tree
 	vector<Y> tempVecY;
@@ -96,8 +96,16 @@ int main()
 	}
 
 	cout << "end" << endl;
-	//system("LWCBGNew.exe");
+	vector<X> Z = pTree->_root->_Z;
+	sort(Z.begin(), Z.end(), cmpXID);
+	for (int i = 0; i < Z.size(); i++)
+	{
+		out << Z[i]._id << endl;
+	}
+	system("Glover.exe");
 
 	in.close();
+	out.close();
 	return 0;
 }
+

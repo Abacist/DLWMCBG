@@ -78,7 +78,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BasicFunction.cpp" />
+    <ClCompile Include="Basic.cpp" />
     <ClCompile Include="Tree.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>

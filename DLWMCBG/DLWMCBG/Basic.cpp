@@ -1,4 +1,34 @@
+#include<fstream>
+#include<Windows.h>
 #include"Basic.h"
+
+
+void generator(char* fileName, int MaxY, int UpdateRange)
+{
+	ofstream out(fileName);
+	out << MaxY << endl;
+	for (int i = 1; i <= MaxY; i++)
+	{
+		out << i << " ";
+	}
+	out << endl;
+	SYSTEMTIME lpsystime;
+	GetLocalTime(&lpsystime);
+	srand(lpsystime.wMinute * 1000 + lpsystime.wMilliseconds);
+	for (int i = 0; i < UpdateRange; i++)
+	{
+		out << 1 << " " << i + 1 << " " << 1 << " " << rand() % MaxY + 1 <<" "<< rand() % MaxY * 3 << endl;;
+	}
+	out << '$' << endl;
+
+
+	out.close();
+}
+
+
+
+
+
 
 Msg::Msg()
 {
@@ -44,8 +74,10 @@ ostream& operator<<(ostream& os, const X& rhs)
 	return os;
 }
 
+
+
 // order y according to its index
-bool cmpY(Y y1, Y y2)
+bool cmpYInc(Y y1, Y y2)
 {
 	return y1._id < y2._id;
 }
@@ -53,5 +85,22 @@ bool cmpY(Y y1, Y y2)
 // priority: increasing end
 bool cmpXEndInc(X x1, X x2)	
 {
-	return x1._e <= x2._e;
+	return x1._e < x2._e;
+}
+
+bool cmpXWeightIDInc(X x1, X x2)
+{
+	if (x1._w < x2._w || x1._w == x2._w && x1._id < x2._id)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool cmpXID(X x1, X x2)
+{
+	return x1._id < x2._id;
 }

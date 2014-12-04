@@ -6,6 +6,7 @@
 #include<list>
 #include<vector>
 #include<stack>
+#include<algorithm>
 
 using namespace std;
 
@@ -90,5 +91,7 @@ public:
 	int flagInsertX();	
 };
 
-bool cmpY(Y y1, Y y2);			// in the increasing y._id ording
+bool cmpYInc(Y y1, Y y2);			// in the increasing y._id ording
 bool cmpXEndInc(X x1, X x2);	// in the increasing x._e ording
+bool cmpXWeightIDInc(X x1, X x2);
+bool cmpXID(X x1, X x2);
