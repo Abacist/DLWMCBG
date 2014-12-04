@@ -9,8 +9,8 @@ public:
 	vector<X> _Z;
 	vector<X> _I;
 	vector<X> _T;
-	vector<X> _ZR;	// corresponds to _matched2 in FAW	
-	//ZL tbd
+	vector<X> _ZR;	// // corresponds to _matched2 in FAW	
+	vector<X> _ZL;  
 
 	TreeNode* _left;
 	TreeNode *_right;
@@ -25,14 +25,15 @@ public:
 	void updateAuxSet4Split();
 
 	
-	Msg insertXinNode(X x);	
+	Msg insertXintoESinNode(X x);
 	
 	//calculate Replaceable Set and Compensable Set tbd
 	X findjInES(vector<Y>*, Y);		// return x where x.e is the least tight piont greater than y in ES 
 	X findlInEE(vector<Y>*, Y);		// return x where x.s is the greatest tight piont less than y in EE
 
 	X replaceMinWeightX(Msg);	// compute the replaceable set in this node and do the repalcement
-	X determineMinWeightX(X, X, TreeNode*&);
+	//X determineMinWeightX(X, X, TreeNode*&);
+	X replaceMinWeightXWhenInfeasible(X insertedX);//the returned x is the deleted x
 	TreeNode * pullBackATransferredXInWeightProcess(TreeNode *, X, Msg, bool&, X&);
 
 

@@ -54,7 +54,7 @@ int main()
 			case '1':
 			{
 				X x;
-				in >> x._id >> x._s._id >> x._e._id >> x._w;
+				in >> x._id >> x._s._id >> x._e._id >> x._w;//divide by Space
 				// if x.s or x.e is not in _Y, insert it. // TBD
 				pTree->insertXinTree(x);
 			}break;

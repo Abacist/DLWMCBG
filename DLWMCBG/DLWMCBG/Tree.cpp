@@ -5,7 +5,14 @@
 // Methods in TreeNode
 TreeNode::TreeNode(vector<Y> vecY)
 {
+	Y start;
+	start._id = 0;
+	_Y.push_back(start);
 	sort(vecY.begin(), vecY.end(), cmpY);
+	if (vecY[0]._id <= 0)
+	{
+		__debugbreak();
+	}
 	for (int i = 0; i < (int)vecY.size(); i++)
 	{
 		_Y.push_back(vecY[i]);
@@ -67,7 +74,7 @@ void TreeNode::updateAuxSet4Split()
 	for (int i = 0; i < (int)tempMatched.size(); i++)
 	{
 		tmpX = tempMatched[i];
-		msg = leftChild->insertXinNode(tmpX);		// insert into the left child node L
+		msg = leftChild->insertXintoESinNode(tmpX);		// insert into the left child node L
 		switch (msg.flagInsertX())
 		{
 		case 0:	// matched
@@ -79,7 +86,7 @@ void TreeNode::updateAuxSet4Split()
 			_Z.push_back(tmpX);
 			vector<X>::iterator it = find(_Z.begin(), _Z.end(), msg._bZ);	// _bZ should be equal to _aT
 			_Z.erase(it);
-			insertXinNode(msg._bZ);	// insert into the parent node P
+			insertXintoESinNode(msg._bZ);	// insert into the parent node P
 		} break;
 		case 2:
 		{
@@ -90,30 +97,35 @@ void TreeNode::updateAuxSet4Split()
 }
 
 // return the least tight piont greater than y in ES 
-X TreeNode::findjInES(vector<Y>* YR, Y y)
+X TreeNode::findjInES(vector<Y>* pESY, Y y)
 {
 	// assume y is between Y.s and Y.e
-	sort((*YR).begin(), (*YR).end(), cmpY);
+	sort((*pESY).begin(), (*pESY).end(), cmpY);
 	sort(_ZR.begin(), _ZR.end(), cmpXEndInc);
-	for (int i = 1; i < (int)_ZR.size(); i++)
+	//ZR must be no more greater than pESY
+	for (int i = 0; i < (int)_ZR.size(); i++)//why 1, not 0
 	{
-		if ((*YR)[i] < y)
+		if ((*pESY)[i] < y)
 		{
 			continue;
 		}
-		else if ((*YR)[i] == _ZR[i]._e)
+		else if ((*pESY)[i] == _ZR[i]._e)
 		{
-			return _ZR[i];	// the least tight point greater than y
+			return _ZR[i];	// the least tight point greater or equal than y
 		}
 	}
-
+	//deal with the last element, i.e., the fake end
+	if (_ZR.size() == pESY->size())
+	{
+		return _ZR[_ZR.size()-1];
+	}
 	X x1;
 	x1._id = -1;
 	return x1;	// there is no tight point after y
 }
 
 // insert x in the tree node
-Msg TreeNode::insertXinNode(X x)
+Msg TreeNode::insertXintoESinNode(X x)
 {
 	Msg msg;
 	msg._aX = x;
@@ -121,10 +133,12 @@ Msg TreeNode::insertXinNode(X x)
 	vector<Y>* pESValues;
 	if (_right != NULL)
 	{
+		//in internal node
 		pESValues = &_right->_Y;
 	}
 	else
 	{
+		//in leaf
 		pESValues = &_Y;
 	}
 	
@@ -135,8 +149,43 @@ Msg TreeNode::insertXinNode(X x)
 	{
 		_Z.push_back(x);
 		_ZR.push_back(x);	
+		// no need to add to _ZL
+		//in leaf, x may be inserted to ZL, tbd
 		msg._aZ = x;
 	}
+	else
+	{
+		//insert fail
+		//transfer
+		if (jTP._e > (*pESValues)[pESValues->size() - 1] || x._e > (*pESValues)[pESValues->size() - 1])
+		{
+			if (jTP._e > x._e)
+			{
+				//jTP into T
+				vector<X>::iterator it = find(_ZR.begin(), _ZR.end(), jTP);
+				_ZR.erase(it);
+				it = find(_Z.begin(), _Z.end(), jTP);
+				_Z.erase(it);
+				_ZR.push_back(x);
+				_Z.push_back(x);
+				_T.push_back(jTP);
+				msg._aZ = x;
+				msg._bZ = jTP;
+				msg._aT = jTP;
+			}
+			else
+			{
+				//x into T
+				_T.push_back(x);
+				msg._aT = x;
+			}
+		}
+		else
+		{
+			//infeasible
+		}
+	}
+	/*
 	else if (x._e > _Y[_Y.size() - 1])	// transferred
 	{	
 		_T.push_back(x);
@@ -153,7 +202,7 @@ Msg TreeNode::insertXinNode(X x)
 
 		_I.push_back(x);
 		msg._aI = x;
-	}	
+	}*/	
 	
 	return msg;
 }
@@ -176,7 +225,9 @@ Tree::Tree(vector<Y> vecY)
 bool Tree::insertXinTree(X x)
 {
 	TreeNode* nodeP = locateLeaf(x);	// locate the leaf corresponding to x.begin
-	Msg msg = nodeP->insertXinNode(x);		// insert the x into the leaf
+	
+	//below is the whole implemention of the MSG passing rule
+	Msg msg = nodeP->insertXintoESinNode(x);		// insert the x into the leaf
 	if (msg.flagInsertX() == 2)
 	{
 		msg._bZ = msg._aI = nodeP->replaceMinWeightX(msg);		// call replaceable algorithm		
@@ -201,7 +252,7 @@ bool Tree::insertXinTree(X x)
 				}
 				else
 				{
-					Msg tempMsg = nodeP->insertXinNode(msg._aT);	//msg._b = msg._aT
+					Msg tempMsg = nodeP->insertXintoESinNode(msg._aT);	//msg._b = msg._aT
 					if (tempMsg._aI._id != -1)
 					{
 						tempMsg._aI = nodeP->replaceMinWeightX(tempMsg);		// call replacement algorithm
@@ -222,7 +273,7 @@ bool Tree::insertXinTree(X x)
 			}
 			else if (msg.flagInsertX() == 1)	// msg._c == 1 // transferred
 			{
-				Msg tempMsg = nodeP->_parent->insertXinNode(msg._bZ);	// msg._b; // if tempMsg._b <> msg._b, then msg._b remains in the matched set of the parent
+				Msg tempMsg = nodeP->_parent->insertXintoESinNode(msg._bZ);	// msg._b; // if tempMsg._b <> msg._b, then msg._b remains in the matched set of the parent
 				//msg._b = tempMsg._b; msg._bEmpty = tempMsg._bEmpty; msg._c = tempMsg._c;
 				msg._bZ = tempMsg._bZ;	
 				msg._aT = tempMsg._aT;
