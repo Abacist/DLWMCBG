@@ -97,4 +97,4 @@ bool cmpXEndInc(X x1, X x2);	// in the increasing x._e ording
 bool cmpXBeginDec(X, X);
 bool cmpXWeightIDInc(X x1, X x2);
 bool cmpXID(X x1, X x2);
-bool cmpXEndBeginId(X x1, X x2);
+bool cmpXEndBeginIdInc(X x1, X x2);
