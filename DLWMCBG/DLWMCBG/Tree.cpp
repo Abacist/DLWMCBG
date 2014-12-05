@@ -47,18 +47,63 @@ void TreeNode::splitDSNode(X x)
 	TreeNode* leftChild = new TreeNode(leftVecY);
 	TreeNode* rightChild = new TreeNode(rightVecY);
 
-	leftChild->_X = _X;	// copy the variables from the parent
+	//leftChild->_X = _X;	// copy the variables from the parent
 
 	_leftChild = leftChild;
 	_rightChild = rightChild;
 	leftChild->_parentNode = this;
 	rightChild->_parentNode = this;
+	updateAuxSet4Split();
 }
 
-// adjust the sets in the process of splitting
+// adjust the sets in the process of splitting, call by the splited node, the standard process need to be discussed
 void TreeNode::updateAuxSet4Split()
 {
-	TreeNode* leftChild = _leftChild;
+	_leftChild->_T = _T;
+	vector<X> restX = _Z;
+	for (int i = 0; i < _I.size(); i++)
+	{
+		restX.push_back(_I[i]);
+	}
+	_ZR.clear();
+	//_ZL.clear();
+	_Z.clear();
+	//part of left side msg passing, _ZL and left->Z keeps the same
+	for (int i = 0; i < restX.size(); i++)
+	{
+		Msg msg = _leftChild->insertXintoESinNode(restX[i]);
+		if (msg._aI._id == -1 && msg._aT._id == -1)
+		{
+			//success
+			_Z.push_back(msg._aZ);
+			_ZL.push_back(msg._aZ);
+		}
+		else if (msg._aI._id == -1 && msg._aT._id != -1)
+		{
+			//transfer
+			_Z.push_back(msg._aZ);
+			_ZL.push_back(msg._aZ);
+			vector<X>::iterator it = find(_Z.begin(), _Z.end(), msg._bZ);
+			_Z.erase(it);
+			it = find(_ZL.begin(), _ZL.end(), msg._bZ);
+			_ZL.erase(it);
+			insertXintoESinNode(msg._aT);
+		} 
+		else if (msg._aI._id != -1 && msg._aT._id == -1)
+		{
+			//infeasible
+			_Z.push_back(msg._aZ);
+			_ZL.push_back(msg._aZ);
+			vector<X>::iterator it = find(_Z.begin(), _Z.end(), msg._bZ);
+			_Z.erase(it);
+			it = find(_ZL.begin(), _ZL.end(), msg._bZ);
+			_ZL.erase(it);
+			_I.push_back(msg._aI);
+		}
+	}
+
+
+	/*TreeNode* leftChild = _leftChild;
 	Msg msg;
 	X tmpX;
 	vector<X> tempMatched = _Z;
@@ -66,7 +111,7 @@ void TreeNode::updateAuxSet4Split()
 	vector<X> tempMatched2 = _ZR;
 	_ZR.clear();
 
-	leftChild->_I = _I;
+	leftChild->_I = _I;//problem
 	leftChild->_T = _T;
 
 	for (int i = 0; i < (int)tempMatched.size(); i++)
@@ -91,7 +136,7 @@ void TreeNode::updateAuxSet4Split()
 			//no infeasible case				
 		} break;
 		}
-	}
+	}*/
 }
 
 // return the least tight piont greater than y in ES 
@@ -124,27 +169,68 @@ void TreeNode::updateAuxSet4Split()
 
 void TreeNode::determineReachableSetinES(X x, vector<X>& R, bool& isTight)
 {
-	vector<Y>* pESY;
+	vector<Y> ESY;
 	if (_rightChild == NULL)
 	{
-		pESY = &_Y;
+		ESY = _Y;
 	}
 	else
 	{
-		pESY = &_rightChild->_Y;
+		ESY = _rightChild->_Y;
 	}
-	sort((*pESY).begin(), (*pESY).end(), cmpYInc);
+	sort(ESY.begin(), ESY.end(), cmpYInc);
+	if (x._e < ESY[0])
+	{
+		return;
+	}
 	sort(_ZR.begin(), _ZR.end(), cmpXEndInc);
 	for (int i = 0; i < _ZR.size(); i++)
 	{
 		R.push_back(_ZR[i]);
-		if (_ZR[i]._e == _Y[i] && _Y[i] >= x._e)
+		if (_ZR[i]._e == ESY[i] && ESY[i] >= x._e)
 		{
 			isTight = true;
 			return;
 		}
 	}
-	if (_ZR.size() == _Y.size())
+	if (_ZR.size() == ESY.size())
+	{
+		isTight = true;
+	}
+	else
+	{
+		isTight = false;
+	}
+}
+
+void TreeNode::determineReachableSetinEE(X x, vector<X>& R, bool& isTight)
+{
+	vector<Y> EEY;
+	if (_leftChild == NULL)
+	{
+		EEY = _Y;
+	}
+	else
+	{
+		EEY = _leftChild->_Y;
+	}
+	sort(EEY.begin(), EEY.end(), cmpYDec);
+	if (x._s > EEY[0])
+	{
+		return;
+	}
+	sort(_ZL.begin(), _ZL.end(), cmpXBeginDec);
+
+	for (int i = 0; i < _ZL.size(); i++)
+	{
+		R.push_back(_ZL[i]);
+		if (_ZL[i]._s == EEY[i] && EEY[i] <= x._s)
+		{
+			isTight = true;
+			return;
+		}
+	}
+	if (_ZL.size() == EEY.size())
 	{
 		isTight = true;
 	}
@@ -162,6 +248,7 @@ Msg TreeNode::insertXintoESinNode(X x)
 {
 	Msg msg;
 	msg._aX = x;
+	msg._aZ = x;
 	vector<X> R;
 	bool isTight;
 	determineReachableSetinES(x, R, isTight);
@@ -171,41 +258,35 @@ Msg TreeNode::insertXintoESinNode(X x)
 		_ZR.push_back(x);	
 		// no need to add to _ZL
 		//in leaf, x may be inserted to ZL, tbd
-		msg._aZ = x;
+		//msg._aZ = x;
 	}
 	else
 	{
 		//insert fail
+		R.push_back(x);
+		sort(R.begin(), R.end(), cmpXEndInc);
 		//transfer
-		if (R[R.size() - 1]._e > _Y[_Y.size() - 1] || x._e >_Y[_Y.size() - 1])//R is sorted by end inc
+		if (R[R.size() - 1]._e > _Y[_Y.size() - 1])
 		{
-			if (R[R.size() - 1]._e > x._e)
-			{
-				//R[R.size() - 1] into T
-				vector<X>::iterator it = find(_ZR.begin(), _ZR.end(), R[R.size() - 1]);
-				_ZR.erase(it);
-				it = find(_Z.begin(), _Z.end(), R[R.size() - 1]);
-				_Z.erase(it);
-				_ZR.push_back(x);
-				_Z.push_back(x);
-				_T.push_back(R[R.size() - 1]);
-				msg._aZ = x;
-				msg._bZ = R[R.size() - 1];
-				msg._aT = R[R.size() - 1];
-			}
-			else
-			{
-				//x into T
-				_T.push_back(x);
-				msg._aT = x;
-			}
+			//R[R.size() - 1] into T
+			_ZR.push_back(x);
+			_Z.push_back(x);
+			vector<X>::iterator it = find(_ZR.begin(), _ZR.end(), R[R.size() - 1]);
+			_ZR.erase(it);
+			it = find(_Z.begin(), _Z.end(), R[R.size() - 1]);
+			_Z.erase(it);
+			_T.push_back(R[R.size() - 1]);
+			//msg._aZ = x;
+			msg._bZ = R[R.size() - 1];
+			msg._aT = R[R.size() - 1];
+
 		}
 		else
 		{
 			
 			//infeasible
 			X r = replaceMinWeightX(x);
-			msg._aZ = x;
+			//msg._aZ = x;
 			msg._bZ = r;
 			msg._aI = r;
 		}
@@ -235,10 +316,12 @@ Msg TreeNode::insertXintoESinNode(X x)
 
 X TreeNode::replaceMinWeightX(X x)
 {
+	vector<X> ESR;
 	vector<X> R;
 	X r;
 	determineReachableSetinES(x, R, *new bool);
 	R.push_back(x);
+	ESR = R;
 	if (_rightChild == NULL)
 	{
 		//a leaf
@@ -260,7 +343,79 @@ X TreeNode::replaceMinWeightX(X x)
 	else
 	{
 		//internal node
-		//tbd
+		X minBeginX = R[0];
+		for (int i = 0; i < R.size(); i++)
+		{
+			if (R[i]._s < minBeginX._s)
+			{
+				minBeginX = R[i];
+			}
+		}
+		determineReachableSetinEE(minBeginX, R, *new bool);
+		r = R[0];
+		for (int i = 0; i < R.size(); i++)
+		{
+			if (cmpXWeightIDInc(R[i],r))
+			{
+				r = R[i];
+			}
+		}
+		vector<X>::iterator it = find(_ZL.begin(), _ZL.end(), r);
+		if (it != _ZL.end())
+		{
+			//r in _ZL, left
+			_Z.push_back(x);
+			_ZR.push_back(x);
+			vector<Y> EEY = _leftChild->_Y;
+			sort(EEY.begin(), EEY.end(), cmpYDec);
+			sort(_ZL.begin(), _ZL.end(), cmpXBeginDec);
+			Y l2;
+			l2._id = -1;
+			for (int i = 0; i < _ZL.size(); i++)
+			{
+				if (EEY[i] == r._s)
+				{
+					break;
+				}	
+				if (_ZL[i]._s == EEY[i])
+				{
+					l2 = EEY[i];
+					return;
+				}
+			}
+			if (l2._id == -1)
+			{
+				l2 = _rightChild->getIntervalStart();
+			}
+			vector<X> allBackX;//must have one, since r in ZL
+			for (int i = 0; i < ESR.size(); i++)
+			{
+				if (ESR[i]._s < l2)
+				{
+					allBackX.push_back(ESR[i]);
+				}
+			}
+			sort(allBackX.begin(), allBackX.end(), cmpXEndBeginId);
+			X backX = allBackX[0];
+			it = find(_ZR.begin(), _ZR.end(), backX);
+			_ZR.erase(it);
+			_ZL.push_back(backX);
+			it = find(_ZL.begin(), _ZL.end(), r);
+			_ZL.erase(it);
+			it = find(_Z.begin(), _Z.end(), r);
+			_Z.erase(it);
+		}
+		else
+		{
+			//not in _ZL, x itself or in _ZR, right
+			_Z.push_back(x);
+			_ZR.push_back(x);
+			it = find(_ZR.begin(), _ZR.end(), r);
+			_ZR.erase(it);
+			it = find(_Z.begin(), _Z.end(), r);
+			_Z.erase(it);
+		}
+
 	}
 	return r;
 }
@@ -357,7 +512,7 @@ TreeNode* Tree::locateLeaf(X x)
 	// if there is no such node, i.e., reaching a leaf which its start is not equal to the x.begin, split the leaf into two leaf.
 	while (x._s._id != node->getIntervalStart()._id)
 	{
-		if (node->_rightChild != NULL)
+		if (node->_rightChild != NULL)//not a leaf
 		{
 			if (x._s._id >= ((TreeNode*)node->_rightChild)->getIntervalStart()._id)
 			{
@@ -371,7 +526,7 @@ TreeNode* Tree::locateLeaf(X x)
 		else // assert there is no case that right child is NULL and left child is not NULL.
 		{
 			node->splitDSNode(x);
-			node->updateAuxSet4Split();
+			//node->updateAuxSet4Split();
 			node = (TreeNode*)node->_rightChild;
 		}
 	}
@@ -379,13 +534,13 @@ TreeNode* Tree::locateLeaf(X x)
 	{
 		node = node->_leftChild;
 	}
-
+	/*//add into _X in the path
 	TreeNode* tmp = node;
 	while (tmp != NULL)
 	{
 		tmp->_X.push_back(x);
 		tmp = tmp->_parentNode;
-	}
+	}*/
 	return node;
 }
 

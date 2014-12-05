@@ -4,7 +4,7 @@
 class TreeNode
 {
 public:
-	vector<X> _X;
+	//vector<X> _X;
 	vector<Y> _Y;
 	vector<X> _Z;
 	vector<X> _I;

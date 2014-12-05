@@ -92,6 +92,9 @@ public:
 };
 
 bool cmpYInc(Y y1, Y y2);			// in the increasing y._id ording
+bool cmpYDec(Y, Y);
 bool cmpXEndInc(X x1, X x2);	// in the increasing x._e ording
+bool cmpXBeginDec(X, X);
 bool cmpXWeightIDInc(X x1, X x2);
 bool cmpXID(X x1, X x2);
+bool cmpXEndBeginId(X x1, X x2);

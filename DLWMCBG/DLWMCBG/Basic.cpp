@@ -82,10 +82,20 @@ bool cmpYInc(Y y1, Y y2)
 	return y1._id < y2._id;
 }
 
+bool cmpYDec(Y y1, Y y2)
+{
+	return y1._id > y2._id;
+}
+
 // priority: increasing end
 bool cmpXEndInc(X x1, X x2)	
 {
 	return x1._e < x2._e;
+}
+
+bool cmpXBeginDec(X x1, X x2)
+{
+	return x1._s > x2._s;
 }
 
 bool cmpXWeightIDInc(X x1, X x2)
@@ -103,4 +113,21 @@ bool cmpXWeightIDInc(X x1, X x2)
 bool cmpXID(X x1, X x2)
 {
 	return x1._id < x2._id;
+}
+
+bool cmpXEndBeginId(X x1, X x2)
+{
+	if (x1._e < x2._e)
+	{
+		return true;
+	}
+	if (x1._e == x2._e && x1._s < x2._s)
+	{
+		return true;
+	}
+	if (x1._e == x2._e && x1._s == x2._s && x1._id < x2._id)
+	{
+		return true;
+	}
+	return false;
 }

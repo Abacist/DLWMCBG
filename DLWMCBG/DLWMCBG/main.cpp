@@ -94,7 +94,7 @@ int main()
 		}
 
 	}
-
+	//output to file and verify
 	cout << "end" << endl;
 	vector<X> Z = pTree->_root->_Z;
 	sort(Z.begin(), Z.end(), cmpXID);
