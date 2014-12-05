@@ -19,6 +19,7 @@ void generator(char* fileName, int MaxY, int UpdateRange)
 	{
 		out << 1 << " " << i + 1 << " " << 1 << " " << rand() % MaxY + 1 <<" "<< rand() % MaxY * 3 << endl;;
 	}
+	out << 1 << " " << 301 << " " << 50 <<" "<< 80 <<" "<< 100 << endl;
 	out << '$' << endl;
 
 
@@ -115,7 +116,7 @@ bool cmpXID(X x1, X x2)
 	return x1._id < x2._id;
 }
 
-bool cmpXEndBeginId(X x1, X x2)
+bool cmpXEndBeginIdInc(X x1, X x2)
 {
 	if (x1._e < x2._e)
 	{

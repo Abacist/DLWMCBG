@@ -3,6 +3,8 @@
 #include"Basic.h"
 #include"Tree.h"
 
+#pragma warning (disable:4018)
+
 using namespace std;
 
 void generator(char* fileName = "input.txt", int MaxY=100, int UpdateRange = 300);

@@ -1,7 +1,9 @@
 //implemention of Tree
 
 #include<algorithm>
+#include<fstream>
 #include"Tree.h"
+#pragma warning (disable:4018)
 
 // Methods in TreeNode
 TreeNode::TreeNode(vector<Y> vecY)
@@ -68,6 +70,7 @@ void TreeNode::updateAuxSet4Split()
 	_ZR.clear();
 	//_ZL.clear();
 	_Z.clear();
+	_I.clear();
 	//part of left side msg passing, _ZL and left->Z keeps the same
 	for (int i = 0; i < restX.size(); i++)
 	{
@@ -78,27 +81,76 @@ void TreeNode::updateAuxSet4Split()
 			_Z.push_back(msg._aZ);
 			_ZL.push_back(msg._aZ);
 		}
+		
 		else if (msg._aI._id == -1 && msg._aT._id != -1)
 		{
-			//transfer
+			//transfer in left
 			_Z.push_back(msg._aZ);
 			_ZL.push_back(msg._aZ);
 			vector<X>::iterator it = find(_Z.begin(), _Z.end(), msg._bZ);
-			_Z.erase(it);
-			it = find(_ZL.begin(), _ZL.end(), msg._bZ);
-			_ZL.erase(it);
-			insertXintoESinNode(msg._aT);
+			if (it != _Z.end())
+			{
+				_Z.erase(it);
+				it = find(_ZL.begin(), _ZL.end(), msg._bZ);
+				_ZL.erase(it);
+				insertXintoESinNode(msg._aT);
+			}
+			else
+			{
+				vector<X> R;
+				determineReachableSetinEE(msg._aZ, R, *new bool);//ES or EE? In Split or Msg Passing?
+				R.push_back(msg._aZ);
+				sort(R.begin(), R.end(), cmpXEndInc);
+				X maxEndinR = R[R.size() - 1];
+				if (maxEndinR._e < _rightChild->getIntervalStart())
+				{
+					//not transfer in P
+					sort(R.begin(), R.end(), cmpXWeightIDInc);
+					vector<X>::iterator it = find(_Z.begin(), _Z.end(), R[0]);
+					_Z.erase(it);
+					it = find(_ZL.begin(), _ZL.end(), R[0]);
+					_ZL.erase(it);
+					_I.push_back(R[0]);
+				}
+				else
+				{
+					vector<X>::iterator it = find(_Z.begin(), _Z.end(), maxEndinR);
+					_Z.erase(it);
+					it = find(_ZL.begin(), _ZL.end(), maxEndinR);
+					_ZL.erase(it);
+					insertXintoESinNode(maxEndinR);
+				}
+				
+			}
 		} 
 		else if (msg._aI._id != -1 && msg._aT._id == -1)
 		{
-			//infeasible
+			//infeasible in Left
 			_Z.push_back(msg._aZ);
 			_ZL.push_back(msg._aZ);
 			vector<X>::iterator it = find(_Z.begin(), _Z.end(), msg._bZ);
-			_Z.erase(it);
-			it = find(_ZL.begin(), _ZL.end(), msg._bZ);
-			_ZL.erase(it);
-			_I.push_back(msg._aI);
+			if (it != _Z.end())
+			{
+				_Z.erase(it);
+				it = find(_ZL.begin(), _ZL.end(), msg._bZ);
+				_ZL.erase(it);
+				_I.push_back(msg._aI);
+			}
+			else
+			{
+				//_bZ has already been preempted. in Split, we can directly use the ES structure of ZL
+				//but how to do in the msg passing?
+				vector<X> R;
+				determineReachableSetinEE(msg._aZ, R, *new bool);//ES or EE? In Split or Msg Passing?
+				R.push_back(msg._aZ);
+				sort(R.begin(), R.end(), cmpXWeightIDInc);
+				it = find(_Z.begin(), _Z.end(), R[0]);
+				_Z.erase(it);
+				it = find(_ZL.begin(), _ZL.end(), R[0]);
+				_ZL.erase(it);
+				_I.push_back(R[0]);
+				
+			}
 		}
 	}
 
@@ -256,6 +308,7 @@ Msg TreeNode::insertXintoESinNode(X x)
 	{
 		_Z.push_back(x);
 		_ZR.push_back(x);	
+		//return msg;
 		// no need to add to _ZL
 		//in leaf, x may be inserted to ZL, tbd
 		//msg._aZ = x;
@@ -285,7 +338,7 @@ Msg TreeNode::insertXintoESinNode(X x)
 		{
 			
 			//infeasible
-			X r = replaceMinWeightX(x);
+			X r = replaceMinWeightX(x);//including adjust ZL and ZR
 			//msg._aZ = x;
 			msg._bZ = r;
 			msg._aI = r;
@@ -364,6 +417,7 @@ X TreeNode::replaceMinWeightX(X x)
 		if (it != _ZL.end())
 		{
 			//r in _ZL, left
+			//if r in ZL,then R must be added some elements in determineEE
 			_Z.push_back(x);
 			_ZR.push_back(x);
 			vector<Y> EEY = _leftChild->_Y;
@@ -380,7 +434,6 @@ X TreeNode::replaceMinWeightX(X x)
 				if (_ZL[i]._s == EEY[i])
 				{
 					l2 = EEY[i];
-					return;
 				}
 			}
 			if (l2._id == -1)
@@ -395,7 +448,7 @@ X TreeNode::replaceMinWeightX(X x)
 					allBackX.push_back(ESR[i]);
 				}
 			}
-			sort(allBackX.begin(), allBackX.end(), cmpXEndBeginId);
+			sort(allBackX.begin(), allBackX.end(), cmpXEndBeginIdInc);
 			X backX = allBackX[0];
 			it = find(_ZR.begin(), _ZR.end(), backX);
 			_ZR.erase(it);
@@ -417,6 +470,7 @@ X TreeNode::replaceMinWeightX(X x)
 		}
 
 	}
+	_I.push_back(r);
 	return r;
 }
 
@@ -528,6 +582,52 @@ TreeNode* Tree::locateLeaf(X x)
 			node->splitDSNode(x);
 			//node->updateAuxSet4Split();
 			node = (TreeNode*)node->_rightChild;
+		//test code for split==========================
+			vector<X> Z = this->_root->_Z;
+			ofstream out("Split-test.txt");
+			sort(Z.begin(), Z.end(), cmpXID);
+			for (int i = 0; i < Z.size(); i++)
+			{
+				out << Z[i]._id << endl;
+			}
+			out << "============T in root==================" << endl;
+			vector<X> T = this->_root->_T;
+			sort(T.begin(), T.end(), cmpXEndInc);
+			for (int i = 0; i < T.size(); i++)
+			{
+				out << T[i]._id << "\t" << T[i]._e << endl;
+			}
+			out << "============I in root==================" << endl;
+			vector<X> I = this->_root->_I;
+			sort(I.begin(), I.end(), cmpXEndInc);
+			for (int i = 0; i < I.size(); i++)
+			{
+				out << I[i]._id << "\t" << I[i]._e << endl;
+			}
+			out << "============Z in left==================" << endl;
+			Z = this->_root->_leftChild->_Z;
+			sort(Z.begin(), Z.end(), cmpXID);
+			for (int i = 0; i < Z.size(); i++)
+			{
+				out << Z[i]._id << endl;
+			}
+			out << "============T in left==================" << endl;
+			T = this->_root->_leftChild->_T;
+			sort(T.begin(), T.end(), cmpXEndInc);
+			for (int i = 0; i < T.size(); i++)
+			{
+				out << T[i]._id << "\t" << T[i]._e << endl;
+			}
+			out << "============I in left==================" << endl;
+			I = this->_root->_leftChild->_I;
+			sort(I.begin(), I.end(), cmpXEndInc);
+			for (int i = 0; i < I.size(); i++)
+			{
+				out << I[i]._id << "\t" << I[i]._e << endl;
+			}
+			out.close();
+			int a = 1;
+		//=========================	
 		}
 	}
 	while (node->_leftChild != NULL) // to leaf
