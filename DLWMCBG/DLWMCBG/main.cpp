@@ -127,7 +127,7 @@ int main()
 		in.close();
 		out.close();
 		//verify
-		if (pTree->_root->_leftChild->veifiyNodeInvariants())
+		if (pTree->_root->_leftChild->veifiyNodeInvariants() && pTree->_root->veifiyNodeInvariants())
 		{
 			cout << "============================Case " << cases++ << " passed!" << endl;
 		}
