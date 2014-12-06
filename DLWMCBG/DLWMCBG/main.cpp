@@ -11,48 +11,51 @@ void generator(char* fileName = "input.txt", int MaxY=100, int UpdateRange = 300
 
 int main()
 {
-	//generator(); //generator need to be fit the format
-	ifstream in("input.txt");
-	ofstream out("output.txt");
-
-	if (!in)
+	int cases = 1;
+	while (true)
 	{
-		cout << "input file open error" << endl;
-		return 0;
-	}
-	//get the range of Y
-	int rangeOfY;
-	in >> rangeOfY;
-	//cout << rangeOfY << endl;
+		generator(); //generator need to be fit the format
+		ifstream in("input.txt");
+		ofstream out("output.txt");
 
-	// init Tree
-	vector<Y> tempVecY;
-	for (int i = 0; i < rangeOfY; i++)
-	{
-		Y temp;
-		in >> temp._id;
-		tempVecY.push_back(temp);
-	}
-	Tree* pTree = new Tree(tempVecY);
-
-	char command;
-	while (!in.eof())
-	{
-		in >> command;
-		if (command == '#')
+		if (!in)
 		{
-			char s[20];
-			in.get(s, 20, '\n');
-			continue;
+			cout << "input file open error" << endl;
+			return 0;
 		}
-		if (command == '$')
-		{
-			break;
-		}
+		//get the range of Y
+		int rangeOfY;
+		in >> rangeOfY;
+		//cout << rangeOfY << endl;
 
-		switch (command)
+		// init Tree
+		vector<Y> tempVecY;
+		for (int i = 0; i < rangeOfY; i++)
 		{
-			//insert an X
+			Y temp;
+			in >> temp._id;
+			tempVecY.push_back(temp);
+		}
+		Tree* pTree = new Tree(tempVecY);
+
+		char command;
+		while (!in.eof())
+		{
+			in >> command;
+			if (command == '#')
+			{
+				char s[20];
+				in.get(s, 20, '\n');
+				continue;
+			}
+			if (command == '$')
+			{
+				break;
+			}
+
+			switch (command)
+			{
+				//insert an X
 			case '1':
 			{
 				X x;
@@ -60,19 +63,19 @@ int main()
 				// if x.s or x.e is not in _Y, insert it.	// TBD			
 				/*if (x._id == 10)
 				{
-					int a = 0;
+				int a = 0;
 				}*/
 				pTree->insertXinTree(x);
-				if (!pTree->veifiyTreeInvariants())
+				/*if (!pTree->veifiyTreeInvariants())
 				{
-					int a = 0;
-				}
+				int a = 0;
+				}*/
 
 				// for test
 				//int flag;
 				//in >> x._id >> x._s._id >> x._e._id >> x._w >> flag;	// divide by Space
 				//pTree->_root->testInsertXintoNode(x, flag);	// for test verification
-				
+
 			}break;
 
 
@@ -107,24 +110,35 @@ int main()
 				in >> y._id;
 
 			}break;
+			}
+
+
 		}
+		//output to file
+		cout << "end" << endl;
+		vector<X> Z = pTree->_root->_Z;
+		sort(Z.begin(), Z.end(), cmpXID);
+		for (int i = 0; i < Z.size(); i++)
+		{
+			out << Z[i]._id << endl;
+		}
+		system("Glover.exe");
 
-
+		in.close();
+		out.close();
+		//verify
+		if (pTree->_root->_leftChild->veifiyNodeInvariants())
+		{
+			cout << "============================Case " << cases++ << " passed!" << endl;
+		}
+		else
+		{
+			cout << "Not satify, please check!" << endl;
+			goto End;
+		}
+		
 	}
-	//output to file and verify
-	cout << "The result of invariant verification is " << pTree->veifiyTreeInvariants() << endl;
-
-	cout << "end" << endl;
-	vector<X> Z = pTree->_root->_Z;
-	sort(Z.begin(), Z.end(), cmpXID);
-	for (int i = 0; i < Z.size(); i++)
-	{
-		out << Z[i]._id << endl;
-	}
-	system("Glover.exe");
-
-	in.close();
-	out.close();
+	End:
 	return 0;
 }
 

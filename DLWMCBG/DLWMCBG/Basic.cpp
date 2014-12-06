@@ -146,7 +146,11 @@ bool cmpXStandard(X x1, X x2)
 	{
 		return true;
 	}
-	else if (x1._w == x2._w && x1._e < x2._e)
+	else if (x1._w == x2._w && x1._id > x2._id)
+	{
+		return true;
+	}
+	/*else if (x1._w == x2._w && x1._e < x2._e)
 	{
 		return true;
 	}
@@ -157,7 +161,7 @@ bool cmpXStandard(X x1, X x2)
 	else if (x1._w == x2._w && x1._e == x2._e && x1._s == x2._s && x1._id < x2._id)
 	{
 		return true;
-	}
+	}*/
 	return false;
 }
 
@@ -209,7 +213,7 @@ bool testCmpXEndBeg(TestX x1, TestX x2)
 // weight decreasing, end increasing, begin decreasing, id increasing
 bool testCmpXStandard(TestX x1, TestX x2)
 {
-	if (x1._X._w > x2._X._w)
+	/*if (x1._X._w > x2._X._w)
 	{
 		return true;
 	}
@@ -222,6 +226,15 @@ bool testCmpXStandard(TestX x1, TestX x2)
 		return true;
 	}
 	else if (x1._X._w == x2._X._w && x1._X._e == x2._X._e && x1._X._s == x2._X._s && x1._X._id < x2._X._id)
+	{
+		return true;
+	}
+	return false;*/
+	if (x1._X._w > x2._X._w)
+	{
+		return true;
+	}
+	else if (x1._X._w == x2._X._w && x1._X._id > x2._X._id)
 	{
 		return true;
 	}
