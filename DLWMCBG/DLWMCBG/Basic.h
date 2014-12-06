@@ -95,6 +95,13 @@ bool cmpYInc(Y y1, Y y2);			// in the increasing y._id ording
 bool cmpYDec(Y, Y);
 bool cmpXEndInc(X x1, X x2);	// in the increasing x._e ording
 bool cmpXBeginDec(X, X);
+bool cmpXStartInc(X x1, X x2);	// increasing start
 bool cmpXWeightIDInc(X x1, X x2);
 bool cmpXID(X x1, X x2);
 bool cmpXEndBeginIdInc(X x1, X x2);
+bool cmpXEndIncStartDec(X x1, X x2);	// end increasing, start decreasing
+bool cmpXStandard(X x1, X x2);	// weight increasing, end increasing, start decreasing, id increasing
+
+bool isXPerfectMatching(const vector<X>&, const vector<Y>&);	// are all X matched w.r.t. Y?
+
+void gloverMatching(const vector<X>& vX, const vector<Y>& vY, vector<X>* vZ);	// return the OIS in the glover mathcing of a CBG

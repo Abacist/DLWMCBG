@@ -81,7 +81,7 @@ void TreeNode::updateAuxSet4Split()
 			_Z.push_back(msg._aZ);
 			_ZL.push_back(msg._aZ);
 		}
-		
+
 		else if (msg._aI._id == -1 && msg._aT._id != -1)
 		{
 			//transfer in left
@@ -120,9 +120,9 @@ void TreeNode::updateAuxSet4Split()
 					_ZL.erase(it);
 					insertXintoESinNode(maxEndinR);
 				}
-				
+
 			}
-		} 
+		}
 		else if (msg._aI._id != -1 && msg._aT._id == -1)
 		{
 			//infeasible in Left
@@ -149,7 +149,7 @@ void TreeNode::updateAuxSet4Split()
 				it = find(_ZL.begin(), _ZL.end(), R[0]);
 				_ZL.erase(it);
 				_I.push_back(R[0]);
-				
+
 			}
 		}
 	}
@@ -168,55 +168,55 @@ void TreeNode::updateAuxSet4Split()
 
 	for (int i = 0; i < (int)tempMatched.size(); i++)
 	{
-		tmpX = tempMatched[i];
-		msg = leftChild->insertXintoESinNode(tmpX);		// insert into the left child node L
-		switch (msg.flagInsertX())
-		{
-		case 0:	// matched
-		{
-			_Z.push_back(tmpX);
-		} break;
-		case 1:	// transferred, add a into matched, delete b from matched, and add b into ES
-		{
-			_Z.push_back(tmpX);
-			vector<X>::iterator it = find(_Z.begin(), _Z.end(), msg._bZ);	// _bZ should be equal to _aT
-			_Z.erase(it);
-			insertXintoESinNode(msg._bZ);	// insert into the parent node P
-		} break;
-		case 2:
-		{
-			//no infeasible case				
-		} break;
-		}
+	tmpX = tempMatched[i];
+	msg = leftChild->insertXintoESinNode(tmpX);		// insert into the left child node L
+	switch (msg.flagInsertX())
+	{
+	case 0:	// matched
+	{
+	_Z.push_back(tmpX);
+	} break;
+	case 1:	// transferred, add a into matched, delete b from matched, and add b into ES
+	{
+	_Z.push_back(tmpX);
+	vector<X>::iterator it = find(_Z.begin(), _Z.end(), msg._bZ);	// _bZ should be equal to _aT
+	_Z.erase(it);
+	insertXintoESinNode(msg._bZ);	// insert into the parent node P
+	} break;
+	case 2:
+	{
+	//no infeasible case
+	} break;
+	}
 	}*/
 }
 
 // return the least tight piont greater than y in ES 
 /*X TreeNode::findjInES(vector<Y>* pESY, Y y)
 {
-	// assume y is between Y.s and Y.e
-	sort((*pESY).begin(), (*pESY).end(), cmpYInc);
-	sort(_ZR.begin(), _ZR.end(), cmpXEndInc);
-	//ZR must be no more greater than pESY
-	for (int i = 0; i < (int)_ZR.size(); i++)//why 1, not 0
-	{
-		if ((*pESY)[i] < y)
-		{
-			continue;
-		}
-		else if ((*pESY)[i] == _ZR[i]._e)
-		{
-			return _ZR[i];	// the least tight point greater or equal than y
-		}
-	}
-	//deal with the last element, i.e., the fake end
-	if (_ZR.size() == pESY->size())
-	{
-		return _ZR[_ZR.size()-1];
-	}
-	X x1;
-	x1._id = -1;
-	return x1;	// there is no tight point after y
+// assume y is between Y.s and Y.e
+sort((*pESY).begin(), (*pESY).end(), cmpYInc);
+sort(_ZR.begin(), _ZR.end(), cmpXEndInc);
+//ZR must be no more greater than pESY
+for (int i = 0; i < (int)_ZR.size(); i++)//why 1, not 0
+{
+if ((*pESY)[i] < y)
+{
+continue;
+}
+else if ((*pESY)[i] == _ZR[i]._e)
+{
+return _ZR[i];	// the least tight point greater or equal than y
+}
+}
+//deal with the last element, i.e., the fake end
+if (_ZR.size() == pESY->size())
+{
+return _ZR[_ZR.size()-1];
+}
+X x1;
+x1._id = -1;
+return x1;	// there is no tight point after y
 }*/
 
 void TreeNode::determineReachableSetinES(X x, vector<X>& R, bool& isTight)
@@ -292,7 +292,7 @@ void TreeNode::determineReachableSetinEE(X x, vector<X>& R, bool& isTight)
 	}
 }
 
-	
+
 
 
 // insert x in the tree node
@@ -307,7 +307,7 @@ Msg TreeNode::insertXintoESinNode(X x)
 	if (isTight == false)	// insert Z successfully
 	{
 		_Z.push_back(x);
-		_ZR.push_back(x);	
+		_ZR.push_back(x);
 		//return msg;
 		// no need to add to _ZL
 		//in leaf, x may be inserted to ZL, tbd
@@ -336,7 +336,7 @@ Msg TreeNode::insertXintoESinNode(X x)
 		}
 		else
 		{
-			
+
 			//infeasible
 			X r = replaceMinWeightX(x);//including adjust ZL and ZR
 			//msg._aZ = x;
@@ -346,23 +346,23 @@ Msg TreeNode::insertXintoESinNode(X x)
 	}
 	/*
 	else if (x._e > _Y[_Y.size() - 1])	// transferred
-	{	
-		_T.push_back(x);
-		msg._aT = x;
+	{
+	_T.push_back(x);
+	msg._aT = x;
 	}
 	else // infeasible
 	{
-		vector<X>::iterator it = find(_Z.begin(), _Z.end(), jTP);
-		_Z.erase(it);
-		vector<X>::iterator it1 = find(_ZR.begin(), _ZR.end(), jTP);
-		_ZR.erase(it1);
-		msg._aZ = x;
-		msg._bZ = jTP;
+	vector<X>::iterator it = find(_Z.begin(), _Z.end(), jTP);
+	_Z.erase(it);
+	vector<X>::iterator it1 = find(_ZR.begin(), _ZR.end(), jTP);
+	_ZR.erase(it1);
+	msg._aZ = x;
+	msg._bZ = jTP;
 
-		_I.push_back(x);
-		msg._aI = x;
-	}*/	
-	
+	_I.push_back(x);
+	msg._aI = x;
+	}*/
+
 	return msg;
 }
 
@@ -408,7 +408,7 @@ X TreeNode::replaceMinWeightX(X x)
 		r = R[0];
 		for (int i = 0; i < R.size(); i++)
 		{
-			if (cmpXWeightIDInc(R[i],r))
+			if (cmpXWeightIDInc(R[i], r))
 			{
 				r = R[i];
 			}
@@ -430,7 +430,7 @@ X TreeNode::replaceMinWeightX(X x)
 				if (EEY[i] == r._s)
 				{
 					break;
-				}	
+				}
 				if (_ZL[i]._s == EEY[i])
 				{
 					l2 = EEY[i];
@@ -474,6 +474,139 @@ X TreeNode::replaceMinWeightX(X x)
 	return r;
 }
 
+void TreeNode::testInsertXintoNode(X x, int flag = 0)
+{
+	if (flag == 0)	// Z
+	{
+		_Z.push_back(x);
+	}
+	else if (flag == 1)	// T
+	{
+		_T.push_back(x);
+	}
+	else if (flag == 2)	// I
+	{
+		_I.push_back(x);
+	}
+
+}
+
+bool TreeNode::veifiyNodeInvariants()
+{
+	sort(_Y.begin(), _Y.end(), cmpYInc);
+
+	// invariant \phi_1: \nexists x\in T, x.e<=Y.e
+	for (int i = 0; i < (int)_T.size(); i++)
+	{
+		if (_T[i]._e <= _Y[_Y.size() - 1])
+		{
+			return false;
+		}
+	}
+
+	// invariant \phi_2: \nexists x\in T, Z+x-x'\in \I
+	if (_T.empty() != true)
+	{
+		sort(_T.begin(), _T.end(), cmpXEndIncStartDec);
+
+		for (int i = 0; i < (int)_Z.size(); i++)
+		{
+			if (_Z[i]._e > _T[0]._e)
+			{
+				X z = _Z[i];
+				int j = 0;
+				while (z._e > _T[j]._e)
+				{
+					vector<X> ZZ;
+					for (int i = 0; i < (int)_Z.size(); i++)
+					{
+						ZZ.push_back(_Z[i]);
+					}
+
+					vector<X>::iterator it = find(ZZ.begin(), ZZ.end(), z);
+					ZZ.erase(it);
+					ZZ.push_back(_T[j]);
+					if (isXPerfectMatching(ZZ, _Y))		// Z+x-x'\in \I
+					{
+						return false;
+					}
+					j++;
+				}
+			}
+		}
+	}
+
+	// invariant \phi_3: \nexists x\in I, x.e>Y.e
+	for (int i = 0; i < (int)_I.size(); i++)
+	{
+		if (_I[i]._e > _Y[_Y.size() - 1])
+		{
+			return false;
+		}
+	}
+
+	// invariant \phi_4: \nexists x\in I, Z+x-x'\in \I
+	sort(_Z.begin(), _Z.end(), cmpXEndIncStartDec);
+	if (!_I.empty() && _Z[_Z.size() - 1]._e > _Y[_Y.size() - 1])
+	{
+		vector<X> Z1;
+		for (int i = 0; i < (int)_Z.size(); i++)
+		{
+			if (_Z[i]._e > _Y[_Y.size() - 1])
+			{
+				Z1.push_back(_Z[i]);
+			}
+		}
+
+		for (int i = 0; i < (int)Z1.size(); i++)
+		{
+			for (int j = 0; j < (int)_I.size(); j++)
+			{
+				vector<X> Z2;
+				for (int k = 0; k < (int)_Z.size(); k++)
+				{
+					Z2.push_back(_Z[k]);
+				}
+				vector<X>::iterator it = find(Z2.begin(), Z2.end(), Z1[i]);
+				Z2.erase(it);
+				Z2.push_back(_I[j]);
+				if (isXPerfectMatching(Z2, _Y))		// Z+x-x'\in \I
+				{
+					return false;
+				}
+			}
+		}
+	}
+
+	// invariant \phi_5: Z of the maximum cardinaltiy
+	vector<X> tmpZ;
+	vector<X> tmpX;
+	for (int i = 0; i < (int)_Z.size(); i++)
+		tmpX.push_back(_Z[i]);
+	for (int i = 0; i < (int)_T.size(); i++)
+		tmpX.push_back(_T[i]);
+	for (int i = 0; i < (int)_I.size(); i++)
+		tmpX.push_back(_I[i]);
+	gloverMatching(tmpX, _Y, &tmpZ);
+	if (tmpZ.size() != _Z.size())
+	{
+		return false;
+	}
+
+
+
+	return true;
+}
+
+void TreeNode::testPrintY()
+{
+	for (int i = 0; i < (int)_Y.size(); i++)
+	{
+		cout << _Y[i]._id << ', ';
+	}
+	cout << endl;
+}
+
 
 // Methods in Tree
 Tree::Tree(vector<Y> vecY)
@@ -484,7 +617,7 @@ Tree::Tree(vector<Y> vecY)
 bool Tree::insertXinTree(X x)
 {
 	TreeNode* nodeP = locateLeaf(x);	// locate the leaf corresponding to x.begin
-	
+
 	//below is the whole implemention of the MSG passing rule
 	Msg msg = nodeP->insertXintoESinNode(x);		// insert the x into the leaf
 	if (msg.flagInsertX() == 2)
@@ -534,10 +667,10 @@ bool Tree::insertXinTree(X x)
 			{
 				Msg tempMsg = nodeP->_parentNode->insertXintoESinNode(msg._bZ);	// msg._b; // if tempMsg._b <> msg._b, then msg._b remains in the matched set of the parent
 				//msg._b = tempMsg._b; msg._bEmpty = tempMsg._bEmpty; msg._c = tempMsg._c;
-				msg._bZ = tempMsg._bZ;	
+				msg._bZ = tempMsg._bZ;
 				msg._aT = tempMsg._aT;
 				msg._aI = tempMsg._aI;
-				
+
 				if (tempMsg.flagInsertX() == 2)	// tempMsg._c == 2
 				{
 					//msg._bZ = msg._aI = nodeP->_parent->replaceMinWeightX(tempMsg);		//msg._b // call replaceable algorithm
@@ -546,7 +679,7 @@ bool Tree::insertXinTree(X x)
 		}
 		else // msg from the right child
 		{
-			
+
 
 		}
 		child = nodeP;
@@ -582,7 +715,7 @@ TreeNode* Tree::locateLeaf(X x)
 			node->splitDSNode(x);
 			//node->updateAuxSet4Split();
 			node = (TreeNode*)node->_rightChild;
-		//test code for split==========================
+			//test code for split==========================
 			vector<X> Z = this->_root->_Z;
 			ofstream out("Split-test.txt");
 			sort(Z.begin(), Z.end(), cmpXID);
@@ -627,7 +760,7 @@ TreeNode* Tree::locateLeaf(X x)
 			}
 			out.close();
 			int a = 1;
-		//=========================	
+			//=========================	
 		}
 	}
 	while (node->_leftChild != NULL) // to leaf
@@ -638,10 +771,102 @@ TreeNode* Tree::locateLeaf(X x)
 	TreeNode* tmp = node;
 	while (tmp != NULL)
 	{
-		tmp->_X.push_back(x);
-		tmp = tmp->_parentNode;
+	tmp->_X.push_back(x);
+	tmp = tmp->_parentNode;
 	}*/
 	return node;
 }
 
 
+bool Tree::veifiyTreeInvariants()
+{
+	TreeNode *node = this->_root;
+	stack<TreeNode *> stk;
+
+	// dfs	- preorder
+	do
+	{
+		if (stk.empty() != true)
+		{
+			node = stk.top()->_rightChild;
+			stk.pop();
+		}
+		if (node->veifiyNodeInvariants() == false)
+		{
+			return false;
+		}
+		while (node->_leftChild != NULL)
+		{
+			if (node->_rightChild != NULL)
+			{
+				stk.push(node);
+			}
+			node = node->_leftChild;
+			// visit
+			//node->testPrintY();
+			if (node->veifiyNodeInvariants() == false)
+			{
+				return false;
+			}
+		}
+	} while (stk.empty() != true);
+
+	//// dfs	- inorder	
+	//cout << endl << endl << "inorder" << endl;
+	//node = this->_root;	// assertion: root is not NULL
+	//do
+	//{
+	//	do
+	//	{
+	//		stk.push(node);
+	//		node = node->_leftChild;
+	//	} while (node != NULL);
+
+	//	do
+	//	{
+	//		node = stk.top();
+	//		stk.pop();
+	//		node->testPrintY();
+	//	} while (!stk.empty() && node->_rightChild == NULL);
+
+	//	node = node->_rightChild;
+	//} while (stk.empty() != true || node != NULL);
+
+	//// dfs	- postorder	
+	//cout << endl << endl << "post order" << endl;
+	//node = this->_root;	// assertion: root is not NULL
+
+	//stk.push(node);
+	//do
+	//{
+	//	while (node->_leftChild != NULL)
+	//	{
+	//		node = node->_leftChild;
+	//		stk.push(node);
+	//	}
+
+	//	if (node->_rightChild != NULL)
+	//	{
+	//		node = node->_rightChild;
+	//		stk.push(node);
+	//		continue;
+	//	}
+	//	else
+	//	{
+	//		do
+	//		{
+	//			node = stk.top();
+	//			stk.pop();
+	//			node->testPrintY();
+	//		} while (!stk.empty() && (node == stk.top()->_rightChild || (node == stk.top()->_leftChild && stk.top()->_rightChild == NULL)));
+	//		if (!stk.empty())
+	//		{
+	//			node = stk.top()->_rightChild;
+	//			stk.push(node);
+	//		}
+	//	}
+	//} while (!stk.empty());
+
+
+	return true;
+}

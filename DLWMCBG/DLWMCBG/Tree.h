@@ -39,6 +39,11 @@ public:
 	TreeNode * pullBackATransferredXInWeightProcess(TreeNode *, X, Msg, bool&, X&);
 
 
+	// verification
+	bool veifiyNodeInvariants();
+	void testInsertXintoNode(X, int);
+	void testPrintY();
+
 };
 
 class Tree
@@ -54,5 +59,8 @@ public:
 	TreeNode* locateLeaf(X x);	//include split
 	TreeNode* locateLeaf(Y y);	
 	bool insertXinTree(X x);
+
+	// verification
+	bool veifiyTreeInvariants();
 	
 };
