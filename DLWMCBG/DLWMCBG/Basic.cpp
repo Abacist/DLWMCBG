@@ -15,11 +15,12 @@ void generator(char* fileName, int MaxY, int UpdateRange)
 	SYSTEMTIME lpsystime;
 	GetLocalTime(&lpsystime);
 	srand(lpsystime.wMinute * 1000 + lpsystime.wMilliseconds);
+	out << 1 << " " << 1000 << " " << MaxY/2 << " " << MaxY-1 << " " << 100 << endl;
 	for (int i = 0; i < UpdateRange; i++)
 	{
 		out << 1 << " " << i + 1 << " " << 1 << " " << rand() % MaxY + 1 << " " << rand() % MaxY * 3 << endl;;
 	}
-	out << 1 << " " << 301 << " " << 50 << " " << 80 << " " << 100 << endl;
+	//out << 1 << " " << 301 << " " << 50 << " " << 80 << " " << 100 << endl;
 	out << '$' << endl;
 
 

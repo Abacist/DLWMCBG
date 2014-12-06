@@ -646,10 +646,10 @@ bool Tree::insertXinTree(X x)
 
 	//below is the whole implemention of the MSG passing rule
 	Msg msg = nodeP->insertXintoESinNode(x);		// insert the x into the leaf
-	if (msg.flagInsertX() == 2)
+	/*if (msg.flagInsertX() == 2)
 	{
 		//msg._bZ = msg._aI = nodeP->replaceMinWeightX(msg);		// call replaceable algorithm		
-	}
+	}*/
 	TreeNode* child = nodeP;
 	nodeP = nodeP->_parentNode;
 
@@ -658,7 +658,141 @@ bool Tree::insertXinTree(X x)
 		// leaf is the current node; the msg comes from its own ES-Tree insert operation
 		if (child == nodeP->_leftChild)	// the node is the left child
 		{
-			if (msg._aT._id == -1 && msg._aI._id == -1)	// msg._c == 0 // 1.success in L
+			if (msg._aI._id == -1 && msg._aT._id == -1)//transfer to flags of msg later
+			{
+				//success
+				nodeP->_Z.push_back(msg._aZ);
+				nodeP->_ZL.push_back(msg._aZ);
+				//msg keeps
+			}
+
+			else if (msg._aI._id == -1 && msg._aT._id != -1)
+			{
+				//transfer in left
+				nodeP->_Z.push_back(msg._aZ);
+				nodeP->_ZL.push_back(msg._aZ);
+				vector<X>::iterator it = find(nodeP->_Z.begin(), nodeP->_Z.end(), msg._bZ);
+				if (it != nodeP->_Z.end())
+				{
+					nodeP->_Z.erase(it);
+					it = find(nodeP->_ZL.begin(), nodeP->_ZL.end(), msg._bZ);
+					nodeP->_ZL.erase(it);
+					Msg tempMsg = nodeP->insertXintoESinNode(msg._aT);
+					msg._aI = tempMsg._aI;
+					msg._aT = tempMsg._aT;
+					msg._bZ = tempMsg._bZ;
+				}
+				else
+				{
+					vector<X> R;
+					nodeP->determineReachableSetinEE(msg._aZ, R, *new bool);//ES or EE? In Split or Msg Passing?
+					//when the R is right, the below code is right
+					R.push_back(msg._aZ);
+					sort(R.begin(), R.end(), cmpXEndInc);
+					X maxEndinR = R[R.size() - 1];
+					if (maxEndinR._e < nodeP->_rightChild->getIntervalStart())
+					{
+						//not transfer in P
+						sort(R.begin(), R.end(), cmpXWeightIDInc);
+						vector<X>::iterator it = find(nodeP->_Z.begin(), nodeP->_Z.end(), R[0]);
+						nodeP->_Z.erase(it);
+						it = find(nodeP->_ZL.begin(), nodeP->_ZL.end(), R[0]);
+						nodeP->_ZL.erase(it);
+						nodeP->_I.push_back(R[0]);
+						Msg tempMsg;
+						tempMsg._aX = msg._aX;
+						tempMsg._aZ = msg._aZ;
+						tempMsg._bZ = R[0];
+						tempMsg._aI = R[0];
+						msg = tempMsg;
+					}
+					else
+					{
+						vector<X>::iterator it = find(nodeP->_Z.begin(), nodeP->_Z.end(), maxEndinR);
+						nodeP->_Z.erase(it);
+						it = find(nodeP->_ZL.begin(), nodeP->_ZL.end(), maxEndinR);
+						nodeP->_ZL.erase(it);
+						Msg tempMsg = nodeP->insertXintoESinNode(maxEndinR);
+						msg._aI = tempMsg._aI;
+						msg._aT = tempMsg._aT;
+						msg._bZ = tempMsg._bZ;
+						//_aZ, _aX keeps
+					}
+
+				}
+			}
+			else if (msg._aI._id != -1 && msg._aT._id == -1)
+			{
+				//infeasible in Left
+				nodeP->_Z.push_back(msg._aZ);
+				nodeP->_ZL.push_back(msg._aZ);
+				vector<X>::iterator it = find(nodeP->_Z.begin(), nodeP->_Z.end(), msg._bZ);
+				if (it != nodeP->_Z.end())
+				{
+					nodeP->_Z.erase(it);
+					it = find(nodeP->_ZL.begin(), nodeP->_ZL.end(), msg._bZ);
+					nodeP->_ZL.erase(it);
+					nodeP->_I.push_back(msg._aI);
+					//msg keeps
+				}
+				else
+				{
+					vector<X> R;
+					nodeP->determineReachableSetinEE(msg._aZ, R, *new bool);//ES or EE? In Split or Msg Passing?
+					//when the R is right, the below code is right
+					R.push_back(msg._aZ);
+					sort(R.begin(), R.end(), cmpXEndInc);
+					X maxEndinR = R[R.size() - 1];
+					if (maxEndinR._e < nodeP->_rightChild->getIntervalStart())
+					{
+						//not transfer in P
+						sort(R.begin(), R.end(), cmpXWeightIDInc);
+						vector<X>::iterator it = find(nodeP->_Z.begin(), nodeP->_Z.end(), R[0]);
+						nodeP->_Z.erase(it);
+						it = find(nodeP->_ZL.begin(), nodeP->_ZL.end(), R[0]);
+						nodeP->_ZL.erase(it);
+						nodeP->_I.push_back(R[0]);
+						Msg tempMsg;
+						tempMsg._aX = msg._aX;
+						tempMsg._aZ = msg._aZ;
+						tempMsg._bZ = R[0];
+						tempMsg._aI = R[0];
+						msg = tempMsg;
+					}
+					else
+					{
+						vector<X>::iterator it = find(nodeP->_Z.begin(), nodeP->_Z.end(), maxEndinR);
+						nodeP->_Z.erase(it);
+						it = find(nodeP->_ZL.begin(), nodeP->_ZL.end(), maxEndinR);
+						nodeP->_ZL.erase(it);
+						Msg tempMsg = nodeP->insertXintoESinNode(maxEndinR);
+						msg._aI = tempMsg._aI;
+						msg._aT = tempMsg._aT;
+						msg._bZ = tempMsg._bZ;
+						//_aZ, _aX keeps
+					}
+					/*vector<X> R;//may transfer
+					nodeP->determineReachableSetinEE(msg._aZ, R, *new bool);
+					R.push_back(msg._aZ);
+					sort(R.begin(), R.end(), cmpXWeightIDInc);
+					it = find(nodeP->_Z.begin(), nodeP->_Z.end(), R[0]);
+					nodeP->_Z.erase(it);
+					it = find(nodeP->_ZL.begin(), nodeP->_ZL.end(), R[0]);
+					nodeP->_ZL.erase(it);
+					nodeP->_I.push_back(R[0]);
+					Msg tempMsg;
+					tempMsg._aX = msg._aX;
+					tempMsg._aZ = msg._aZ;
+					tempMsg._bZ = R[0];
+					tempMsg._aI = R[0];
+					msg = tempMsg;*/
+
+				}
+			}
+
+
+
+			/*if (msg._aT._id == -1 && msg._aI._id == -1)	// msg._c == 0 // 1.success in L
 			{
 				nodeP->_parentNode->_Z.push_back(msg._aZ);	// msg._a
 			}
@@ -701,12 +835,11 @@ bool Tree::insertXinTree(X x)
 				{
 					//msg._bZ = msg._aI = nodeP->_parent->replaceMinWeightX(tempMsg);		//msg._b // call replaceable algorithm
 				}
-			}
+			}*/
 		}
 		else // msg from the right child
 		{
-
-
+			break;
 		}
 		child = nodeP;
 		nodeP = nodeP->_parentNode;
@@ -742,7 +875,7 @@ TreeNode* Tree::locateLeaf(X x)
 			//node->updateAuxSet4Split();
 			node = (TreeNode*)node->_rightChild;
 			//test code for split==========================
-			vector<X> Z = this->_root->_Z;
+			/*vector<X> Z = this->_root->_Z;
 			ofstream out("Split-test.txt");
 			sort(Z.begin(), Z.end(), cmpXID);
 			for (int i = 0; i < Z.size(); i++)
@@ -785,7 +918,7 @@ TreeNode* Tree::locateLeaf(X x)
 				out << I[i]._id << "\t" << I[i]._e << endl;
 			}
 			out.close();
-			int a = 1;
+			int a = 1;*/
 			//=========================	
 		}
 	}

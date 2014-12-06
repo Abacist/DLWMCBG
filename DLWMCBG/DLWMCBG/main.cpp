@@ -7,7 +7,7 @@
 
 using namespace std;
 
-void generator(char* fileName = "input.txt", int MaxY=100, int UpdateRange = 300);
+void generator(char* fileName = "input.txt", int MaxY=50, int UpdateRange = 150);
 
 int main()
 {
@@ -127,7 +127,12 @@ int main()
 		in.close();
 		out.close();
 		//verify
-		if (pTree->_root->_leftChild->veifiyNodeInvariants() && pTree->_root->veifiyNodeInvariants())
+		if (
+			pTree->_root->veifiyNodeInvariants()
+			&& pTree->_root->_leftChild->veifiyNodeInvariants()
+			//&&pTree->_root->_leftChild->_leftChild->veifiyNodeInvariants() 
+			//&& pTree->_root->_leftChild->_leftChild->_leftChild->_leftChild->veifiyNodeInvariants()
+			)
 		{
 			cout << "============================Case " << cases++ << " passed!" << endl;
 		}
