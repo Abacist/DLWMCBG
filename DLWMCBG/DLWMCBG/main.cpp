@@ -11,7 +11,7 @@ void generator(char* fileName = "input.txt", int MaxY=100, int UpdateRange = 300
 
 int main()
 {
-	// generator(); //generator need to be fit the format
+	//generator(); //generator need to be fit the format
 	ifstream in("input.txt");
 	ofstream out("output.txt");
 
@@ -56,14 +56,22 @@ int main()
 			case '1':
 			{
 				X x;
-				// in >> x._id >> x._s._id >> x._e._id >> x._w;	// divide by Space
-				// if x.s or x.e is not in _Y, insert it.	// TBD				
-				// pTree->insertXinTree(x);
+				in >> x._id >> x._s._id >> x._e._id >> x._w;	// divide by Space
+				// if x.s or x.e is not in _Y, insert it.	// TBD			
+				/*if (x._id == 10)
+				{
+					int a = 0;
+				}*/
+				pTree->insertXinTree(x);
+				if (!pTree->veifiyTreeInvariants())
+				{
+					int a = 0;
+				}
 
 				// for test
-				int flag;
-				in >> x._id >> x._s._id >> x._e._id >> x._w >> flag;	// divide by Space
-				pTree->_root->testInsertXintoNode(x, flag);	// for test verification
+				//int flag;
+				//in >> x._id >> x._s._id >> x._e._id >> x._w >> flag;	// divide by Space
+				//pTree->_root->testInsertXintoNode(x, flag);	// for test verification
 				
 			}break;
 

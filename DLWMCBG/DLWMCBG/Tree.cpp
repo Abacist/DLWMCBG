@@ -526,7 +526,10 @@ bool TreeNode::veifiyNodeInvariants()
 					vector<X>::iterator it = find(ZZ.begin(), ZZ.end(), z);
 					ZZ.erase(it);
 					ZZ.push_back(_T[j]);
-					if (isXPerfectMatching(ZZ, _Y))		// Z+x-x'\in \I
+
+					vector<X> tmpZ;
+					gloverMatching(ZZ, _Y, &tmpZ);
+					if (tmpZ.size() == ZZ.size())		// Z+x-x'\in \I
 					{
 						return false;
 					}
@@ -570,7 +573,10 @@ bool TreeNode::veifiyNodeInvariants()
 				vector<X>::iterator it = find(Z2.begin(), Z2.end(), Z1[i]);
 				Z2.erase(it);
 				Z2.push_back(_I[j]);
-				if (isXPerfectMatching(Z2, _Y))		// Z+x-x'\in \I
+
+				vector<X> tmpZ;
+				gloverMatching(Z2, _Y, &tmpZ);
+				if (tmpZ.size() == Z2.size())		// Z+x-x'\in \I
 				{
 					return false;
 				}
@@ -593,7 +599,27 @@ bool TreeNode::veifiyNodeInvariants()
 		return false;
 	}
 
-
+	// invariant \phi_6: Z of the maximum weight w.r.t. X-T
+	tmpZ.clear();
+	tmpX.clear();
+	for (int i = 0; i < (int)_Z.size(); i++)
+		tmpX.push_back(_Z[i]);
+	for (int i = 0; i < (int)_I.size(); i++)
+		tmpX.push_back(_I[i]);
+	PlaxtonMWM(tmpX, _Y, &tmpZ);
+	if (tmpZ.size() != _Z.size())
+	{
+		return false;
+	}
+	sort(_Z.begin(), _Z.end(), cmpXStandard);
+	sort(tmpZ.begin(), tmpZ.end(), cmpXStandard);
+	for (int i = 0; i < (int)_Z.size(); i++)
+	{
+		if (!(_Z[i] == tmpZ[i]))
+		{
+			return false;
+		}		
+	}
 
 	return true;
 }

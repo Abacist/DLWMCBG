@@ -139,10 +139,10 @@ bool cmpXEndBeginIdInc(X x1, X x2)
 	return false;
 }
 
-// weight increasing, end increasing, begin decreasing, id increasing
+// weight decreasing, end increasing, begin decreasing, id increasing
 bool cmpXStandard(X x1, X x2)
 {
-	if (x1._w < x2._w)
+	if (x1._w > x2._w)
 	{
 		return true;
 	}
@@ -175,54 +175,25 @@ bool cmpXEndIncStartDec(X x1, X x2)
 	return false;
 }
 
-// are all X matched w.r.t. Y?
-bool isXPerfectMatching(const vector<X>& vX, const vector<Y>& vY)
-{
-	vector<X> XX;
-	vector<Y> YY;
-	for (int i = 0; i < (int)vX.size(); i++)
-	{
-		XX.push_back(vX[i]);
-	}
-	for (int i = 0; i < (int)vY.size(); i++)
-	{
-		YY.push_back(vY[i]);
-	}
-	sort(XX.begin(), XX.end(), cmpXEndIncStartDec);
-	sort(YY.begin(), YY.end(), cmpYInc);
-
-	for (int i = 0; i < (int)XX.size(); i++)
-	{
-		if (XX[i]._s > YY[i] || XX[i]._e < YY[i])
-		{
-			return false;
-		}
-	}
-
-	return true;
-}
-
-
-
 // For Test
-struct SX
+struct TestX
 {
 	X _X;
 	int flag = 0;
-	bool operator==(const SX& x)
+	bool operator==(const TestX& x)
 	{
 		return this->_X._id == x._X._id;
 	}
 };
 
 // increasing start
-bool testCmpXStartInc(SX x1, SX x2)
+bool testCmpXStartInc(TestX x1, TestX x2)
 {
 	return x1._X._s < x2._X._s;
 }
 
 // weight increasing, end increasing, begin decreasing, id increasing
-bool testCmpXEndBeg(SX x1, SX x2)
+bool testCmpXEndBeg(TestX x1, TestX x2)
 {
 	if (x1._X._e < x2._X._e)
 	{
@@ -235,14 +206,36 @@ bool testCmpXEndBeg(SX x1, SX x2)
 	return false;
 }
 
+// weight decreasing, end increasing, begin decreasing, id increasing
+bool testCmpXStandard(TestX x1, TestX x2)
+{
+	if (x1._X._w > x2._X._w)
+	{
+		return true;
+	}
+	else if (x1._X._w == x2._X._w && x1._X._e < x2._X._e)
+	{
+		return true;
+	}
+	else if (x1._X._w == x2._X._w && x1._X._e == x2._X._e && x1._X._s > x2._X._s)
+	{
+		return true;
+	}
+	else if (x1._X._w == x2._X._w && x1._X._e == x2._X._e && x1._X._s == x2._X._s && x1._X._id < x2._X._id)
+	{
+		return true;
+	}
+	return false;
+}
+
 // return the OIS in the glover mathcing of a CBG
 void gloverMatching(const vector<X>& vX, const vector<Y>& vY, vector<X>* vZ)
 {	
-	vector<SX> XX;
+	vector<TestX> XX;
 	vector<Y> YY;
 	for (int i = 0; i < (int)vX.size(); i++)
 	{
-		SX sx;
+		TestX sx;
 		sx._X = vX[i];		
 		XX.push_back(sx);
 	}
@@ -250,13 +243,13 @@ void gloverMatching(const vector<X>& vX, const vector<Y>& vY, vector<X>* vZ)
 	{
 		YY.push_back(vY[i]);
 	}
-	sort(XX.begin(), XX.end(), testCmpXStartInc);
+	sort(XX.begin(), XX.end(), testCmpXStandard);
 	sort(YY.begin(), YY.end(), cmpYInc);
 		
 	vZ->clear();
 	for (int i = 0; i < (int)YY.size(); i++)
 	{
-		vector<SX> W;	// the x set that may match with YY[i]
+		vector<TestX> W;	// the x set that may match with YY[i]
 		int j = 0;
 		while (j < (int)XX.size() && XX[j]._X._s <= YY[i])
 		{
@@ -272,7 +265,7 @@ void gloverMatching(const vector<X>& vX, const vector<Y>& vY, vector<X>* vZ)
 			if (W[k].flag == 0)	// get the unmatched x which has the smallest end
 			{
 				vZ->push_back(W[k]._X);
-				vector<SX>::iterator it = find(XX.begin(), XX.end(), W[k]);
+				vector<TestX>::iterator it = find(XX.begin(), XX.end(), W[k]);
 				it->flag = 1;
 				break;
 			}
@@ -281,3 +274,34 @@ void gloverMatching(const vector<X>& vX, const vector<Y>& vY, vector<X>* vZ)
 
 }
 
+// return the OIS in the plaxton MWM of a LWCBG
+void PlaxtonMWM(const vector<X>& vX, const vector<Y>& vY, vector<X>* vZ)
+{
+	vector<TestX> XX;
+	vector<Y> YY;
+	for (int i = 0; i < (int)vX.size(); i++)
+	{
+		TestX sx;
+		sx._X = vX[i];
+		XX.push_back(sx);
+	}
+	for (int i = 0; i < (int)vY.size(); i++)
+	{
+		YY.push_back(vY[i]);
+	}
+	sort(XX.begin(), XX.end(), testCmpXStandard);
+	sort(YY.begin(), YY.end(), cmpYInc);
+
+	vZ->clear();	
+	for (int i = 0; i < (int)XX.size(); i++)
+	{		
+		vector<X> tmpZ;
+		vZ->push_back(XX[i]._X);
+		gloverMatching(*vZ, YY, &tmpZ);
+		if (tmpZ.size() < vZ->size())
+		{
+			vector<X>::iterator it = find(vZ->begin(), vZ->end(), XX[i]._X);
+			vZ->erase(it);
+		}				
+	}
+}
