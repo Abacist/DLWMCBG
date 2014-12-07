@@ -7,12 +7,12 @@
 
 using namespace std;
 
-void generator(char* fileName = "input.txt", int MaxY = 5, int UpdateRange = 5, int WeightRange = 100);
+void generator(char* fileName = "input.txt", int MaxY = 5, int UpdateRange = 10, int WeightRange = 100);
 
 int main()
 {
 	int cases = 1;
-	while (cases <= 10)
+	while (true)
 	{
 		generator(); //generator need to be fit the format
 		ifstream in("input.txt");
@@ -61,15 +61,15 @@ int main()
 				X x;
 				in >> x._id >> x._s._id >> x._e._id >> x._w;	// divide by Space
 				// if x.s or x.e is not in _Y, insert it.	// TBD			
-				if (x._id == 90)
+				if (x._id == 7)
 				{
 					int a = 0;
 				}
 				pTree->insertXinTree(x);
-				if (pTree->verifyTreeInvariants() != 0)
+				/*if (pTree->verifyTreeInvariants() != 0)
 				{
 					int a = 0;
-				}
+				}*/
 
 
 
@@ -112,8 +112,9 @@ int main()
 
 		}
 		//output to file
-		/*cout << "end" << endl;
-		vector<X> Z = pTree->_root->_Z;
+		//cout << "end" << endl;
+		
+		/*vector<X> Z = pTree->_root->_Z;
 		sort(Z.begin(), Z.end(), cmpXID);
 		for (int i = 0; i < Z.size(); i++)
 		{
@@ -124,8 +125,8 @@ int main()
 		in.close();
 		out.close();
 		//verify
-		//int flag = pTree->verifyInvariantsRecur();
-		int flag = pTree->verifyTreeInvariants();
+		int flag = pTree->verifyInvariantsRecur();
+//		int flag = pTree->verifyTreeInvariants();
 		if (flag == 0
 			//pTree->_root->verifyNodeInvariants()
 			//&& pTree->_root->_leftChild->verifyNodeInvariants()

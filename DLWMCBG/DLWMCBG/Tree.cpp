@@ -533,7 +533,35 @@ void TreeNode::testInsertXintoNode(X x, int flag = 0)
 
 int TreeNode::verifyNodeInvariants()
 {
+
 	sort(_Y.begin(), _Y.end(), cmpYInc);
+
+	//X = Z+I+T
+	vector<X> ZIT = _Z;
+	for (int i = 0; i < _I.size(); i++)
+	{
+		ZIT.push_back(_I[i]);
+	}
+	for (int i = 0; i < _T.size(); i++)
+	{
+		ZIT.push_back(_T[i]);
+	}
+	if (ZIT.size() != _X.size())
+	{
+		return 7;
+	}
+	else
+	{
+		sort(ZIT.begin(), ZIT.end(), cmpXID);
+		sort(_X.begin(), _X.end(), cmpXID);
+		for (int i = 0; i < ZIT.size(); i++)
+		{
+			if (ZIT[i]._id != _X[i]._id)
+			{
+				return 7;
+			}
+		}
+	}
 
 	// invariant \phi_1: \nexists x\in T, x.e<=Y.e
 	for (int i = 0; i < (int)_T.size(); i++)
@@ -574,6 +602,10 @@ int TreeNode::verifyNodeInvariants()
 						return 2;
 					}
 					j++;
+					if (j >= _T.size())
+					{
+						break;
+					}
 				}
 			}
 		}
@@ -661,32 +693,7 @@ int TreeNode::verifyNodeInvariants()
 		}
 	}
 
-	//X = Z+I+T
-	vector<X> ZIT = _Z;
-	for (int i = 0; i < _I.size(); i++)
-	{
-		ZIT.push_back(_I[i]);
-	}
-	for (int i = 0; i < _T.size(); i++)
-	{
-		ZIT.push_back(_T[i]);
-	}
-	if (ZIT.size() != _X.size())
-	{
-		return 7;
-	}
-	else
-	{
-		sort(ZIT.begin(), ZIT.end(), cmpXID);
-		sort(_X.begin(), _X.end(), cmpXID);
-		for (int i = 0; i < ZIT.size(); i++)
-		{
-			if (ZIT[i]._id != _X[i]._id)
-			{
-				return 7;
-			}
-		}
-	}
+	
 
 	return 0;
 }
@@ -743,13 +750,14 @@ bool Tree::insertXinTree(X x)
 			{
 				//transfer in left
 				nodeP->_Z.push_back(msg._aZ);
-				nodeP->_ZL.push_back(msg._aZ);
+				
 				vector<X>::iterator it = find(nodeP->_Z.begin(), nodeP->_Z.end(), msg._bZ);
 				if (it != nodeP->_Z.end())
 				{
 					vector<X> R;
 					nodeP->determineReachableSetinEE(msg._aZ, R, *new bool);
 					R.push_back(msg._aZ);
+					nodeP->_ZL.push_back(msg._aZ);
 					sort(R.begin(), R.end(), cmpXEndInc);
 					X maxEndinR = R[R.size() - 1];
 					it = find(nodeP->_Z.begin(), nodeP->_Z.end(), maxEndinR);
@@ -767,6 +775,7 @@ bool Tree::insertXinTree(X x)
 					nodeP->determineReachableSetinEE(msg._aZ, R, *new bool);//ES or EE? In Split or Msg Passing?
 					//when the R is correct, the below code is right
 					R.push_back(msg._aZ);
+					nodeP->_ZL.push_back(msg._aZ);
 					sort(R.begin(), R.end(), cmpXEndInc);
 					X maxEndinR = R[R.size() - 1];
 					if (maxEndinR._e < nodeP->_rightChild->getIntervalStart())
@@ -816,10 +825,13 @@ bool Tree::insertXinTree(X x)
 				}
 				else
 				{
+					vector<X>::iterator it = find(nodeP->_ZL.begin(), nodeP->_ZL.end(), msg._aZ);
+					nodeP->_ZL.erase(it);
 					vector<X> R;
 					nodeP->determineReachableSetinEE(msg._aZ, R, *new bool);//ES or EE? In Split or Msg Passing?
 					//when the R is right, the below code is right
 					R.push_back(msg._aZ);
+					nodeP->_ZL.push_back(msg._aZ);
 					sort(R.begin(), R.end(), cmpXEndInc);
 					X maxEndinR = R[R.size() - 1];
 					if (maxEndinR._e < nodeP->_rightChild->getIntervalStart())
@@ -993,7 +1005,7 @@ bool Tree::insertXinTree(X x)
 			{
 				vector<X> t; t.erase(t.begin());
 			}
-			break;
+			//break;
 		}
 		child = nodeP;
 		nodeP = nodeP->_parentNode;
@@ -1200,14 +1212,15 @@ int Tree::verifyInvariantsRecur(TreeNode* curRoot)
 	}
 	else
 	{
-		int flag = verifyInvariantsRecur(curRoot->_leftChild);
-		if (flag == 0)
+		int flagL = verifyInvariantsRecur(curRoot->_leftChild);
+		int flagR = verifyInvariantsRecur(curRoot->_rightChild);
+		if (flagL == 0 && flagR == 0)
 		{
 			return curRoot->verifyNodeInvariants();
 		}
 		else
 		{
-			return flag;
+			return flagL;
 		}
 	}
 }
