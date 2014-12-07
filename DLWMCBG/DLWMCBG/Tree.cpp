@@ -158,7 +158,7 @@ void TreeNode::updateAuxSet4Split()
 			{
 				//_bZ has already been preempted. in Split, we can directly use the ES structure of ZL
 				//but how to do in the msg passing?
-				vector<X> R;
+				/*vector<X> R;
 				determineReachableSetinEE(msg._aZ, R, *new bool);//ES or EE? In Split or Msg Passing?
 				R.push_back(msg._aZ);
 				sort(R.begin(), R.end(), cmpXWeightIDInc);
@@ -166,7 +166,31 @@ void TreeNode::updateAuxSet4Split()
 				_Z.erase(it);
 				it = find(_ZL.begin(), _ZL.end(), R[0]);
 				_ZL.erase(it);
-				_I.push_back(R[0]);
+				_I.push_back(R[0]);*/
+				vector<X> R;
+				determineReachableSetinEE(msg._aZ, R, *new bool);//ES or EE? In Split or Msg Passing?
+				//when the R is right, the below code is right
+				R.push_back(msg._aZ);
+				sort(R.begin(), R.end(), cmpXEndInc);
+				X maxEndinR = R[R.size() - 1];
+				if (maxEndinR._e < _rightChild->getIntervalStart())
+				{
+					//not transfer in P
+					sort(R.begin(), R.end(), cmpXWeightIDInc);
+					vector<X>::iterator it = find(_Z.begin(), _Z.end(), R[0]);
+					_Z.erase(it);
+					it = find(_ZL.begin(), _ZL.end(), R[0]);
+					_ZL.erase(it);
+					_I.push_back(R[0]);
+				}
+				else
+				{
+					vector<X>::iterator it = find(_Z.begin(), _Z.end(), maxEndinR);
+					_Z.erase(it);
+					it = find(_ZL.begin(), _ZL.end(), maxEndinR);
+					_ZL.erase(it);
+					insertXintoESinNode(maxEndinR);
+				}
 
 			}
 		}
@@ -743,7 +767,7 @@ bool Tree::insertXinTree(X x)
 				{
 					vector<X> R;
 					nodeP->determineReachableSetinEE(msg._aZ, R, *new bool);//ES or EE? In Split or Msg Passing?
-					//when the R is right, the below code is right
+					//when the R is correct, the below code is right
 					R.push_back(msg._aZ);
 					sort(R.begin(), R.end(), cmpXEndInc);
 					X maxEndinR = R[R.size() - 1];
