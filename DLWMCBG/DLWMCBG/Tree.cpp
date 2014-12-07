@@ -374,11 +374,9 @@ Msg TreeNode::insertXintoESinNode(X x)
 			//msg._aZ = x;
 			msg._bZ = R[R.size() - 1];
 			msg._aT = R[R.size() - 1];
-
 		}
 		else
 		{
-
 			//infeasible
 			X r = replaceMinWeightX(x);//including adjust ZL and ZR
 			//msg._aZ = x;
@@ -490,7 +488,7 @@ X TreeNode::replaceMinWeightX(X x)
 					allBackX.push_back(ESR[i]);
 				}
 			}
-			sort(allBackX.begin(), allBackX.end(), cmpXEndBeginIdInc);
+			sort(allBackX.begin(), allBackX.end(), cmpXEndBeginIdInc);	// TBC: increaing start? should be decreasing?
 			X backX = allBackX[0];
 			it = find(_ZR.begin(), _ZR.end(), backX);
 			_ZR.erase(it);
@@ -920,6 +918,81 @@ bool Tree::insertXinTree(X x)
 		}
 		else // msg from the right child
 		{
+			nodeP->_X.push_back(x);
+			if (msg._aT._id == -1 && msg._aI._id == -1)
+			{
+				// success in R
+				Msg tempMsg = nodeP->insertXintoESinNode(msg._aZ);
+				msg._aI = tempMsg._aI;
+				msg._aT = tempMsg._aT;
+				msg._bZ = tempMsg._bZ;
+			}
+			else if (msg._aI._id == -1 && msg._aT._id != -1)
+			{
+				// x' is replaced by x in Z and moved to T in R
+				if (msg._aZ == msg._aT)		// x is transferred itself
+				{					
+					nodeP->_T.push_back(msg._aT);
+				}
+				else
+				{
+					vector<X>::iterator it = find(nodeP->_Z.begin(), nodeP->_Z.end(), msg._bZ);
+					if (it != nodeP->_Z.end())
+					{
+						// x' \in T
+						nodeP->_Z.push_back(msg._aZ);
+						nodeP->_ZR.push_back(msg._aZ);
+						it = find(nodeP->_ZR.begin(), nodeP->_ZR.end(), msg._bZ);
+						nodeP->_ZR.erase(it);
+						it = find(nodeP->_Z.begin(), nodeP->_Z.end(), msg._bZ);
+						nodeP->_Z.erase(it);
+						nodeP->_T.push_back(msg._bZ);
+					}
+					else
+					{
+						// x' \notin T; reinsert x
+						Msg tempMsg = nodeP->insertXintoESinNode(msg._aZ);
+						msg._aI = tempMsg._aI;
+						msg._aT = tempMsg._aT;
+						msg._bZ = tempMsg._bZ;
+					}
+				}				
+			}
+			else if (msg._aI._id != -1 && msg._aT._id == -1)
+			{
+				// x' is replaced by x in Z and moved to I in R
+				if (msg._aZ == msg._aI)		// x is infeasible
+				{	
+					nodeP->_I.push_back(msg._aI);
+				}
+				else
+				{
+					vector<X>::iterator it = find(nodeP->_Z.begin(), nodeP->_Z.end(), msg._bZ);
+					if (it != nodeP->_Z.end())
+					{
+						// x' \in I
+						nodeP->_Z.push_back(msg._aZ);
+						nodeP->_ZR.push_back(msg._aZ);
+						it = find(nodeP->_ZR.begin(), nodeP->_ZR.end(), msg._bZ);
+						nodeP->_ZR.erase(it);
+						it = find(nodeP->_Z.begin(), nodeP->_Z.end(), msg._bZ);
+						nodeP->_Z.erase(it);
+						nodeP->_I.push_back(msg._bZ);
+					}
+					else
+					{
+						// x' \notin I; reinsert x
+						Msg tempMsg = nodeP->insertXintoESinNode(msg._aZ);
+						msg._aI = tempMsg._aI;
+						msg._aT = tempMsg._aT;
+						msg._bZ = tempMsg._bZ;
+					}
+				}				
+			}			
+			else
+			{
+				vector<X> t; t.erase(t.begin());
+			}
 			break;
 		}
 		child = nodeP;
@@ -1018,10 +1091,11 @@ TreeNode* Tree::locateLeaf(X x)
 }
 
 
-bool Tree::verifyTreeInvariants()
+int Tree::verifyTreeInvariants()
 {
 	TreeNode *node = this->_root;
 	stack<TreeNode *> stk;
+	int flag = 0;
 
 	// dfs	- preorder
 	do
@@ -1031,9 +1105,10 @@ bool Tree::verifyTreeInvariants()
 			node = stk.top()->_rightChild;
 			stk.pop();
 		}
-		if (node->verifyNodeInvariants() != 0)
+		flag = node->verifyNodeInvariants();
+		if (flag != 0)
 		{
-			return false;
+			return flag;
 		}
 		while (node->_leftChild != NULL)
 		{
@@ -1044,9 +1119,10 @@ bool Tree::verifyTreeInvariants()
 			node = node->_leftChild;
 			// visit
 			//node->testPrintY();
-			if (node->verifyNodeInvariants() != 0)
+			flag = node->verifyNodeInvariants();
+			if (flag != 0)
 			{
-				return false;
+				return flag;
 			}
 		}
 	} while (stk.empty() != true);
@@ -1108,7 +1184,7 @@ bool Tree::verifyTreeInvariants()
 	//} while (!stk.empty());
 
 
-	return true;
+	return 0;
 }
 
 int Tree::verifyInvariantsRecur()

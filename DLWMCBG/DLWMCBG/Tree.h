@@ -36,7 +36,7 @@ public:
 	
 	X replaceMinWeightX(X x);	// compute the replaceable set in this node and do the repalcement
 	//X determineMinWeightX(X, X, TreeNode*&);
-	TreeNode * pullBackATransferredXInWeightProcess(TreeNode *, X, Msg, bool&, X&);
+	//TreeNode * pullBackATransferredXInWeightProcess(TreeNode *, X, Msg, bool&, X&);
 
 
 	// verification
@@ -61,7 +61,7 @@ public:
 	bool insertXinTree(X x);
 
 	// verification
-	bool verifyTreeInvariants();
+	int verifyTreeInvariants();
 	int verifyInvariantsRecur();
 	int verifyInvariantsRecur(TreeNode* curRoot);
 };
