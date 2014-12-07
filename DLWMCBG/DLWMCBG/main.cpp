@@ -7,12 +7,12 @@
 
 using namespace std;
 
-void generator(char* fileName = "input.txt", int MaxY=50, int UpdateRange = 50);
+void generator(char* fileName = "input.txt", int MaxY = 5, int UpdateRange = 5, int WeightRange = 100);
 
 int main()
 {
 	int cases = 1;
-	while (true)
+	while (cases <= 10)
 	{
 		generator(); //generator need to be fit the format
 		ifstream in("input.txt");
@@ -63,18 +63,15 @@ int main()
 				// if x.s or x.e is not in _Y, insert it.	// TBD			
 				if (x._id == 90)
 				{
-				int a = 0;
+					int a = 0;
 				}
 				pTree->insertXinTree(x);
-				/*if (!pTree->veifiyTreeInvariants())
+				if (pTree->verifyTreeInvariants() != 0)
 				{
-				int a = 0;
-				}*/
+					int a = 0;
+				}
 
-				// for test
-				//int flag;
-				//in >> x._id >> x._s._id >> x._e._id >> x._w >> flag;	// divide by Space
-				//pTree->_root->testInsertXintoNode(x, flag);	// for test verification
+
 
 			}break;
 
@@ -120,14 +117,15 @@ int main()
 		sort(Z.begin(), Z.end(), cmpXID);
 		for (int i = 0; i < Z.size(); i++)
 		{
-			out << Z[i]._id << endl;
+		out << Z[i]._id << endl;
 		}
 		system("Glover.exe");*/
 
 		in.close();
 		out.close();
 		//verify
-		int flag = pTree->verifyInvariantsRecur();
+		//int flag = pTree->verifyInvariantsRecur();
+		int flag = pTree->verifyTreeInvariants();
 		if (flag == 0
 			//pTree->_root->verifyNodeInvariants()
 			//&& pTree->_root->_leftChild->verifyNodeInvariants()
@@ -136,16 +134,16 @@ int main()
 			//&& pTree->_root->_leftChild->_leftChild->_leftChild->_leftChild->_leftChild->veifiyNodeInvariants()
 			)
 		{
-			cout <<"============================Case " << cases++ << " passed!" << endl;
+			cout << "============================Case " << cases++ << " passed!" << endl;
 		}
 		else
 		{
-			cout << endl << endl << endl << endl << "Not satify, please check! Error code: "<<flag << endl;
+			cout << endl << endl << endl << endl << "Not satify, please check! Error code: " << flag << endl;
 			goto End;
 		}
-		
+
 	}
-	End:
+End:
 	return 0;
 }
 

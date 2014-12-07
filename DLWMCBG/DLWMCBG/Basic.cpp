@@ -3,7 +3,7 @@
 #include"Basic.h"
 
 
-void generator(char* fileName, int MaxY, int UpdateRange)
+void generator(char* fileName, int MaxY, int UpdateRange, int WeightRange)
 {
 	ofstream out(fileName);
 	out << MaxY << endl;
@@ -19,31 +19,47 @@ void generator(char* fileName, int MaxY, int UpdateRange)
 	//out << 1 << " " << 1001 << " " << 9<< " " << MaxY - 1 << " " << 100 << endl;
 	//out << 1 << " " << 1002 << " " << 20<< " " << MaxY - 1 << " " << 100 << endl;
 	//out << 1 << " " << 1003 << " " << 5 << " " << MaxY - 1 << " " << 100 << endl;
+
+	//out << 1 << " " << 1 << " " << 3 << " " << rand() % MaxY + 1 << " " << rand() % WeightRange + 1 << endl;
+
 	int i = 0;
 	for (; i < UpdateRange; i++)
 	{
-		out << 1 << " " << i + 1 << " " << 1 << " " << rand() % MaxY + 1 << " " << rand() % MaxY * 10 << endl;;
+		int s = rand() % MaxY + 1;
+		int rest = MaxY - s;
+		int e;
+		if (rest == 0)
+			e = s;
+		else
+		{
+			int diff = rand() % rest;
+			e = s + diff;
+		}
+		out << 1 << " " << i + 1 << " " << s << " " << e << " " << rand() % WeightRange << endl;
+
+		//out << 1 << " " << i + 1 << " " << 1 << " " << rand() % MaxY + 1 << " " << rand() % MaxY * 10 << endl;;
+		//out << 1 << " " << i + 2 << " " << 3 << " " << rand() % MaxY + 1 << " " << rand() % WeightRange  + 1 << endl;
 	}
-	out << 1 << " " << 1000 << " " << 40 << " " << 80 << " " << 100 << endl;
+	/*out << 1 << " " << 1000 << " " << 40 << " " << 80 << " " << 100 << endl;
 	for (int j = 0; j < UpdateRange; j++, i++)
 	{
-		out << 1 << " " << i + 1 << " " << 1 << " " << rand() % MaxY + 1 << " " << rand() % MaxY * 10 << endl;;
+	out << 1 << " " << i + 1 << " " << 1 << " " << rand() % MaxY + 1 << " " << rand() % MaxY * 10 << endl;;
 	}
 	out << 1 << " " << 1001 << " " << 30 << " " << 80 << " " << 100 << endl;
 	for (int j = 0; j < UpdateRange; j++, i++)
 	{
-		out << 1 << " " << i + 1 << " " << 1 << " " << rand() % MaxY + 1 << " " << rand() % MaxY * 10 << endl;;
+	out << 1 << " " << i + 1 << " " << 1 << " " << rand() % MaxY + 1 << " " << rand() % MaxY * 10 << endl;;
 	}
 	out << 1 << " " << 1002 << " " << 20 << " " << 80 << " " << 100 << endl;
 	for (int j = 0; j < UpdateRange; j++, i++)
 	{
-		out << 1 << " " << i + 1 << " " << 1 << " " << rand() % MaxY + 1 << " " << rand() % MaxY * 10 << endl;;
+	out << 1 << " " << i + 1 << " " << 1 << " " << rand() % MaxY + 1 << " " << rand() % MaxY * 10 << endl;;
 	}
 	out << 1 << " " << 1003 << " " << 10 << " " << 80 << " " << 100 << endl;
 	for (int j = 0; j < UpdateRange; j++, i++)
 	{
-		out << 1 << " " << i + 1 << " " << 1 << " " << rand() % MaxY + 1 << " " << rand() % MaxY * 10 << endl;;
-	}
+	out << 1 << " " << i + 1 << " " << 1 << " " << rand() % MaxY + 1 << " " << rand() % MaxY * 10 << endl;;
+	}*/
 	out << '$' << endl;
 
 
@@ -176,15 +192,15 @@ bool cmpXStandard(X x1, X x2)
 	}
 	/*else if (x1._w == x2._w && x1._e < x2._e)
 	{
-		return true;
+	return true;
 	}
 	else if (x1._w == x2._w && x1._e == x2._e && x1._s > x2._s)
 	{
-		return true;
+	return true;
 	}
 	else if (x1._w == x2._w && x1._e == x2._e && x1._s == x2._s && x1._id < x2._id)
 	{
-		return true;
+	return true;
 	}*/
 	return false;
 }
@@ -239,6 +255,37 @@ bool testCmpXStandard(TestX x1, TestX x2)
 {
 	/*if (x1._X._w > x2._X._w)
 	{
+	return true;
+	}
+	else if (x1._X._w == x2._X._w && x1._X._e < x2._X._e)
+	{
+	return true;
+	}
+	else if (x1._X._w == x2._X._w && x1._X._e == x2._X._e && x1._X._s > x2._X._s)
+	{
+	return true;
+	}
+	else if (x1._X._w == x2._X._w && x1._X._e == x2._X._e && x1._X._s == x2._X._s && x1._X._id < x2._X._id)
+	{
+	return true;
+	}
+	return false;*/
+	if (x1._X._w > x2._X._w)
+	{
+		return true;
+	}
+	else if (x1._X._w == x2._X._w && x1._X._id > x2._X._id)
+	{
+		return true;
+	}
+	return false;
+}
+
+// weight decreasing, end increasing, begin decreasing, id increasing
+bool testCmpXStandard_TEMP(TestX x1, TestX x2)
+{
+	if (x1._X._w > x2._X._w)
+	{
 		return true;
 	}
 	else if (x1._X._w == x2._X._w && x1._X._e < x2._X._e)
@@ -253,62 +300,48 @@ bool testCmpXStandard(TestX x1, TestX x2)
 	{
 		return true;
 	}
-	return false;*/
-	if (x1._X._w > x2._X._w)
-	{
-		return true;
-	}
-	else if (x1._X._w == x2._X._w && x1._X._id > x2._X._id)
-	{
-		return true;
-	}
 	return false;
 }
 
 // return the OIS in the glover mathcing of a CBG
 void gloverMatching(const vector<X>& vX, const vector<Y>& vY, vector<X>* vZ)
-{	
+{
 	vector<TestX> XX;
 	vector<Y> YY;
 	for (int i = 0; i < (int)vX.size(); i++)
 	{
 		TestX sx;
-		sx._X = vX[i];		
+		sx._X = vX[i];
 		XX.push_back(sx);
 	}
-	for (int i = 0; i < (int)vY.size(); i++)
+	YY = vY;
+	/*for (int i = 0; i < (int)vY.size(); i++)
 	{
-		YY.push_back(vY[i]);
-	}
-	sort(XX.begin(), XX.end(), testCmpXStandard);
+	YY.push_back(vY[i]);
+	}*/
+	sort(XX.begin(), XX.end(), testCmpXStandard_TEMP);
 	sort(YY.begin(), YY.end(), cmpYInc);
-		
+
 	vZ->clear();
 	for (int i = 0; i < (int)YY.size(); i++)
 	{
-		vector<TestX> W;	// the x set that may match with YY[i]
-		int j = 0;
-		while (j < (int)XX.size() && XX[j]._X._s <= YY[i])
+		vector<TestX> W;	// the unmatched x set that may match with YY[i]
+		for (int j = 0; j < (int)XX.size(); j++)
 		{
-			if (XX[j]._X._e >= YY[i])
+			if (XX[j]._X._e >= YY[i] && XX[j]._X._s <= YY[i] && XX[j].flag == 0)
 			{
 				W.push_back(XX[j]);
 			}
-			j++;
 		}
-		sort(W.begin(), W.end(), testCmpXEndBeg);
-		for (int k = 0; k < (int)W.size(); k++)
+
+		if ((int)W.size() > 0)
 		{
-			if (W[k].flag == 0)	// get the unmatched x which has the smallest end
-			{
-				vZ->push_back(W[k]._X);
-				vector<TestX>::iterator it = find(XX.begin(), XX.end(), W[k]);
-				it->flag = 1;
-				break;
-			}
+			sort(W.begin(), W.end(), testCmpXEndBeg);
+			vZ->push_back(W[0]._X);
+			vector<TestX>::iterator it = find(XX.begin(), XX.end(), W[0]);
+			it->flag = 1;
 		}
 	}
-
 }
 
 // return the OIS in the plaxton MWM of a LWCBG
@@ -322,16 +355,17 @@ void PlaxtonMWM(const vector<X>& vX, const vector<Y>& vY, vector<X>* vZ)
 		sx._X = vX[i];
 		XX.push_back(sx);
 	}
-	for (int i = 0; i < (int)vY.size(); i++)
+	YY = vY;
+	/*for (int i = 0; i < (int)vY.size(); i++)
 	{
-		YY.push_back(vY[i]);
-	}
-	sort(XX.begin(), XX.end(), testCmpXStandard);
+	YY.push_back(vY[i]);
+	}*/
+	sort(XX.begin(), XX.end(), testCmpXStandard_TEMP);
 	sort(YY.begin(), YY.end(), cmpYInc);
 
-	vZ->clear();	
+	vZ->clear();
 	for (int i = 0; i < (int)XX.size(); i++)
-	{		
+	{
 		vector<X> tmpZ;
 		vZ->push_back(XX[i]._X);
 		gloverMatching(*vZ, YY, &tmpZ);
@@ -339,6 +373,6 @@ void PlaxtonMWM(const vector<X>& vX, const vector<Y>& vY, vector<X>* vZ)
 		{
 			vector<X>::iterator it = find(vZ->begin(), vZ->end(), XX[i]._X);
 			vZ->erase(it);
-		}				
+		}
 	}
 }
