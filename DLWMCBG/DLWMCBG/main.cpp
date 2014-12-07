@@ -14,7 +14,7 @@ int main()
 	int cases = 1;
 	while (true)
 	{
-		//generator(); //generator need to be fit the format
+		generator(); //generator need to be fit the format
 		ifstream in("input.txt");
 		ofstream out("output.txt");
 
