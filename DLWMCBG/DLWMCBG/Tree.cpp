@@ -61,16 +61,22 @@ void TreeNode::splitDSNode(X x)
 // adjust the sets in the process of splitting, call by the splited node, the standard process need to be discussed
 void TreeNode::updateAuxSet4Split()
 {
-	_leftChild->_T = _T;
+	//_leftChild->_T = _T;
+	_leftChild->_X = _X;
 	vector<X> restX = _Z;
 	for (int i = 0; i < _I.size(); i++)
 	{
 		restX.push_back(_I[i]);
 	}
+	for (int i = 0; i < _T.size(); i++)
+	{
+		restX.push_back(_T[i]);
+	}
 	_ZR.clear();
 	//_ZL.clear();
 	_Z.clear();
 	_I.clear();
+	_T.clear();
 	//part of left side msg passing, _ZL and left->Z keeps the same
 	for (int i = 0; i < restX.size(); i++)
 	{
@@ -90,10 +96,22 @@ void TreeNode::updateAuxSet4Split()
 			vector<X>::iterator it = find(_Z.begin(), _Z.end(), msg._bZ);
 			if (it != _Z.end())
 			{
+				vector<X> R;
+				determineReachableSetinEE(msg._aZ, R, *new bool);
+				R.push_back(msg._aZ);
+				sort(R.begin(), R.end(), cmpXEndInc);
+				X maxEndinR = R[R.size() - 1];
+				it = find(_Z.begin(), _Z.end(), maxEndinR);
 				_Z.erase(it);
+				it = find(_ZL.begin(), _ZL.end(), maxEndinR);
+				_ZL.erase(it);
+				insertXintoESinNode(maxEndinR);
+
+
+				/*_Z.erase(it);//has bug
 				it = find(_ZL.begin(), _ZL.end(), msg._bZ);
 				_ZL.erase(it);
-				insertXintoESinNode(msg._aT);
+				insertXintoESinNode(msg._aT);*/
 			}
 			else
 			{
@@ -140,7 +158,7 @@ void TreeNode::updateAuxSet4Split()
 			{
 				//_bZ has already been preempted. in Split, we can directly use the ES structure of ZL
 				//but how to do in the msg passing?
-				vector<X> R;
+				/*vector<X> R;
 				determineReachableSetinEE(msg._aZ, R, *new bool);//ES or EE? In Split or Msg Passing?
 				R.push_back(msg._aZ);
 				sort(R.begin(), R.end(), cmpXWeightIDInc);
@@ -148,7 +166,31 @@ void TreeNode::updateAuxSet4Split()
 				_Z.erase(it);
 				it = find(_ZL.begin(), _ZL.end(), R[0]);
 				_ZL.erase(it);
-				_I.push_back(R[0]);
+				_I.push_back(R[0]);*/
+				vector<X> R;
+				determineReachableSetinEE(msg._aZ, R, *new bool);//ES or EE? In Split or Msg Passing?
+				//when the R is right, the below code is right
+				R.push_back(msg._aZ);
+				sort(R.begin(), R.end(), cmpXEndInc);
+				X maxEndinR = R[R.size() - 1];
+				if (maxEndinR._e < _rightChild->getIntervalStart())
+				{
+					//not transfer in P
+					sort(R.begin(), R.end(), cmpXWeightIDInc);
+					vector<X>::iterator it = find(_Z.begin(), _Z.end(), R[0]);
+					_Z.erase(it);
+					it = find(_ZL.begin(), _ZL.end(), R[0]);
+					_ZL.erase(it);
+					_I.push_back(R[0]);
+				}
+				else
+				{
+					vector<X>::iterator it = find(_Z.begin(), _Z.end(), maxEndinR);
+					_Z.erase(it);
+					it = find(_ZL.begin(), _ZL.end(), maxEndinR);
+					_ZL.erase(it);
+					insertXintoESinNode(maxEndinR);
+				}
 
 			}
 		}
@@ -491,7 +533,7 @@ void TreeNode::testInsertXintoNode(X x, int flag = 0)
 
 }
 
-bool TreeNode::veifiyNodeInvariants()
+int TreeNode::verifyNodeInvariants()
 {
 	sort(_Y.begin(), _Y.end(), cmpYInc);
 
@@ -500,7 +542,7 @@ bool TreeNode::veifiyNodeInvariants()
 	{
 		if (_T[i]._e <= _Y[_Y.size() - 1])
 		{
-			return false;
+			return 1;
 		}
 	}
 
@@ -531,7 +573,7 @@ bool TreeNode::veifiyNodeInvariants()
 					gloverMatching(ZZ, _Y, &tmpZ);
 					if (tmpZ.size() == ZZ.size())		// Z+x-x'\in \I
 					{
-						return false;
+						return 2;
 					}
 					j++;
 				}
@@ -544,7 +586,7 @@ bool TreeNode::veifiyNodeInvariants()
 	{
 		if (_I[i]._e > _Y[_Y.size() - 1])
 		{
-			return false;
+			return 3;
 		}
 	}
 
@@ -578,7 +620,7 @@ bool TreeNode::veifiyNodeInvariants()
 				gloverMatching(Z2, _Y, &tmpZ);
 				if (tmpZ.size() == Z2.size())		// Z+x-x'\in \I
 				{
-					return false;
+					return 4;
 				}
 			}
 		}
@@ -596,7 +638,7 @@ bool TreeNode::veifiyNodeInvariants()
 	gloverMatching(tmpX, _Y, &tmpZ);
 	if (tmpZ.size() != _Z.size())
 	{
-		return false;
+		return 5;
 	}
 
 	// invariant \phi_6: Z of the maximum weight w.r.t. X-T
@@ -609,7 +651,7 @@ bool TreeNode::veifiyNodeInvariants()
 	PlaxtonMWM(tmpX, _Y, &tmpZ);
 	if (tmpZ.size() != _Z.size())
 	{
-		return false;
+		return 6;
 	}
 	sort(_Z.begin(), _Z.end(), cmpXStandard);
 	sort(tmpZ.begin(), tmpZ.end(), cmpXStandard);
@@ -617,11 +659,38 @@ bool TreeNode::veifiyNodeInvariants()
 	{
 		if (!(_Z[i] == tmpZ[i]))
 		{
-			return false;
-		}		
+			return 6;
+		}
 	}
 
-	return true;
+	//X = Z+I+T
+	vector<X> ZIT = _Z;
+	for (int i = 0; i < _I.size(); i++)
+	{
+		ZIT.push_back(_I[i]);
+	}
+	for (int i = 0; i < _T.size(); i++)
+	{
+		ZIT.push_back(_T[i]);
+	}
+	if (ZIT.size() != _X.size())
+	{
+		return 7;
+	}
+	else
+	{
+		sort(ZIT.begin(), ZIT.end(), cmpXID);
+		sort(_X.begin(), _X.end(), cmpXID);
+		for (int i = 0; i < ZIT.size(); i++)
+		{
+			if (ZIT[i]._id != _X[i]._id)
+			{
+				return 7;
+			}
+		}
+	}
+
+	return 0;
 }
 
 void TreeNode::testPrintY()
@@ -632,6 +701,9 @@ void TreeNode::testPrintY()
 	}
 	cout << endl;
 }
+
+
+
 
 
 // Methods in Tree
@@ -646,9 +718,10 @@ bool Tree::insertXinTree(X x)
 
 	//below is the whole implemention of the MSG passing rule
 	Msg msg = nodeP->insertXintoESinNode(x);		// insert the x into the leaf
+	nodeP->_X.push_back(x);
 	/*if (msg.flagInsertX() == 2)
 	{
-		//msg._bZ = msg._aI = nodeP->replaceMinWeightX(msg);		// call replaceable algorithm		
+	//msg._bZ = msg._aI = nodeP->replaceMinWeightX(msg);		// call replaceable algorithm
 	}*/
 	TreeNode* child = nodeP;
 	nodeP = nodeP->_parentNode;
@@ -658,6 +731,8 @@ bool Tree::insertXinTree(X x)
 		// leaf is the current node; the msg comes from its own ES-Tree insert operation
 		if (child == nodeP->_leftChild)	// the node is the left child
 		{
+
+			nodeP->_X.push_back(x);
 			if (msg._aI._id == -1 && msg._aT._id == -1)//transfer to flags of msg later
 			{
 				//success
@@ -674,10 +749,16 @@ bool Tree::insertXinTree(X x)
 				vector<X>::iterator it = find(nodeP->_Z.begin(), nodeP->_Z.end(), msg._bZ);
 				if (it != nodeP->_Z.end())
 				{
+					vector<X> R;
+					nodeP->determineReachableSetinEE(msg._aZ, R, *new bool);
+					R.push_back(msg._aZ);
+					sort(R.begin(), R.end(), cmpXEndInc);
+					X maxEndinR = R[R.size() - 1];
+					it = find(nodeP->_Z.begin(), nodeP->_Z.end(), maxEndinR);
 					nodeP->_Z.erase(it);
-					it = find(nodeP->_ZL.begin(), nodeP->_ZL.end(), msg._bZ);
+					it = find(nodeP->_ZL.begin(), nodeP->_ZL.end(), maxEndinR);
 					nodeP->_ZL.erase(it);
-					Msg tempMsg = nodeP->insertXintoESinNode(msg._aT);
+					Msg tempMsg = nodeP->insertXintoESinNode(maxEndinR);
 					msg._aI = tempMsg._aI;
 					msg._aT = tempMsg._aT;
 					msg._bZ = tempMsg._bZ;
@@ -686,7 +767,7 @@ bool Tree::insertXinTree(X x)
 				{
 					vector<X> R;
 					nodeP->determineReachableSetinEE(msg._aZ, R, *new bool);//ES or EE? In Split or Msg Passing?
-					//when the R is right, the below code is right
+					//when the R is correct, the below code is right
 					R.push_back(msg._aZ);
 					sort(R.begin(), R.end(), cmpXEndInc);
 					X maxEndinR = R[R.size() - 1];
@@ -794,26 +875,26 @@ bool Tree::insertXinTree(X x)
 
 			/*if (msg._aT._id == -1 && msg._aI._id == -1)	// msg._c == 0 // 1.success in L
 			{
-				nodeP->_parentNode->_Z.push_back(msg._aZ);	// msg._a
+			nodeP->_parentNode->_Z.push_back(msg._aZ);	// msg._a
 			}
 			else if (msg._aZ._id == -1 || msg._aZ == msg._bZ)	// msg._a == msg._b 	// 2.non-sucessful, a = b
 			{
-				if (msg._aI._id != -1)
-				{
-					nodeP->_I.push_back(msg._aI);	//msg._b = msg._aI
-				}
-				else
-				{
-					Msg tempMsg = nodeP->insertXintoESinNode(msg._aT);	//msg._b = msg._aT
-					if (tempMsg._aI._id != -1)
-					{
-						//tempMsg._aI = nodeP->replaceMinWeightX(tempMsg);		// call replacement algorithm
-					}
-					// msg._b = tempMsg._b; msg._bEmpty = tempMsg._bEmpty; msg._c = tempMsg._c;
-					msg._bZ = tempMsg._bZ;
-					msg._aT = tempMsg._aT;
-					msg._aI = tempMsg._aI;
-				}
+			if (msg._aI._id != -1)
+			{
+			nodeP->_I.push_back(msg._aI);	//msg._b = msg._aI
+			}
+			else
+			{
+			Msg tempMsg = nodeP->insertXintoESinNode(msg._aT);	//msg._b = msg._aT
+			if (tempMsg._aI._id != -1)
+			{
+			//tempMsg._aI = nodeP->replaceMinWeightX(tempMsg);		// call replacement algorithm
+			}
+			// msg._b = tempMsg._b; msg._bEmpty = tempMsg._bEmpty; msg._c = tempMsg._c;
+			msg._bZ = tempMsg._bZ;
+			msg._aT = tempMsg._aT;
+			msg._aI = tempMsg._aI;
+			}
 			}
 			else   // 3.non-sucessful, a != b
 			{
@@ -821,20 +902,20 @@ bool Tree::insertXinTree(X x)
 
 			if (msg.flagInsertX() == 2)	// msg._c == 2 // infeasible
 			{
-				nodeP->_parentNode->_I.push_back(msg._bZ);	// msg._b; assertion: msg._bZ == msg._aI
+			nodeP->_parentNode->_I.push_back(msg._bZ);	// msg._b; assertion: msg._bZ == msg._aI
 			}
 			else if (msg.flagInsertX() == 1)	// msg._c == 1 // transferred
 			{
-				Msg tempMsg = nodeP->_parentNode->insertXintoESinNode(msg._bZ);	// msg._b; // if tempMsg._b <> msg._b, then msg._b remains in the matched set of the parent
-				//msg._b = tempMsg._b; msg._bEmpty = tempMsg._bEmpty; msg._c = tempMsg._c;
-				msg._bZ = tempMsg._bZ;
-				msg._aT = tempMsg._aT;
-				msg._aI = tempMsg._aI;
+			Msg tempMsg = nodeP->_parentNode->insertXintoESinNode(msg._bZ);	// msg._b; // if tempMsg._b <> msg._b, then msg._b remains in the matched set of the parent
+			//msg._b = tempMsg._b; msg._bEmpty = tempMsg._bEmpty; msg._c = tempMsg._c;
+			msg._bZ = tempMsg._bZ;
+			msg._aT = tempMsg._aT;
+			msg._aI = tempMsg._aI;
 
-				if (tempMsg.flagInsertX() == 2)	// tempMsg._c == 2
-				{
-					//msg._bZ = msg._aI = nodeP->_parent->replaceMinWeightX(tempMsg);		//msg._b // call replaceable algorithm
-				}
+			if (tempMsg.flagInsertX() == 2)	// tempMsg._c == 2
+			{
+			//msg._bZ = msg._aI = nodeP->_parent->replaceMinWeightX(tempMsg);		//msg._b // call replaceable algorithm
+			}
 			}*/
 		}
 		else // msg from the right child
@@ -880,42 +961,42 @@ TreeNode* Tree::locateLeaf(X x)
 			sort(Z.begin(), Z.end(), cmpXID);
 			for (int i = 0; i < Z.size(); i++)
 			{
-				out << Z[i]._id << endl;
+			out << Z[i]._id << endl;
 			}
 			out << "============T in root==================" << endl;
 			vector<X> T = this->_root->_T;
 			sort(T.begin(), T.end(), cmpXEndInc);
 			for (int i = 0; i < T.size(); i++)
 			{
-				out << T[i]._id << "\t" << T[i]._e << endl;
+			out << T[i]._id << "\t" << T[i]._e << endl;
 			}
 			out << "============I in root==================" << endl;
 			vector<X> I = this->_root->_I;
 			sort(I.begin(), I.end(), cmpXEndInc);
 			for (int i = 0; i < I.size(); i++)
 			{
-				out << I[i]._id << "\t" << I[i]._e << endl;
+			out << I[i]._id << "\t" << I[i]._e << endl;
 			}
 			out << "============Z in left==================" << endl;
 			Z = this->_root->_leftChild->_Z;
 			sort(Z.begin(), Z.end(), cmpXID);
 			for (int i = 0; i < Z.size(); i++)
 			{
-				out << Z[i]._id << endl;
+			out << Z[i]._id << endl;
 			}
 			out << "============T in left==================" << endl;
 			T = this->_root->_leftChild->_T;
 			sort(T.begin(), T.end(), cmpXEndInc);
 			for (int i = 0; i < T.size(); i++)
 			{
-				out << T[i]._id << "\t" << T[i]._e << endl;
+			out << T[i]._id << "\t" << T[i]._e << endl;
 			}
 			out << "============I in left==================" << endl;
 			I = this->_root->_leftChild->_I;
 			sort(I.begin(), I.end(), cmpXEndInc);
 			for (int i = 0; i < I.size(); i++)
 			{
-				out << I[i]._id << "\t" << I[i]._e << endl;
+			out << I[i]._id << "\t" << I[i]._e << endl;
 			}
 			out.close();
 			int a = 1;*/
@@ -937,7 +1018,7 @@ TreeNode* Tree::locateLeaf(X x)
 }
 
 
-bool Tree::veifiyTreeInvariants()
+bool Tree::verifyTreeInvariants()
 {
 	TreeNode *node = this->_root;
 	stack<TreeNode *> stk;
@@ -950,7 +1031,7 @@ bool Tree::veifiyTreeInvariants()
 			node = stk.top()->_rightChild;
 			stk.pop();
 		}
-		if (node->veifiyNodeInvariants() == false)
+		if (node->verifyNodeInvariants() != 0)
 		{
 			return false;
 		}
@@ -963,7 +1044,7 @@ bool Tree::veifiyTreeInvariants()
 			node = node->_leftChild;
 			// visit
 			//node->testPrintY();
-			if (node->veifiyNodeInvariants() == false)
+			if (node->verifyNodeInvariants() != 0)
 			{
 				return false;
 			}
@@ -1028,4 +1109,29 @@ bool Tree::veifiyTreeInvariants()
 
 
 	return true;
+}
+
+int Tree::verifyInvariantsRecur()
+{
+	return verifyInvariantsRecur(_root);
+}
+
+int Tree::verifyInvariantsRecur(TreeNode* curRoot)
+{
+	if (curRoot->_leftChild == NULL)
+	{
+		return curRoot->verifyNodeInvariants();
+	}
+	else
+	{
+		int flag = verifyInvariantsRecur(curRoot->_leftChild);
+		if (flag == 0)
+		{
+			return curRoot->verifyNodeInvariants();
+		}
+		else
+		{
+			return flag;
+		}
+	}
 }

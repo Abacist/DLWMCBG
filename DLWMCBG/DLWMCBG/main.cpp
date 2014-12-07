@@ -7,14 +7,14 @@
 
 using namespace std;
 
-void generator(char* fileName = "input.txt", int MaxY=50, int UpdateRange = 150);
+void generator(char* fileName = "input.txt", int MaxY=50, int UpdateRange = 50);
 
 int main()
 {
 	int cases = 1;
 	while (true)
 	{
-		generator(); //generator need to be fit the format
+		//generator(); //generator need to be fit the format
 		ifstream in("input.txt");
 		ofstream out("output.txt");
 
@@ -61,10 +61,10 @@ int main()
 				X x;
 				in >> x._id >> x._s._id >> x._e._id >> x._w;	// divide by Space
 				// if x.s or x.e is not in _Y, insert it.	// TBD			
-				/*if (x._id == 10)
+				if (x._id == 90)
 				{
 				int a = 0;
-				}*/
+				}
 				pTree->insertXinTree(x);
 				/*if (!pTree->veifiyTreeInvariants())
 				{
@@ -115,30 +115,32 @@ int main()
 
 		}
 		//output to file
-		cout << "end" << endl;
+		/*cout << "end" << endl;
 		vector<X> Z = pTree->_root->_Z;
 		sort(Z.begin(), Z.end(), cmpXID);
 		for (int i = 0; i < Z.size(); i++)
 		{
 			out << Z[i]._id << endl;
 		}
-		system("Glover.exe");
+		system("Glover.exe");*/
 
 		in.close();
 		out.close();
 		//verify
-		if (
-			pTree->_root->veifiyNodeInvariants()
-			&& pTree->_root->_leftChild->veifiyNodeInvariants()
-			//&&pTree->_root->_leftChild->_leftChild->veifiyNodeInvariants() 
+		int flag = pTree->verifyInvariantsRecur();
+		if (flag == 0
+			//pTree->_root->verifyNodeInvariants()
+			//&& pTree->_root->_leftChild->verifyNodeInvariants()
+			//&& pTree->_root->_leftChild->_leftChild->verifyNodeInvariants() 
 			//&& pTree->_root->_leftChild->_leftChild->_leftChild->_leftChild->veifiyNodeInvariants()
+			//&& pTree->_root->_leftChild->_leftChild->_leftChild->_leftChild->_leftChild->veifiyNodeInvariants()
 			)
 		{
-			cout << "============================Case " << cases++ << " passed!" << endl;
+			cout <<"============================Case " << cases++ << " passed!" << endl;
 		}
 		else
 		{
-			cout << "Not satify, please check!" << endl;
+			cout << endl << endl << endl << endl << "Not satify, please check! Error code: "<<flag << endl;
 			goto End;
 		}
 		

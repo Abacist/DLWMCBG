@@ -15,12 +15,35 @@ void generator(char* fileName, int MaxY, int UpdateRange)
 	SYSTEMTIME lpsystime;
 	GetLocalTime(&lpsystime);
 	srand(lpsystime.wMinute * 1000 + lpsystime.wMilliseconds);
-	out << 1 << " " << 1000 << " " << MaxY/2 << " " << MaxY-1 << " " << 100 << endl;
-	for (int i = 0; i < UpdateRange; i++)
+	//out << 1 << " " << 1000 << " " << 40<< " " << MaxY-1 << " " << 100 << endl;
+	//out << 1 << " " << 1001 << " " << 9<< " " << MaxY - 1 << " " << 100 << endl;
+	//out << 1 << " " << 1002 << " " << 20<< " " << MaxY - 1 << " " << 100 << endl;
+	//out << 1 << " " << 1003 << " " << 5 << " " << MaxY - 1 << " " << 100 << endl;
+	int i = 0;
+	for (; i < UpdateRange; i++)
 	{
-		out << 1 << " " << i + 1 << " " << 1 << " " << rand() % MaxY + 1 << " " << rand() % MaxY * 3 << endl;;
+		out << 1 << " " << i + 1 << " " << 1 << " " << rand() % MaxY + 1 << " " << rand() % MaxY * 10 << endl;;
 	}
-	//out << 1 << " " << 301 << " " << 50 << " " << 80 << " " << 100 << endl;
+	out << 1 << " " << 1000 << " " << 40 << " " << 80 << " " << 100 << endl;
+	for (int j = 0; j < UpdateRange; j++, i++)
+	{
+		out << 1 << " " << i + 1 << " " << 1 << " " << rand() % MaxY + 1 << " " << rand() % MaxY * 10 << endl;;
+	}
+	out << 1 << " " << 1001 << " " << 30 << " " << 80 << " " << 100 << endl;
+	for (int j = 0; j < UpdateRange; j++, i++)
+	{
+		out << 1 << " " << i + 1 << " " << 1 << " " << rand() % MaxY + 1 << " " << rand() % MaxY * 10 << endl;;
+	}
+	out << 1 << " " << 1002 << " " << 20 << " " << 80 << " " << 100 << endl;
+	for (int j = 0; j < UpdateRange; j++, i++)
+	{
+		out << 1 << " " << i + 1 << " " << 1 << " " << rand() % MaxY + 1 << " " << rand() % MaxY * 10 << endl;;
+	}
+	out << 1 << " " << 1003 << " " << 10 << " " << 80 << " " << 100 << endl;
+	for (int j = 0; j < UpdateRange; j++, i++)
+	{
+		out << 1 << " " << i + 1 << " " << 1 << " " << rand() % MaxY + 1 << " " << rand() % MaxY * 10 << endl;;
+	}
 	out << '$' << endl;
 
 
