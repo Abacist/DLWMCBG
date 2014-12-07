@@ -4,7 +4,7 @@
 class TreeNode
 {
 public:
-	//vector<X> _X;
+	vector<X> _X;
 	vector<Y> _Y;
 	vector<X> _Z;
 	vector<X> _I;
@@ -40,7 +40,7 @@ public:
 
 
 	// verification
-	bool veifiyNodeInvariants();
+	int verifyNodeInvariants();
 	void testInsertXintoNode(X, int);
 	void testPrintY();
 
@@ -61,6 +61,7 @@ public:
 	bool insertXinTree(X x);
 
 	// verification
-	bool veifiyTreeInvariants();
-	
+	bool verifyTreeInvariants();
+	int verifyInvariantsRecur();
+	int verifyInvariantsRecur(TreeNode* curRoot);
 };
