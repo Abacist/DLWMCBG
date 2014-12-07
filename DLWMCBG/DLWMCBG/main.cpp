@@ -7,7 +7,7 @@
 
 using namespace std;
 
-void generator(char* fileName = "input.txt", int MaxY = 5, int UpdateRange = 10, int WeightRange = 100);
+void generator(char* fileName = "input.txt", int MaxY = 30, int UpdateRange = 150, int WeightRange = 100);
 
 int main()
 {
@@ -61,7 +61,7 @@ int main()
 				X x;
 				in >> x._id >> x._s._id >> x._e._id >> x._w;	// divide by Space
 				// if x.s or x.e is not in _Y, insert it.	// TBD			
-				if (x._id == 7)
+				if (x._id == 10)
 				{
 					int a = 0;
 				}

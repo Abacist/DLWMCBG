@@ -952,13 +952,27 @@ bool Tree::insertXinTree(X x)
 					if (it != nodeP->_Z.end())
 					{
 						// x' \in T
-						nodeP->_Z.push_back(msg._aZ);
-						nodeP->_ZR.push_back(msg._aZ);
-						it = find(nodeP->_ZR.begin(), nodeP->_ZR.end(), msg._bZ);
-						nodeP->_ZR.erase(it);
-						it = find(nodeP->_Z.begin(), nodeP->_Z.end(), msg._bZ);
-						nodeP->_Z.erase(it);
-						nodeP->_T.push_back(msg._bZ);
+						vector<X> RinPES;
+						nodeP->determineReachableSetinES(msg._aZ, RinPES, *new bool);
+						it = find(RinPES.begin(), RinPES.end(), msg._bZ);
+						if (it != RinPES.end())
+						{
+							nodeP->_Z.push_back(msg._aZ);
+							nodeP->_ZR.push_back(msg._aZ);
+							it = find(nodeP->_ZR.begin(), nodeP->_ZR.end(), msg._bZ);
+							nodeP->_ZR.erase(it);
+							it = find(nodeP->_Z.begin(), nodeP->_Z.end(), msg._bZ);
+							nodeP->_Z.erase(it);
+							nodeP->_T.push_back(msg._bZ);
+						}
+						else
+						{
+							Msg tempMsg = nodeP->insertXintoESinNode(msg._aZ);
+							msg._aI = tempMsg._aI;
+							msg._aT = tempMsg._aT;
+							msg._bZ = tempMsg._bZ;
+						}
+
 					}
 					else
 					{
