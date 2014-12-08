@@ -64,4 +64,5 @@ public:
 	int verifyTreeInvariants();
 	int verifyInvariantsRecur();
 	int verifyInvariantsRecur(TreeNode* curRoot);
+	int verifyTreeInvariantsSimple();	// only verify the top three nodes
 };

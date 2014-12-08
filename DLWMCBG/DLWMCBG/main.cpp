@@ -7,12 +7,12 @@
 
 using namespace std;
 
-void generator(char* fileName = "input.txt", int MaxY = 30, int UpdateRange = 150, int WeightRange = 100);
+void generator(char* fileName = "input.txt", int MaxY = 1000, int UpdateRange = 2000, int WeightRange = 10000);
 
 int main()
 {
 	int cases = 1;
-	while (true)
+	while (cases<=2)
 	{
 		generator(); //generator need to be fit the format
 		ifstream in("input.txt");
@@ -125,6 +125,7 @@ int main()
 		in.close();
 		out.close();
 		//verify
+//		int flag = pTree->verifyTreeInvariantsSimple();
 		int flag = pTree->verifyInvariantsRecur();
 //		int flag = pTree->verifyTreeInvariants();
 		if (flag == 0

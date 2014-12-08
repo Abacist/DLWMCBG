@@ -319,7 +319,7 @@ void gloverMatching(const vector<X>& vX, const vector<Y>& vY, vector<X>* vZ)
 	{
 	YY.push_back(vY[i]);
 	}*/
-	sort(XX.begin(), XX.end(), testCmpXStandard_TEMP);
+	sort(XX.begin(), XX.end(), testCmpXStandard);
 	sort(YY.begin(), YY.end(), cmpYInc);
 
 	vZ->clear();

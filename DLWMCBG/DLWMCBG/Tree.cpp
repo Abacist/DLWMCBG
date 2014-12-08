@@ -693,7 +693,7 @@ int TreeNode::verifyNodeInvariants()
 		}
 	}
 
-	
+
 
 	return 0;
 }
@@ -750,7 +750,7 @@ bool Tree::insertXinTree(X x)
 			{
 				//transfer in left
 				nodeP->_Z.push_back(msg._aZ);
-				
+
 				vector<X>::iterator it = find(nodeP->_Z.begin(), nodeP->_Z.end(), msg._bZ);
 				if (it != nodeP->_Z.end())
 				{
@@ -943,7 +943,7 @@ bool Tree::insertXinTree(X x)
 			{
 				// x' is replaced by x in Z and moved to T in R
 				if (msg._aZ == msg._aT)		// x is transferred itself
-				{					
+				{
 					nodeP->_T.push_back(msg._aT);
 				}
 				else
@@ -952,6 +952,7 @@ bool Tree::insertXinTree(X x)
 					if (it != nodeP->_Z.end())
 					{
 						// x' \in T
+						// in P, there may a new tight point between x.e and the y matched with x'
 						vector<X> RinPES;
 						nodeP->determineReachableSetinES(msg._aZ, RinPES, *new bool);
 						it = find(RinPES.begin(), RinPES.end(), msg._bZ);
@@ -972,7 +973,6 @@ bool Tree::insertXinTree(X x)
 							msg._aT = tempMsg._aT;
 							msg._bZ = tempMsg._bZ;
 						}
-
 					}
 					else
 					{
@@ -982,13 +982,13 @@ bool Tree::insertXinTree(X x)
 						msg._aT = tempMsg._aT;
 						msg._bZ = tempMsg._bZ;
 					}
-				}				
+				}
 			}
 			else if (msg._aI._id != -1 && msg._aT._id == -1)
 			{
 				// x' is replaced by x in Z and moved to I in R
 				if (msg._aZ == msg._aI)		// x is infeasible
-				{	
+				{
 					nodeP->_I.push_back(msg._aI);
 				}
 				else
@@ -1013,8 +1013,8 @@ bool Tree::insertXinTree(X x)
 						msg._aT = tempMsg._aT;
 						msg._bZ = tempMsg._bZ;
 					}
-				}				
-			}			
+				}
+			}
 			else
 			{
 				vector<X> t; t.erase(t.begin());
@@ -1236,5 +1236,31 @@ int Tree::verifyInvariantsRecur(TreeNode* curRoot)
 		{
 			return flagL;
 		}
+	}
+}
+
+// only verify the top three nodes
+int Tree::verifyTreeInvariantsSimple()
+{
+	TreeNode* node = _root;
+	int flag = node->verifyNodeInvariants();
+	int flagL = 0, flagR = 0;
+	if (node->_rightChild != NULL)
+	{
+		flagL = node->_leftChild->verifyNodeInvariants();
+		flagR = node->_rightChild->verifyNodeInvariants();
+	}
+
+	if (flag != 0)
+	{
+		return flag;
+	}
+	else if (flagL != 0 || flagR != 0)
+	{
+		return (flagL > flagR) ? flagL : flagR;
+	}
+	else
+	{
+		return 0;
 	}
 }
