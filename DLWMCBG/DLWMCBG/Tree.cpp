@@ -371,7 +371,7 @@ void TreeNode::determineReachableSetinEE(X x, vector<X>& R, bool& isTight)
 	if (x._s > EEY[0])
 	{
 		return;
-	}	
+	}
 
 	sort(_ZL.begin(), _ZL.end(), cmpXBeginDec);
 
@@ -475,33 +475,143 @@ Msg TreeNode::insertYintoESLeaf(Y y)
 
 	Y lAlphaTP = leftAlphaTightPoint(y, this);
 
-	//decide the X to be matched;	
 	vector<X> backX;
-	for (int j = 0; j < _I.size(); j++)
+	if (y > _Y[(int)_Y.size() - 1])
 	{
-		if (_I[j]._e > lAlphaTP)
+		// y > _Y.e case, only check T
+		if (!_T.empty())
 		{
-			backX.push_back(_I[j]);
+			// adjust T and I according to the inserted y
+			sort(_T.begin(), _T.end(), cmpXEndBeginIdInc);			
+			for (vector<X>::iterator it = _T.begin(); it != _T.end(); it++)
+			{
+				if (it->_e > y)
+				{
+					backX.push_back(*it);
+				}
+				else
+				{
+					_I.push_back(*it);
+					_T.erase(it);
+				}
+			}
+
+			if (!backX.empty())
+			{
+				sort(backX.begin(), backX.end(), cmpXStandard);
+				X x1 = backX[0];
+				_Z.push_back(x1);
+				_ZR.push_back(x1);
+				vector<X>::iterator it = find(_T.begin(), _T.end(), x1);
+				_T.erase(it);
+			}			
 		}
-	}
-	if (!backX.empty())
-	{
-		sort(backX.begin(), backX.end(), cmpXStandard);
-		X x1 = backX[(int)backX.size() - 1];
-		_Z.push_back(x1);
-		_ZR.push_back(x1);
-		vector<X>::iterator it = find(_I.begin(), _I.end(), x1);
-		_I.erase(it);
+
 	}
 	else
 	{
-		//chose from T
+		//decide the X to be matched;		
+		for (int j = 0; j < _I.size(); j++)
+		{
+			if (_I[j]._e > lAlphaTP)
+			{
+				backX.push_back(_I[j]);
+			}
+		}
+		if (!backX.empty())
+		{
+			sort(backX.begin(), backX.end(), cmpXStandard);
+			X x1 = backX[0];
+			_Z.push_back(x1);
+			_ZR.push_back(x1);
+			vector<X>::iterator it = find(_I.begin(), _I.end(), x1);
+			_I.erase(it);
+		}
+		else
+		{
+			//choose from T
+			if (!_T.empty())
+			{
+				sort(_T.begin(), _T.end(), cmpXEndBeginIdInc);
+				_Z.push_back(_T[0]);
+				_ZR.push_back(_T[0]);
+				_T.erase(_T.begin());
+			}
+		}
+	}	
+
+	return msg;
+}
+
+// only for the internal Node in Tree
+Msg TreeNode::insertYintoESinNode(Y y)
+{
+	Msg msg;
+	msg._aY = y;
+
+	Y lAlphaTP = leftAlphaTightPoint(y, this->_rightChild);
+	
+	vector<X> backX;
+	if (y > _Y[(int)_Y.size() - 1])
+	{
+		// y > _Y.e case, only check T
 		if (!_T.empty())
 		{
+			// adjust T and I according to the inserted y
 			sort(_T.begin(), _T.end(), cmpXEndBeginIdInc);
-			_Z.push_back(_T[0]);
-			_ZR.push_back(_T[0]);
-			_T.erase(_T.begin());
+			for (vector<X>::iterator it = _T.begin(); it != _T.end(); it++)
+			{
+				if (it->_e > y)
+				{
+					backX.push_back(*it);
+				}
+				else
+				{
+					_I.push_back(*it);
+					_T.erase(it);
+				}
+			}
+
+			if (!backX.empty())
+			{
+				sort(backX.begin(), backX.end(), cmpXStandard);
+				X x1 = backX[0];
+				_Z.push_back(x1);
+				_ZR.push_back(x1);
+				vector<X>::iterator it = find(_T.begin(), _T.end(), x1);
+				_T.erase(it);
+			}
+		}
+	}
+	else
+	{
+		//vector<X> IL, IR, IT;	// the x\in IT has x.s < YR.s && x.e >= YR.s		
+		for (int j = 0; j < _I.size(); j++)
+		{
+			if (_I[j]._e > lAlphaTP)	// the if ensure that it must be in IR or IT, not in IL
+			{				
+				backX.push_back(_I[j]);
+			}
+		}
+		if (!backX.empty())
+		{
+			sort(backX.begin(), backX.end(), cmpXStandard);
+			X x1 = backX[0];
+			_Z.push_back(x1);
+			_ZR.push_back(x1);
+			vector<X>::iterator it = find(_I.begin(), _I.end(), x1);
+			_I.erase(it);
+		}
+		else
+		{
+			//choose from T
+			if (!_T.empty())
+			{
+				sort(_T.begin(), _T.end(), cmpXEndBeginIdInc);
+				_Z.push_back(_T[0]);
+				_ZR.push_back(_T[0]);
+				_T.erase(_T.begin());
+			}
 		}
 	}
 
@@ -1083,7 +1193,20 @@ bool Tree::insertYinTree(Y y)
 	nodeP = nodeP->_parentNode;
 
 	while (nodeP != NULL)	//send msg until the root, the msg is from a node to its parent
-	{
+	{		
+		if (child == nodeP->_leftChild)	
+		{
+			// msg from the left child
+
+		}
+		else
+		{
+			// msg from the right child			
+			nodeP->insertYintoESinNode(y);		// insert the y into the node
+			nodeP->_Y.push_back(y);
+		}
+		child = nodeP;
+		nodeP = nodeP->_parentNode;
 	}
 	return true;
 }
