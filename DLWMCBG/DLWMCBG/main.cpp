@@ -7,14 +7,14 @@
 
 using namespace std;
 
-void generator(char* fileName = "input.txt", int MaxY = 1000, int UpdateRange = 2000, int WeightRange = 10000);
+void generator(char* fileName = "input.txt", int MaxY = 20, int UpdateRange = 40, int WeightRange = 1000);
 
 int main()
 {
 	int cases = 1;
-	while (cases<=2)
+	while (true)
 	{
-		generator(); //generator need to be fit the format
+		//generator(); //generator need to be fit the format
 		ifstream in("input.txt");
 		ofstream out("output.txt");
 
@@ -36,6 +36,7 @@ int main()
 			in >> temp._id;
 			tempVecY.push_back(temp);
 		}
+		// TBD: add y with id=0 to avoid split in insert y ops.
 		Tree* pTree = new Tree(tempVecY);
 
 		char command;
@@ -60,8 +61,9 @@ int main()
 			{
 				X x;
 				in >> x._id >> x._s._id >> x._e._id >> x._w;	// divide by Space
+				pTree->adjustXToProper(x);
 				// if x.s or x.e is not in _Y, insert it.	// TBD			
-				if (x._id == 10)
+				if (x._id == 3)
 				{
 					int a = 0;
 				}
@@ -70,9 +72,6 @@ int main()
 				{
 					int a = 0;
 				}*/
-
-
-
 			}break;
 
 
@@ -82,6 +81,9 @@ int main()
 			}break;
 			case '3':
 			{
+				Y y;
+				in >> y._id;	
+				pTree->insertYinTree(y);
 
 			}break;
 			case '4':

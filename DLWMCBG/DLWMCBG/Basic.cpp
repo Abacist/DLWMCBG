@@ -205,14 +205,18 @@ bool cmpXStandard(X x1, X x2)
 	return false;
 }
 
-// end increasing, begin decreasing
+// end increasing, begin decreasing, increasing id
 bool cmpXEndIncStartDec(X x1, X x2)
 {
 	if (x1._e < x2._e)
 	{
 		return true;
 	}
-	if (x1._e == x2._e && x1._s > x2._s)
+	else if (x1._e == x2._e && x1._s > x2._s)
+	{
+		return true;
+	}
+	else if (x1._e == x2._e && x1._s == x2._s && x1._id < x2._id)
 	{
 		return true;
 	}

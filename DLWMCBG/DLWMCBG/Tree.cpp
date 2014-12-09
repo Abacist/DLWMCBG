@@ -27,6 +27,22 @@ Y TreeNode::getIntervalStart()
 	return _Y[0];
 }
 
+// insert x.s or x.e in Y if it does not exist
+void Tree::adjustXToProper(X x)
+{
+	vector<Y>::iterator it = find(_root->_Y.begin(), _root->_Y.end(), x._s);
+	if (it == _root->_Y.end())
+	{
+		insertYinTree(x._s);
+	}
+
+	it = find(_root->_Y.begin(), _root->_Y.end(), x._e);
+	if (it == _root->_Y.end())
+	{
+		insertYinTree(x._e);
+	}
+}
+
 // split a leaf into three nodes, a parent with two children.
 void TreeNode::splitDSNode(X x)
 {
@@ -261,6 +277,31 @@ x1._id = -1;
 return x1;	// there is no tight point after y
 }*/
 
+// return the tightest point that is less than y; return y with y.id=-1 if there is no such one.
+Y TreeNode::leftAlphaTightPoint(Y y, TreeNode * node)
+{
+	if (node == NULL)
+	{
+		vector<int> t; t.erase(t.begin());
+	}
+	vector<Y> YY = node->_Y;
+	vector<X> ZZ = node->_Z;
+
+	sort(YY.begin(), YY.end(), cmpYInc);
+	sort(ZZ.begin(), ZZ.end(), cmpXEndInc);
+	for (int i = (int)ZZ.size() - 1; i >= 0; i--)
+	{
+		if (ZZ[i]._e == YY[i] && YY[i] < y)
+		{
+			return YY[i];
+		}
+	}
+
+	Y tmpY;
+	tmpY._id = -1;
+	return tmpY;
+}
+
 void TreeNode::determineReachableSetinES(X x, vector<X>& R, bool& isTight)
 {
 	vector<Y> ESY;
@@ -277,6 +318,24 @@ void TreeNode::determineReachableSetinES(X x, vector<X>& R, bool& isTight)
 	{
 		return;
 	}
+	// not necessay, since if x.e does not exist, add it before insert x.
+	//else
+	//{
+	//	// if x.e does not exist in Y, set it as the greatest one less than x.e
+	//	vector<Y>::iterator it = find(ESY.begin(), ESY.end(), x._e);
+	//	if (it == ESY.end())
+	//	{
+	//		for (int i = (int)ESY.size() - 1; i >= 0; i--)
+	//		{
+	//			if (ESY[i] < x._e)
+	//			{
+	//				x._e = ESY[i];
+	//				break;
+	//			}
+	//		}
+	//	}
+	//}
+
 	sort(_ZR.begin(), _ZR.end(), cmpXEndInc);
 	for (int i = 0; i < _ZR.size(); i++)
 	{
@@ -312,7 +371,8 @@ void TreeNode::determineReachableSetinEE(X x, vector<X>& R, bool& isTight)
 	if (x._s > EEY[0])
 	{
 		return;
-	}
+	}	
+
 	sort(_ZL.begin(), _ZL.end(), cmpXBeginDec);
 
 	for (int i = 0; i < _ZL.size(); i++)
@@ -402,6 +462,48 @@ Msg TreeNode::insertXintoESinNode(X x)
 	_I.push_back(x);
 	msg._aI = x;
 	}*/
+
+	return msg;
+}
+
+// only for the Leaf Node in Tree
+Msg TreeNode::insertYintoESLeaf(Y y)
+{
+	Msg msg;
+	msg._aY = y;
+	//TreeNode * node = (this->_rightChild != NULL) ? this->_rightChild : this;
+
+	Y lAlphaTP = leftAlphaTightPoint(y, this);
+
+	//decide the X to be matched;	
+	vector<X> backX;
+	for (int j = 0; j < _I.size(); j++)
+	{
+		if (_I[j]._e > lAlphaTP)
+		{
+			backX.push_back(_I[j]);
+		}
+	}
+	if (!backX.empty())
+	{
+		sort(backX.begin(), backX.end(), cmpXStandard);
+		X x1 = backX[(int)backX.size() - 1];
+		_Z.push_back(x1);
+		_ZR.push_back(x1);
+		vector<X>::iterator it = find(_I.begin(), _I.end(), x1);
+		_I.erase(it);
+	}
+	else
+	{
+		//chose from T
+		if (!_T.empty())
+		{
+			sort(_T.begin(), _T.end(), cmpXEndBeginIdInc);
+			_Z.push_back(_T[0]);
+			_ZR.push_back(_T[0]);
+			_T.erase(_T.begin());
+		}
+	}
 
 	return msg;
 }
@@ -709,8 +811,6 @@ void TreeNode::testPrintY()
 
 
 
-
-
 // Methods in Tree
 Tree::Tree(vector<Y> vecY)
 {
@@ -862,71 +962,8 @@ bool Tree::insertXinTree(X x)
 						msg._bZ = tempMsg._bZ;
 						//_aZ, _aX keeps
 					}
-					/*vector<X> R;//may transfer
-					nodeP->determineReachableSetinEE(msg._aZ, R, *new bool);
-					R.push_back(msg._aZ);
-					sort(R.begin(), R.end(), cmpXWeightIDInc);
-					it = find(nodeP->_Z.begin(), nodeP->_Z.end(), R[0]);
-					nodeP->_Z.erase(it);
-					it = find(nodeP->_ZL.begin(), nodeP->_ZL.end(), R[0]);
-					nodeP->_ZL.erase(it);
-					nodeP->_I.push_back(R[0]);
-					Msg tempMsg;
-					tempMsg._aX = msg._aX;
-					tempMsg._aZ = msg._aZ;
-					tempMsg._bZ = R[0];
-					tempMsg._aI = R[0];
-					msg = tempMsg;*/
-
 				}
 			}
-
-
-
-			/*if (msg._aT._id == -1 && msg._aI._id == -1)	// msg._c == 0 // 1.success in L
-			{
-			nodeP->_parentNode->_Z.push_back(msg._aZ);	// msg._a
-			}
-			else if (msg._aZ._id == -1 || msg._aZ == msg._bZ)	// msg._a == msg._b 	// 2.non-sucessful, a = b
-			{
-			if (msg._aI._id != -1)
-			{
-			nodeP->_I.push_back(msg._aI);	//msg._b = msg._aI
-			}
-			else
-			{
-			Msg tempMsg = nodeP->insertXintoESinNode(msg._aT);	//msg._b = msg._aT
-			if (tempMsg._aI._id != -1)
-			{
-			//tempMsg._aI = nodeP->replaceMinWeightX(tempMsg);		// call replacement algorithm
-			}
-			// msg._b = tempMsg._b; msg._bEmpty = tempMsg._bEmpty; msg._c = tempMsg._c;
-			msg._bZ = tempMsg._bZ;
-			msg._aT = tempMsg._aT;
-			msg._aI = tempMsg._aI;
-			}
-			}
-			else   // 3.non-sucessful, a != b
-			{
-			}
-
-			if (msg.flagInsertX() == 2)	// msg._c == 2 // infeasible
-			{
-			nodeP->_parentNode->_I.push_back(msg._bZ);	// msg._b; assertion: msg._bZ == msg._aI
-			}
-			else if (msg.flagInsertX() == 1)	// msg._c == 1 // transferred
-			{
-			Msg tempMsg = nodeP->_parentNode->insertXintoESinNode(msg._bZ);	// msg._b; // if tempMsg._b <> msg._b, then msg._b remains in the matched set of the parent
-			//msg._b = tempMsg._b; msg._bEmpty = tempMsg._bEmpty; msg._c = tempMsg._c;
-			msg._bZ = tempMsg._bZ;
-			msg._aT = tempMsg._aT;
-			msg._aI = tempMsg._aI;
-
-			if (tempMsg.flagInsertX() == 2)	// tempMsg._c == 2
-			{
-			//msg._bZ = msg._aI = nodeP->_parent->replaceMinWeightX(tempMsg);		//msg._b // call replaceable algorithm
-			}
-			}*/
 		}
 		else // msg from the right child
 		{
@@ -1017,7 +1054,7 @@ bool Tree::insertXinTree(X x)
 			}
 			else
 			{
-				vector<X> t; t.erase(t.begin());
+				vector<int> t; t.erase(t.begin());
 			}
 			//break;
 		}
@@ -1025,7 +1062,29 @@ bool Tree::insertXinTree(X x)
 		nodeP = nodeP->_parentNode;
 	}
 
+	return true;
+}
 
+bool Tree::insertYinTree(Y y)
+{
+	TreeNode* nodeP = locateLeaf(y);	// locate the leaf corresponding to x.begin
+	// if y is in Y, return
+	vector<Y>::iterator it = find(nodeP->_Y.begin(), nodeP->_Y.end(), y);
+	if (it != nodeP->_Y.end())
+	{
+		return false;
+	}
+
+	//below is the whole implemention of the MSG passing rule
+	Msg msg = nodeP->insertYintoESLeaf(y);		// insert the y into the leaf
+	nodeP->_Y.push_back(y);
+
+	TreeNode* child = nodeP;
+	nodeP = nodeP->_parentNode;
+
+	while (nodeP != NULL)	//send msg until the root, the msg is from a node to its parent
+	{
+	}
 	return true;
 }
 
@@ -1113,6 +1172,27 @@ TreeNode* Tree::locateLeaf(X x)
 	tmp->_X.push_back(x);
 	tmp = tmp->_parentNode;
 	}*/
+	return node;
+}
+
+TreeNode* Tree::locateLeaf(Y y)
+{
+	// assume that y with id=0 has been inserted and there is no split needed
+
+	TreeNode* node = _root;
+	// find the node in which y in Y	
+	while (node->_rightChild != NULL)
+	{
+		if (node->_rightChild != NULL && y < node->_rightChild->_Y[0])
+		{
+			node = node->_leftChild;
+		}
+		else
+		{
+			node = node->_rightChild;
+		}
+	}
+
 	return node;
 }
 
