@@ -7,12 +7,12 @@
 
 using namespace std;
 
-void generator(char* fileName = "input.txt", int MaxY = 1000, int UpdateRange = 2000, int WeightRange = 10000);
+void generator(char* fileName = "input.txt", int MaxY = 50, int UpdateRange = 200, int WeightRange = 1000);
 
 int main()
 {
 	int cases = 1;
-	while (cases<=2)
+	while (true)
 	{
 		generator(); //generator need to be fit the format
 		ifstream in("input.txt");
@@ -61,7 +61,7 @@ int main()
 				X x;
 				in >> x._id >> x._s._id >> x._e._id >> x._w;	// divide by Space
 				// if x.s or x.e is not in _Y, insert it.	// TBD			
-				if (x._id == 10)
+				if (x._id == 5)
 				{
 					int a = 0;
 				}
