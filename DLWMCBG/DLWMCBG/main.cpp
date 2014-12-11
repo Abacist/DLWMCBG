@@ -63,7 +63,8 @@ int main()
 				in >> x._id >> x._s._id >> x._e._id >> x._w;	// divide by Space
 				pTree->adjustXToProper(x);
 				// if x.s or x.e is not in _Y, insert it.	// TBD			
-				if (x._id == 3)
+				if (x._id == 5)
+
 				{
 					int a = 0;
 				}

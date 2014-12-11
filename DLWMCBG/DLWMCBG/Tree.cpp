@@ -108,13 +108,14 @@ void TreeNode::updateAuxSet4Split()
 		{
 			//transfer in left
 			_Z.push_back(msg._aZ);
-			_ZL.push_back(msg._aZ);
+
 			vector<X>::iterator it = find(_Z.begin(), _Z.end(), msg._bZ);
 			if (it != _Z.end())
 			{
 				vector<X> R;
 				determineReachableSetinEE(msg._aZ, R, *new bool);
 				R.push_back(msg._aZ);
+				_ZL.push_back(msg._aZ);
 				sort(R.begin(), R.end(), cmpXEndInc);
 				X maxEndinR = R[R.size() - 1];
 				it = find(_Z.begin(), _Z.end(), maxEndinR);
@@ -122,24 +123,20 @@ void TreeNode::updateAuxSet4Split()
 				it = find(_ZL.begin(), _ZL.end(), maxEndinR);
 				_ZL.erase(it);
 				insertXintoESinNode(maxEndinR);
-
-
-				/*_Z.erase(it);//has bug
-				it = find(_ZL.begin(), _ZL.end(), msg._bZ);
-				_ZL.erase(it);
-				insertXintoESinNode(msg._aT);*/
 			}
 			else
 			{
 				vector<X> R;
 				determineReachableSetinEE(msg._aZ, R, *new bool);//ES or EE? In Split or Msg Passing?
+				//when the R is correct, the below code is right
 				R.push_back(msg._aZ);
+				_ZL.push_back(msg._aZ);
 				sort(R.begin(), R.end(), cmpXEndInc);
 				X maxEndinR = R[R.size() - 1];
 				if (maxEndinR._e < _rightChild->getIntervalStart())
 				{
 					//not transfer in P
-					sort(R.begin(), R.end(), cmpXWeightIDInc);
+					sort(R.begin(), R.end(), cmpXWeightInc);
 					vector<X>::iterator it = find(_Z.begin(), _Z.end(), R[0]);
 					_Z.erase(it);
 					it = find(_ZL.begin(), _ZL.end(), R[0]);
@@ -169,30 +166,23 @@ void TreeNode::updateAuxSet4Split()
 				it = find(_ZL.begin(), _ZL.end(), msg._bZ);
 				_ZL.erase(it);
 				_I.push_back(msg._aI);
+				//msg keeps
 			}
 			else
 			{
-				//_bZ has already been preempted. in Split, we can directly use the ES structure of ZL
-				//but how to do in the msg passing?
-				/*vector<X> R;
-				determineReachableSetinEE(msg._aZ, R, *new bool);//ES or EE? In Split or Msg Passing?
-				R.push_back(msg._aZ);
-				sort(R.begin(), R.end(), cmpXWeightIDInc);
-				it = find(_Z.begin(), _Z.end(), R[0]);
-				_Z.erase(it);
-				it = find(_ZL.begin(), _ZL.end(), R[0]);
+				vector<X>::iterator it = find(_ZL.begin(), _ZL.end(), msg._aZ);
 				_ZL.erase(it);
-				_I.push_back(R[0]);*/
 				vector<X> R;
 				determineReachableSetinEE(msg._aZ, R, *new bool);//ES or EE? In Split or Msg Passing?
 				//when the R is right, the below code is right
 				R.push_back(msg._aZ);
+				_ZL.push_back(msg._aZ);
 				sort(R.begin(), R.end(), cmpXEndInc);
 				X maxEndinR = R[R.size() - 1];
 				if (maxEndinR._e < _rightChild->getIntervalStart())
 				{
 					//not transfer in P
-					sort(R.begin(), R.end(), cmpXWeightIDInc);
+					sort(R.begin(), R.end(), cmpXWeightInc);
 					vector<X>::iterator it = find(_Z.begin(), _Z.end(), R[0]);
 					_Z.erase(it);
 					it = find(_ZL.begin(), _ZL.end(), R[0]);
@@ -206,47 +196,13 @@ void TreeNode::updateAuxSet4Split()
 					it = find(_ZL.begin(), _ZL.end(), maxEndinR);
 					_ZL.erase(it);
 					insertXintoESinNode(maxEndinR);
+					//_aZ, _aX keeps
 				}
 
 			}
 		}
 	}
 
-
-	/*TreeNode* leftChild = _leftChild;
-	Msg msg;
-	X tmpX;
-	vector<X> tempMatched = _Z;
-	_Z.clear();
-	vector<X> tempMatched2 = _ZR;
-	_ZR.clear();
-
-	leftChild->_I = _I;//problem
-	leftChild->_T = _T;
-
-	for (int i = 0; i < (int)tempMatched.size(); i++)
-	{
-	tmpX = tempMatched[i];
-	msg = leftChild->insertXintoESinNode(tmpX);		// insert into the left child node L
-	switch (msg.flagInsertX())
-	{
-	case 0:	// matched
-	{
-	_Z.push_back(tmpX);
-	} break;
-	case 1:	// transferred, add a into matched, delete b from matched, and add b into ES
-	{
-	_Z.push_back(tmpX);
-	vector<X>::iterator it = find(_Z.begin(), _Z.end(), msg._bZ);	// _bZ should be equal to _aT
-	_Z.erase(it);
-	insertXintoESinNode(msg._bZ);	// insert into the parent node P
-	} break;
-	case 2:
-	{
-	//no infeasible case
-	} break;
-	}
-	}*/
 }
 
 // return the least tight piont greater than y in ES 
@@ -444,25 +400,6 @@ Msg TreeNode::insertXintoESinNode(X x)
 			msg._aI = r;
 		}
 	}
-	/*
-	else if (x._e > _Y[_Y.size() - 1])	// transferred
-	{
-	_T.push_back(x);
-	msg._aT = x;
-	}
-	else // infeasible
-	{
-	vector<X>::iterator it = find(_Z.begin(), _Z.end(), jTP);
-	_Z.erase(it);
-	vector<X>::iterator it1 = find(_ZR.begin(), _ZR.end(), jTP);
-	_ZR.erase(it1);
-	msg._aZ = x;
-	msg._bZ = jTP;
-
-	_I.push_back(x);
-	msg._aI = x;
-	}*/
-
 	return msg;
 }
 
@@ -633,7 +570,7 @@ X TreeNode::replaceMinWeightX(X x)
 		r = R[0];
 		for (int i = 0; i < R.size(); i++)
 		{
-			if (cmpXWeightIDInc(R[i], r))
+			if (cmpXWeightInc(R[i], r))
 			{
 				r = R[i];
 			}
@@ -660,7 +597,7 @@ X TreeNode::replaceMinWeightX(X x)
 		r = R[0];
 		for (int i = 0; i < R.size(); i++)
 		{
-			if (cmpXWeightIDInc(R[i], r))
+			if (cmpXWeightInc(R[i], r))
 			{
 				r = R[i];
 			}
@@ -700,7 +637,8 @@ X TreeNode::replaceMinWeightX(X x)
 					allBackX.push_back(ESR[i]);
 				}
 			}
-			sort(allBackX.begin(), allBackX.end(), cmpXEndBeginIdInc);	// TBC: increaing start? should be decreasing?
+//			sort(allBackX.begin(), allBackX.end(), cmpXEndBeginIdInc);	// TBC: increaing start? should be decreasing?
+			sort(allBackX.begin(), allBackX.end(), cmpXEndInc);
 			X backX = allBackX[0];
 			it = find(_ZR.begin(), _ZR.end(), backX);
 			_ZR.erase(it);
@@ -787,15 +725,17 @@ int TreeNode::verifyNodeInvariants()
 	// invariant \phi_2: \nexists x\in T, Z+x-x'\in \I
 	if (_T.empty() != true)
 	{
-		sort(_T.begin(), _T.end(), cmpXEndIncStartDec);
+		sort(_T.begin(), _T.end(), cmpXEndInc);
 
 		for (int i = 0; i < (int)_Z.size(); i++)
 		{
-			if (_Z[i]._e > _T[0]._e)
+			//if (_Z[i]._e > _T[0]._e)
+			if (cmpXEndInc(_T[0], _Z[i]))
 			{
 				X z = _Z[i];
 				int j = 0;
-				while (z._e > _T[j]._e)
+				//while (z._e > _T[j]._e)
+				while (cmpXEndInc(_T[j], z))
 				{
 					vector<X> ZZ;
 					for (int i = 0; i < (int)_Z.size(); i++)
@@ -991,7 +931,7 @@ bool Tree::insertXinTree(X x)
 					if (maxEndinR._e < nodeP->_rightChild->getIntervalStart())
 					{
 						//not transfer in P
-						sort(R.begin(), R.end(), cmpXWeightIDInc);
+						sort(R.begin(), R.end(), cmpXWeightInc);
 						vector<X>::iterator it = find(nodeP->_Z.begin(), nodeP->_Z.end(), R[0]);
 						nodeP->_Z.erase(it);
 						it = find(nodeP->_ZL.begin(), nodeP->_ZL.end(), R[0]);
@@ -1047,7 +987,7 @@ bool Tree::insertXinTree(X x)
 					if (maxEndinR._e < nodeP->_rightChild->getIntervalStart())
 					{
 						//not transfer in P
-						sort(R.begin(), R.end(), cmpXWeightIDInc);
+						sort(R.begin(), R.end(), cmpXWeightInc);
 						vector<X>::iterator it = find(nodeP->_Z.begin(), nodeP->_Z.end(), R[0]);
 						nodeP->_Z.erase(it);
 						it = find(nodeP->_ZL.begin(), nodeP->_ZL.end(), R[0]);
@@ -1074,6 +1014,7 @@ bool Tree::insertXinTree(X x)
 					}
 				}
 			}
+
 		}
 		else // msg from the right child
 		{
@@ -1115,6 +1056,7 @@ bool Tree::insertXinTree(X x)
 						}
 						else
 						{
+							throw new exception();
 							Msg tempMsg = nodeP->insertXintoESinNode(msg._aZ);
 							msg._aI = tempMsg._aI;
 							msg._aT = tempMsg._aT;
@@ -1234,54 +1176,16 @@ TreeNode* Tree::locateLeaf(X x)
 		else // assert there is no case that right child is NULL and left child is not NULL.
 		{
 			node->splitDSNode(x);
+			int flag = verifyInvariantsRecur(node);
+			if (flag != 0)
+			{
+				throw new exception("Split Error");
+			}
+
+
 			//node->updateAuxSet4Split();
-			node = (TreeNode*)node->_rightChild;
-			//test code for split==========================
-			/*vector<X> Z = this->_root->_Z;
-			ofstream out("Split-test.txt");
-			sort(Z.begin(), Z.end(), cmpXID);
-			for (int i = 0; i < Z.size(); i++)
-			{
-			out << Z[i]._id << endl;
-			}
-			out << "============T in root==================" << endl;
-			vector<X> T = this->_root->_T;
-			sort(T.begin(), T.end(), cmpXEndInc);
-			for (int i = 0; i < T.size(); i++)
-			{
-			out << T[i]._id << "\t" << T[i]._e << endl;
-			}
-			out << "============I in root==================" << endl;
-			vector<X> I = this->_root->_I;
-			sort(I.begin(), I.end(), cmpXEndInc);
-			for (int i = 0; i < I.size(); i++)
-			{
-			out << I[i]._id << "\t" << I[i]._e << endl;
-			}
-			out << "============Z in left==================" << endl;
-			Z = this->_root->_leftChild->_Z;
-			sort(Z.begin(), Z.end(), cmpXID);
-			for (int i = 0; i < Z.size(); i++)
-			{
-			out << Z[i]._id << endl;
-			}
-			out << "============T in left==================" << endl;
-			T = this->_root->_leftChild->_T;
-			sort(T.begin(), T.end(), cmpXEndInc);
-			for (int i = 0; i < T.size(); i++)
-			{
-			out << T[i]._id << "\t" << T[i]._e << endl;
-			}
-			out << "============I in left==================" << endl;
-			I = this->_root->_leftChild->_I;
-			sort(I.begin(), I.end(), cmpXEndInc);
-			for (int i = 0; i < I.size(); i++)
-			{
-			out << I[i]._id << "\t" << I[i]._e << endl;
-			}
-			out.close();
-			int a = 1;*/
-			//=========================	
+			node = node->_rightChild;
+			
 		}
 	}
 	while (node->_leftChild != NULL) // to leaf

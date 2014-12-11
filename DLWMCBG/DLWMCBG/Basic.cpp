@@ -131,21 +131,39 @@ bool cmpYDec(Y y1, Y y2)
 // priority: increasing end
 bool cmpXEndInc(X x1, X x2)
 {
-	return x1._e < x2._e;
+	if (x1._e < x2._e)
+	{
+		return true;
+	}
+	if (x1._e == x2._e && x1._id < x2._id)
+	{
+		return true;
+	}
+	return false;//x1._e < x2._e;
 }
 
 bool cmpXBeginDec(X x1, X x2)
 {
-	return x1._s > x2._s;
+	if (x1._s > x2._s)
+	{
+		return true;
+	}
+	if (x1._s == x2._s && x1._id > x2._id)
+	{
+		return true;
+	}
+	return false;//x1._e < x2._e;
+	//return x1._s > x2._s;
+
 }
 
 // increasing start
-bool cmpXStartInc(X x1, X x2)
+/*bool cmpXStartInc(X x1, X x2)
 {
 	return x1._s < x2._s;
-}
+}*/
 
-bool cmpXWeightIDInc(X x1, X x2)
+bool cmpXWeightInc(X x1, X x2)
 {
 	if (x1._w < x2._w || x1._w == x2._w && x1._id < x2._id)
 	{
