@@ -419,7 +419,7 @@ Msg TreeNode::insertYintoESLeaf(Y y)
 		if (!_T.empty())
 		{
 			// adjust T and I according to the inserted y
-			sort(_T.begin(), _T.end(), cmpXEndBeginIdInc);			
+			sort(_T.begin(), _T.end(), cmpXEndInc);			
 			for (vector<X>::iterator it = _T.begin(); it != _T.end(); it++)
 			{
 				if (it->_e > y)
@@ -435,8 +435,8 @@ Msg TreeNode::insertYintoESLeaf(Y y)
 
 			if (!backX.empty())
 			{
-				sort(backX.begin(), backX.end(), cmpXStandard);
-				X x1 = backX[0];
+				sort(backX.begin(), backX.end(), cmpXWeightInc);
+				X x1 = backX[backX.size()-1];
 				_Z.push_back(x1);
 				_ZR.push_back(x1);
 				vector<X>::iterator it = find(_T.begin(), _T.end(), x1);
@@ -457,8 +457,8 @@ Msg TreeNode::insertYintoESLeaf(Y y)
 		}
 		if (!backX.empty())
 		{
-			sort(backX.begin(), backX.end(), cmpXStandard);
-			X x1 = backX[0];
+			sort(backX.begin(), backX.end(), cmpXWeightInc);
+			X x1 = backX[backX.size()-1];
 			_Z.push_back(x1);
 			_ZR.push_back(x1);
 			vector<X>::iterator it = find(_I.begin(), _I.end(), x1);
@@ -469,7 +469,7 @@ Msg TreeNode::insertYintoESLeaf(Y y)
 			//choose from T
 			if (!_T.empty())
 			{
-				sort(_T.begin(), _T.end(), cmpXEndBeginIdInc);
+				sort(_T.begin(), _T.end(), cmpXEndInc);
 				_Z.push_back(_T[0]);
 				_ZR.push_back(_T[0]);
 				_T.erase(_T.begin());
@@ -495,7 +495,7 @@ Msg TreeNode::insertYintoESinNode(Y y)
 		if (!_T.empty())
 		{
 			// adjust T and I according to the inserted y
-			sort(_T.begin(), _T.end(), cmpXEndBeginIdInc);
+			sort(_T.begin(), _T.end(), cmpXEndInc);
 			for (vector<X>::iterator it = _T.begin(); it != _T.end(); it++)
 			{
 				if (it->_e > y)
@@ -511,8 +511,8 @@ Msg TreeNode::insertYintoESinNode(Y y)
 
 			if (!backX.empty())
 			{
-				sort(backX.begin(), backX.end(), cmpXStandard);
-				X x1 = backX[0];
+				sort(backX.begin(), backX.end(), cmpXWeightInc);
+				X x1 = backX[backX.size()-1];
 				_Z.push_back(x1);
 				_ZR.push_back(x1);
 				vector<X>::iterator it = find(_T.begin(), _T.end(), x1);
@@ -532,8 +532,8 @@ Msg TreeNode::insertYintoESinNode(Y y)
 		}
 		if (!backX.empty())
 		{
-			sort(backX.begin(), backX.end(), cmpXStandard);
-			X x1 = backX[0];
+			sort(backX.begin(), backX.end(), cmpXWeightInc);
+			X x1 = backX[backX.size()-1];
 			_Z.push_back(x1);
 			_ZR.push_back(x1);
 			vector<X>::iterator it = find(_I.begin(), _I.end(), x1);
@@ -544,7 +544,7 @@ Msg TreeNode::insertYintoESinNode(Y y)
 			//choose from T
 			if (!_T.empty())
 			{
-				sort(_T.begin(), _T.end(), cmpXEndBeginIdInc);
+				sort(_T.begin(), _T.end(), cmpXEndInc);
 				_Z.push_back(_T[0]);
 				_ZR.push_back(_T[0]);
 				_T.erase(_T.begin());
@@ -737,12 +737,7 @@ int TreeNode::verifyNodeInvariants()
 				//while (z._e > _T[j]._e)
 				while (cmpXEndInc(_T[j], z))
 				{
-					vector<X> ZZ;
-					for (int i = 0; i < (int)_Z.size(); i++)
-					{
-						ZZ.push_back(_Z[i]);
-					}
-
+					vector<X> ZZ = _Z;
 					vector<X>::iterator it = find(ZZ.begin(), ZZ.end(), z);
 					ZZ.erase(it);
 					ZZ.push_back(_T[j]);
@@ -773,7 +768,7 @@ int TreeNode::verifyNodeInvariants()
 	}
 
 	// invariant \phi_4: \nexists x\in I, Z+x-x'\in \I
-	sort(_Z.begin(), _Z.end(), cmpXEndIncStartDec);
+	sort(_Z.begin(), _Z.end(), cmpXEndInc);
 	if (!_I.empty() && _Z[_Z.size() - 1]._e > _Y[_Y.size() - 1])
 	{
 		vector<X> Z1;
@@ -789,11 +784,7 @@ int TreeNode::verifyNodeInvariants()
 		{
 			for (int j = 0; j < (int)_I.size(); j++)
 			{
-				vector<X> Z2;
-				for (int k = 0; k < (int)_Z.size(); k++)
-				{
-					Z2.push_back(_Z[k]);
-				}
+				vector<X> Z2 = _Z;
 				vector<X>::iterator it = find(Z2.begin(), Z2.end(), Z1[i]);
 				Z2.erase(it);
 				Z2.push_back(_I[j]);
@@ -835,8 +826,8 @@ int TreeNode::verifyNodeInvariants()
 	{
 		return 6;
 	}
-	sort(_Z.begin(), _Z.end(), cmpXStandard);
-	sort(tmpZ.begin(), tmpZ.end(), cmpXStandard);
+	sort(_Z.begin(), _Z.end(), cmpXWeightInc);
+	sort(tmpZ.begin(), tmpZ.end(), cmpXWeightInc);
 	for (int i = 0; i < (int)_Z.size(); i++)
 	{
 		if (!(_Z[i] == tmpZ[i]))
@@ -1041,11 +1032,11 @@ bool Tree::insertXinTree(X x)
 					{
 						// x' \in T
 						// in P, there may a new tight point between x.e and the y matched with x'
-						vector<X> RinPES;
+						/*vector<X> RinPES;
 						nodeP->determineReachableSetinES(msg._aZ, RinPES, *new bool);
 						it = find(RinPES.begin(), RinPES.end(), msg._bZ);
 						if (it != RinPES.end())
-						{
+						{*/
 							nodeP->_Z.push_back(msg._aZ);
 							nodeP->_ZR.push_back(msg._aZ);
 							it = find(nodeP->_ZR.begin(), nodeP->_ZR.end(), msg._bZ);
@@ -1053,7 +1044,7 @@ bool Tree::insertXinTree(X x)
 							it = find(nodeP->_Z.begin(), nodeP->_Z.end(), msg._bZ);
 							nodeP->_Z.erase(it);
 							nodeP->_T.push_back(msg._bZ);
-						}
+						/*}
 						else
 						{
 							throw new exception();
@@ -1061,7 +1052,7 @@ bool Tree::insertXinTree(X x)
 							msg._aI = tempMsg._aI;
 							msg._aT = tempMsg._aT;
 							msg._bZ = tempMsg._bZ;
-						}
+						}*/
 					}
 					else
 					{

@@ -24,3 +24,11 @@ example
 Note
 //only command 1 with 4 params
 //the format of X in query command should contain all info.
+
+Msg flag:
+1
+2
+3
+4
+...
+

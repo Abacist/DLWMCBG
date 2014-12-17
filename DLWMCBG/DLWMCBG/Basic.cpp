@@ -1,7 +1,7 @@
 #include<fstream>
 #include<Windows.h>
 #include"Basic.h"
-
+#pragma warning (disable:4018)
 
 void generator(char* fileName, int MaxY, int UpdateRange, int WeightRange)
 {
@@ -165,14 +165,15 @@ bool cmpXBeginDec(X x1, X x2)
 
 bool cmpXWeightInc(X x1, X x2)
 {
-	if (x1._w < x2._w || x1._w == x2._w && x1._id < x2._id)
+	if (x1._w < x2._w)
 	{
 		return true;
 	}
-	else
+	if (x1._w == x2._w)
 	{
-		return false;
+		return !cmpXEndInc(x1, x2);
 	}
+	return false;
 }
 
 bool cmpXID(X x1, X x2)
@@ -180,7 +181,7 @@ bool cmpXID(X x1, X x2)
 	return x1._id < x2._id;
 }
 
-bool cmpXEndBeginIdInc(X x1, X x2)
+/*bool cmpXEndBeginIdInc(X x1, X x2)
 {
 	if (x1._e < x2._e)
 	{
@@ -195,10 +196,10 @@ bool cmpXEndBeginIdInc(X x1, X x2)
 		return true;
 	}
 	return false;
-}
+}*/
 
 // weight decreasing, end increasing, begin decreasing, id increasing
-bool cmpXStandard(X x1, X x2)
+/*bool cmpXStandard(X x1, X x2)
 {
 	if (x1._w > x2._w)
 	{
@@ -208,7 +209,7 @@ bool cmpXStandard(X x1, X x2)
 	{
 		return true;
 	}
-	/*else if (x1._w == x2._w && x1._e < x2._e)
+	else if (x1._w == x2._w && x1._e < x2._e)
 	{
 	return true;
 	}
@@ -219,12 +220,12 @@ bool cmpXStandard(X x1, X x2)
 	else if (x1._w == x2._w && x1._e == x2._e && x1._s == x2._s && x1._id < x2._id)
 	{
 	return true;
-	}*/
+	}
 	return false;
-}
+}*/
 
 // end increasing, begin decreasing, increasing id
-bool cmpXEndIncStartDec(X x1, X x2)
+/*bool cmpXEndIncStartDec(X x1, X x2)
 {
 	if (x1._e < x2._e)
 	{
@@ -239,10 +240,10 @@ bool cmpXEndIncStartDec(X x1, X x2)
 		return true;
 	}
 	return false;
-}
+}*/
 
 // For Test
-struct TestX
+/*struct TestX
 {
 	X _X;
 	int flag = 0;
@@ -250,16 +251,16 @@ struct TestX
 	{
 		return this->_X._id == x._X._id;
 	}
-};
+};*/
 
 // increasing start
-bool testCmpXStartInc(TestX x1, TestX x2)
+/*bool testCmpXStartInc(TestX x1, TestX x2)
 {
 	return x1._X._s < x2._X._s;
-}
+}*/
 
 // weight increasing, end increasing, begin decreasing, id increasing
-bool testCmpXEndBeg(TestX x1, TestX x2)
+/*bool testCmpXEndBeg(TestX x1, TestX x2)
 {
 	if (x1._X._e < x2._X._e)
 	{
@@ -270,12 +271,12 @@ bool testCmpXEndBeg(TestX x1, TestX x2)
 		return true;
 	}
 	return false;
-}
+}*/
 
 // weight decreasing, end increasing, begin decreasing, id increasing
-bool testCmpXStandard(TestX x1, TestX x2)
+/*bool testCmpXStandard(TestX x1, TestX x2)
 {
-	/*if (x1._X._w > x2._X._w)
+	if (x1._X._w > x2._X._w)
 	{
 	return true;
 	}
@@ -291,7 +292,7 @@ bool testCmpXStandard(TestX x1, TestX x2)
 	{
 	return true;
 	}
-	return false;*/
+	return false;
 	if (x1._X._w > x2._X._w)
 	{
 		return true;
@@ -301,10 +302,10 @@ bool testCmpXStandard(TestX x1, TestX x2)
 		return true;
 	}
 	return false;
-}
+}*/
 
 // weight decreasing, end increasing, begin decreasing, id increasing
-bool testCmpXStandard_TEMP(TestX x1, TestX x2)
+/*bool testCmpXStandard_TEMP(TestX x1, TestX x2)
 {
 	if (x1._X._w > x2._X._w)
 	{
@@ -323,78 +324,78 @@ bool testCmpXStandard_TEMP(TestX x1, TestX x2)
 		return true;
 	}
 	return false;
-}
+}*/
 
 // return the OIS in the glover mathcing of a CBG
 void gloverMatching(const vector<X>& vX, const vector<Y>& vY, vector<X>* vZ)
 {
-	vector<TestX> XX;
-	vector<Y> YY;
-	for (int i = 0; i < (int)vX.size(); i++)
-	{
-		TestX sx;
-		sx._X = vX[i];
-		XX.push_back(sx);
-	}
-	YY = vY;
-	/*for (int i = 0; i < (int)vY.size(); i++)
-	{
-	YY.push_back(vY[i]);
-	}*/
-	sort(XX.begin(), XX.end(), testCmpXStandard);
-	sort(YY.begin(), YY.end(), cmpYInc);
-
+	vector<X> XX = vX;
+	vector<Y> YY = vY;
 	vZ->clear();
-	for (int i = 0; i < (int)YY.size(); i++)
+
+	for (int i = 0; i < YY.size(); i++)
 	{
-		vector<TestX> W;	// the unmatched x set that may match with YY[i]
-		for (int j = 0; j < (int)XX.size(); j++)
+		vector<X> selectedX;
+		for (int j = 0; j < XX.size(); j++)
 		{
-			if (XX[j]._X._e >= YY[i] && XX[j]._X._s <= YY[i] && XX[j].flag == 0)
+			if (XX[j]._s <= YY[i] && XX[j]._e >= YY[i])
 			{
-				W.push_back(XX[j]);
+				selectedX.push_back(XX[j]);
 			}
 		}
 
-		if ((int)W.size() > 0)
+		if (selectedX.size() == 0)
 		{
-			sort(W.begin(), W.end(), testCmpXEndBeg);
-			vZ->push_back(W[0]._X);
-			vector<TestX>::iterator it = find(XX.begin(), XX.end(), W[0]);
-			it->flag = 1;
+			continue;
+		}
+		else
+		{
+			X x = selectedX[0];
+			for (int j = 0; j < selectedX.size(); j++)
+			{
+				if (cmpXEndInc(selectedX[j],x))
+					//(selectedX[j]._e == x._e && selectedX[j]._s < x._s)
+					//|| (selectedX[j]._e == x._e && selectedX[j]._s == x._s && selectedX[j]._id < x._id))
+				{
+					x = selectedX[j];
+				}
+			}
+
+			vZ->push_back(x);
+			vector<X>::iterator it = find(XX.begin(),XX.end(), x);
+			XX.erase(it);
+			if (vZ->size() == vX.size() || vZ->size() == vY.size())
+			{
+				return;
+			}
 		}
 	}
+	return;
 }
 
 // return the OIS in the plaxton MWM of a LWCBG
 void PlaxtonMWM(const vector<X>& vX, const vector<Y>& vY, vector<X>* vZ)
 {
-	vector<TestX> XX;
-	vector<Y> YY;
-	for (int i = 0; i < (int)vX.size(); i++)
-	{
-		TestX sx;
-		sx._X = vX[i];
-		XX.push_back(sx);
-	}
-	YY = vY;
-	/*for (int i = 0; i < (int)vY.size(); i++)
-	{
-	YY.push_back(vY[i]);
-	}*/
-	sort(XX.begin(), XX.end(), testCmpXStandard);
+	vector<X> XX = vX;
+	vector<Y> YY = vY;
+	
+	sort(XX.begin(), XX.end(), cmpXWeightInc);
 	sort(YY.begin(), YY.end(), cmpYInc);
 
 	vZ->clear();
-	for (int i = 0; i < (int)XX.size(); i++)
+	for (int i = XX.size() - 1; i >= 0;  i--)
 	{
 		vector<X> tmpZ;
-		vZ->push_back(XX[i]._X);
+		vZ->push_back(XX[i]);
 		gloverMatching(*vZ, YY, &tmpZ);
 		if (tmpZ.size() < vZ->size())
 		{
-			vector<X>::iterator it = find(vZ->begin(), vZ->end(), XX[i]._X);
+			vector<X>::iterator it = find(vZ->begin(), vZ->end(), XX[i]);
 			vZ->erase(it);
+		}
+		if (vZ->size() == vX.size() || vZ->size() == vY.size())
+		{
+			return;
 		}
 	}
 }

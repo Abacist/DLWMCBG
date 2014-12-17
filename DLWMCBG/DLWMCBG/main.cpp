@@ -7,14 +7,14 @@
 
 using namespace std;
 
-void generator(char* fileName = "input.txt", int MaxY = 20, int UpdateRange = 40, int WeightRange = 1000);
+void generator(char* fileName = "input.txt", int MaxY = 80, int UpdateRange = 300, int WeightRange = 1000);
 
 int main()
 {
 	int cases = 1;
 	while (true)
 	{
-		//generator(); //generator need to be fit the format
+		generator(); //generator need to be fit the format
 		ifstream in("input.txt");
 		ofstream out("output.txt");
 

@@ -98,9 +98,9 @@ bool cmpXBeginDec(X, X);
 //bool cmpXStartInc(X x1, X x2);	// increasing start
 bool cmpXWeightInc(X x1, X x2);
 bool cmpXID(X x1, X x2);
-bool cmpXEndBeginIdInc(X x1, X x2);
-bool cmpXEndIncStartDec(X x1, X x2);	// end increasing, start decreasing
-bool cmpXStandard(X x1, X x2);	// weight decreasing, end increasing, start decreasing, id increasing
+//bool cmpXEndBeginIdInc(X x1, X x2);
+//bool cmpXEndIncStartDec(X x1, X x2);	// end increasing, start decreasing
+//bool cmpXStandard(X x1, X x2);	// weight decreasing, end increasing, start decreasing, id increasing
 
 void gloverMatching(const vector<X>& vX, const vector<Y>& vY, vector<X>* vZ);	// return the OIS in the glover mathcing of a CBG
 void PlaxtonMWM(const vector<X>& vX, const vector<Y>& vY, vector<X>* vZ);	// return the OIS in the plaxton MWM of a LWCBG
