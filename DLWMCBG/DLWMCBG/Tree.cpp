@@ -421,7 +421,7 @@ Msg TreeNode::insertYintoLeafW(Y y)
 		if (!_T.empty())
 		{
 			// adjust T and I according to the inserted y
-			sort(_T.begin(), _T.end(), cmpXEndInc);			
+			sort(_T.begin(), _T.end(), cmpXEndInc);
 			for (vector<X>::iterator it = _T.begin(); it != _T.end(); it++)
 			{
 				if (it->_e > y)
@@ -439,12 +439,12 @@ Msg TreeNode::insertYintoLeafW(Y y)
 			if (!backX.empty())
 			{
 				sort(backX.begin(), backX.end(), cmpXWeightInc);
-				X x1 = backX[backX.size()-1];
+				X x1 = backX[backX.size() - 1];
 				_Z.push_back(x1);
 				_ZR.push_back(x1);
 				vector<X>::iterator it = find(_T.begin(), _T.end(), x1);
 				_T.erase(it);
-			}			
+			}
 		}
 
 	}
@@ -461,7 +461,7 @@ Msg TreeNode::insertYintoLeafW(Y y)
 		if (!backX.empty())
 		{
 			sort(backX.begin(), backX.end(), cmpXWeightInc);
-			X x1 = backX[backX.size()-1];
+			X x1 = backX[backX.size() - 1];
 			_Z.push_back(x1);
 			_ZR.push_back(x1);
 			vector<X>::iterator it = find(_I.begin(), _I.end(), x1);
@@ -478,7 +478,7 @@ Msg TreeNode::insertYintoLeafW(Y y)
 				_T.erase(_T.begin());
 			}
 		}
-	}	
+	}
 
 	return msg;
 }
@@ -490,7 +490,7 @@ Msg TreeNode::insertYintoESinNodeW(Y y)
 	msg._aY = y;
 
 	Y lAlphaTP = leftAlphaTightPoint(y);//call right child
-	
+
 	vector<X> backX;
 	if (y > _Y[(int)_Y.size() - 1])
 	{
@@ -515,7 +515,7 @@ Msg TreeNode::insertYintoESinNodeW(Y y)
 			if (!backX.empty())
 			{
 				sort(backX.begin(), backX.end(), cmpXWeightInc);
-				X x1 = backX[backX.size()-1];
+				X x1 = backX[backX.size() - 1];
 				_Z.push_back(x1);
 				_ZR.push_back(x1);
 				vector<X>::iterator it = find(_T.begin(), _T.end(), x1);
@@ -529,14 +529,14 @@ Msg TreeNode::insertYintoESinNodeW(Y y)
 		for (int j = 0; j < _I.size(); j++)
 		{
 			if (_I[j]._e > lAlphaTP)	// the if ensure that it must be in IR or IT, not in IL
-			{				
+			{
 				backX.push_back(_I[j]);
 			}
 		}
 		if (!backX.empty())
 		{
 			sort(backX.begin(), backX.end(), cmpXWeightInc);
-			X x1 = backX[backX.size()-1];
+			X x1 = backX[backX.size() - 1];
 			_Z.push_back(x1);
 			_ZR.push_back(x1);
 			vector<X>::iterator it = find(_I.begin(), _I.end(), x1);
@@ -640,7 +640,7 @@ X TreeNode::replaceMinWeightX(X x)
 					allBackX.push_back(ESR[i]);
 				}
 			}
-//			sort(allBackX.begin(), allBackX.end(), cmpXEndBeginIdInc);	// TBC: increaing start? should be decreasing?
+			//			sort(allBackX.begin(), allBackX.end(), cmpXEndBeginIdInc);	// TBC: increaing start? should be decreasing?
 			sort(allBackX.begin(), allBackX.end(), cmpXEndInc);
 			X backX = allBackX[0];
 			it = find(_ZR.begin(), _ZR.end(), backX);
@@ -772,7 +772,7 @@ int TreeNode::verifyNodeInvariants()
 
 	// invariant \phi_4: \nexists x\in I, Z+x-x'\in \I
 	sort(_Z.begin(), _Z.end(), cmpXEndInc);
-	if (!_I.empty() &&_Z.size() > 0&& _Z[_Z.size() - 1]._e > _Y[_Y.size() - 1])
+	if (!_I.empty() && _Z.size() > 0 && _Z[_Z.size() - 1]._e > _Y[_Y.size() - 1])
 	{
 		vector<X> Z1;
 		for (int i = 0; i < (int)_Z.size(); i++)
@@ -1040,21 +1040,21 @@ bool Tree::insertXinTree(X x)
 						it = find(RinPES.begin(), RinPES.end(), msg._bZ);
 						if (it != RinPES.end())
 						{*/
-							nodeP->_Z.push_back(msg._aZ);
-							nodeP->_ZR.push_back(msg._aZ);
-							it = find(nodeP->_ZR.begin(), nodeP->_ZR.end(), msg._bZ);
-							nodeP->_ZR.erase(it);
-							it = find(nodeP->_Z.begin(), nodeP->_Z.end(), msg._bZ);
-							nodeP->_Z.erase(it);
-							nodeP->_T.push_back(msg._bZ);
+						nodeP->_Z.push_back(msg._aZ);
+						nodeP->_ZR.push_back(msg._aZ);
+						it = find(nodeP->_ZR.begin(), nodeP->_ZR.end(), msg._bZ);
+						nodeP->_ZR.erase(it);
+						it = find(nodeP->_Z.begin(), nodeP->_Z.end(), msg._bZ);
+						nodeP->_Z.erase(it);
+						nodeP->_T.push_back(msg._bZ);
 						/*}
 						else
 						{
-							throw new exception();
-							Msg tempMsg = nodeP->insertXintoESinNode(msg._aZ);
-							msg._aI = tempMsg._aI;
-							msg._aT = tempMsg._aT;
-							msg._bZ = tempMsg._bZ;
+						throw new exception();
+						Msg tempMsg = nodeP->insertXintoESinNode(msg._aZ);
+						msg._aI = tempMsg._aI;
+						msg._aT = tempMsg._aT;
+						msg._bZ = tempMsg._bZ;
 						}*/
 					}
 					else
@@ -1129,8 +1129,8 @@ bool Tree::insertYinTreeW(Y y)
 	nodeP = nodeP->_parentNode;
 
 	while (nodeP != NULL)	//send msg until the root, the msg is from a node to its parent
-	{		
-		if (child == nodeP->_leftChild)	
+	{
+		if (child == nodeP->_leftChild)
 		{
 			// msg from the left child
 
@@ -1179,7 +1179,7 @@ TreeNode* Tree::locateLeaf(X x)
 
 			//node->updateAuxSet4Split();
 			node = node->_rightChild;
-			
+
 		}
 	}
 	while (node->_leftChild != NULL) // to leaf
@@ -1405,4 +1405,156 @@ int Tree::verifyInvariantsInUnweightedCase(TreeNode* curRoot)
 
 
 	return 0;
+}
+
+Msg TreeNode::insertYintoLeaf(Y y)
+{
+	Msg msg;
+	msg._aY = y;
+
+	// if y is greater than Y.e, choose the least x from T
+	if (y > _Y[_Y.size() - 1])
+	{
+		if (!_T.empty())
+		{
+			// select the x in T which has the minimum x.e to compensate
+			sort(_T.begin(), _T.end(), cmpXEndInc);
+			_Z.push_back(_T[0]);
+			_ZR.push_back(_T[0]);
+			_T.erase(_T.begin());
+			msg._aZ = _T[0];
+			msg._bT = _T[0];
+
+			// move the possible infeasible x in T to I
+			for (int i = 1; i < (int)_T.size(); i++)
+			{
+				if (_T[i]._e == y)
+				{
+					_I.push_back(_T[i]);
+					vector<X>::iterator it = find(_T.begin(), _T.end(), _T[i]);
+					_T.erase(it);
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
+		return msg;
+	}
+
+	Y rATP = rightAlphaTightPoint(y);
+	if (rATP._id == -1)
+	{
+		return msg;
+	}
+	else
+	{
+		Y lATP = leftAlphaTightPoint(y);
+		//decide the X to be matched;	
+		sort(_I.begin(), _I.end(), cmpXEndInc);
+		for (int j = 0; j < _I.size(); j++)
+		{
+			if (_I[j]._e > lATP)
+			{
+				X x1 = _I[j];
+				_Z.push_back(x1);
+				_ZR.push_back(x1);
+				vector<X>::iterator it = find(_I.begin(), _I.end(), x1);
+				_I.erase(it);
+				msg._aZ = x1;
+				msg._bI = x1;
+				return msg;
+			}
+		}
+
+		//if there is no compensable vertex in I, check T
+		if (!_T.empty())
+		{
+			sort(_T.begin(), _T.end(), cmpXEndInc);
+			_Z.push_back(_T[0]);
+			_ZR.push_back(_T[0]);
+			_T.erase(_T.begin());
+			msg._aZ = _T[0];
+			msg._bT = _T[0];
+		}
+	}
+
+	return msg;
+}
+
+
+bool Tree::insertYinTree(Y y)
+{
+	TreeNode* nodeP = locateLeaf(y);	// locate the leaf corresponding to x.begin
+	// if y is in Y, return
+	vector<Y>::iterator it = find(nodeP->_Y.begin(), nodeP->_Y.end(), y);
+	if (it != nodeP->_Y.end())
+	{
+		return false;
+	}
+
+	//below is the whole implemention of the MSG passing rule
+	Msg msg = nodeP->insertYintoLeaf(y);		// insert the y into the leaf
+	nodeP->_Y.push_back(y);
+
+	TreeNode* child = nodeP;
+	nodeP = nodeP->_parentNode;
+
+	while (nodeP != NULL)	//send msg until the root, the msg is from a node to its parent
+	{
+		if (child == nodeP->_leftChild)
+		{
+			// msg from the left child
+			if (msg._aZ._id == -1)	// there is no change in Z,I,T in L
+			{				
+				//msg keeps
+			}
+			else if (msg._bI._id != -1)	// x is added from I_L
+			{
+				// add the same x as in L
+				nodeP->_Z.push_back(msg._aZ);
+				nodeP->_ZL.push_back(msg._aZ);
+				//msg keeps
+			}
+			else    // x is added from T_L
+			{				
+				vector<X>::iterator itI = find(nodeP->_I.begin(), nodeP->_I.end(), msg._aZ);
+				vector<X>::iterator itT = find(nodeP->_T.begin(), nodeP->_T.end(), msg._aZ);
+				if (itI != nodeP->_I.end() || itT != nodeP->_T.end())	// x is in I_P or T_P
+				{
+					// add the same x as in L
+					nodeP->_Z.push_back(msg._aZ);
+					nodeP->_ZL.push_back(msg._aZ);
+					//msg keeps
+				}
+				else     // x is in Z_P
+				{
+					// add the x.e in right part of P
+					msg = nodeP->insertYintoESinNode(msg._aZ._e);		// insert the y into the node					
+				}
+			}
+			nodeP->_Y.push_back(y);	// add y in Y
+		}
+		else
+		{
+			// msg from the right child			
+			msg = nodeP->insertYintoESinNode(y);		// insert the y into the node
+			nodeP->_Y.push_back(y);	// add y in Y
+		}
+		child = nodeP;
+		nodeP = nodeP->_parentNode;
+	}
+	return true;
+}
+
+Msg TreeNode::insertYintoESinNode(Y y)
+{
+	Msg msg;
+	return msg;
+}
+
+Y TreeNode::rightAlphaTightPoint(Y y)
+{	
+	return y;
 }
