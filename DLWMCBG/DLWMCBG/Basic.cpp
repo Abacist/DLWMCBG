@@ -15,13 +15,6 @@ void generator(char* fileName, int MaxY, int UpdateRange, int WeightRange)
 	SYSTEMTIME lpsystime;
 	GetLocalTime(&lpsystime);
 	srand(lpsystime.wMinute * 1000 + lpsystime.wMilliseconds);
-	//out << 1 << " " << 1000 << " " << 40<< " " << MaxY-1 << " " << 100 << endl;
-	//out << 1 << " " << 1001 << " " << 9<< " " << MaxY - 1 << " " << 100 << endl;
-	//out << 1 << " " << 1002 << " " << 20<< " " << MaxY - 1 << " " << 100 << endl;
-	//out << 1 << " " << 1003 << " " << 5 << " " << MaxY - 1 << " " << 100 << endl;
-
-	//out << 1 << " " << 1 << " " << 3 << " " << rand() % MaxY + 1 << " " << rand() % WeightRange + 1 << endl;
-
 	int i = 0;
 	for (; i < UpdateRange; i++)
 	{
@@ -35,31 +28,11 @@ void generator(char* fileName, int MaxY, int UpdateRange, int WeightRange)
 			int diff = rand() % rest;
 			e = s + diff;
 		}
-		out << 1 << " " << i + 1 << " " << s << " " << e << " " << rand() % WeightRange << endl;
+		out << 1 << " " << i + 1 << " " << s << " " << e << " " << 0/*rand() % WeightRange*/ << endl;
 
 		//out << 1 << " " << i + 1 << " " << 1 << " " << rand() % MaxY + 1 << " " << rand() % MaxY * 10 << endl;;
 		//out << 1 << " " << i + 2 << " " << 3 << " " << rand() % MaxY + 1 << " " << rand() % WeightRange  + 1 << endl;
 	}
-	/*out << 1 << " " << 1000 << " " << 40 << " " << 80 << " " << 100 << endl;
-	for (int j = 0; j < UpdateRange; j++, i++)
-	{
-	out << 1 << " " << i + 1 << " " << 1 << " " << rand() % MaxY + 1 << " " << rand() % MaxY * 10 << endl;;
-	}
-	out << 1 << " " << 1001 << " " << 30 << " " << 80 << " " << 100 << endl;
-	for (int j = 0; j < UpdateRange; j++, i++)
-	{
-	out << 1 << " " << i + 1 << " " << 1 << " " << rand() % MaxY + 1 << " " << rand() % MaxY * 10 << endl;;
-	}
-	out << 1 << " " << 1002 << " " << 20 << " " << 80 << " " << 100 << endl;
-	for (int j = 0; j < UpdateRange; j++, i++)
-	{
-	out << 1 << " " << i + 1 << " " << 1 << " " << rand() % MaxY + 1 << " " << rand() % MaxY * 10 << endl;;
-	}
-	out << 1 << " " << 1003 << " " << 10 << " " << 80 << " " << 100 << endl;
-	for (int j = 0; j < UpdateRange; j++, i++)
-	{
-	out << 1 << " " << i + 1 << " " << 1 << " " << rand() % MaxY + 1 << " " << rand() % MaxY * 10 << endl;;
-	}*/
 	out << '$' << endl;
 
 

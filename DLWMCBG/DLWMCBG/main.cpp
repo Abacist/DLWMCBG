@@ -129,15 +129,9 @@ int main()
 		out.close();
 		//verify
 //		int flag = pTree->verifyTreeInvariantsSimple();
-		int flag = pTree->verifyInvariantsRecur();
-//		int flag = pTree->verifyTreeInvariants();
-		if (flag == 0
-			//pTree->_root->verifyNodeInvariants()
-			//&& pTree->_root->_leftChild->verifyNodeInvariants()
-			//&& pTree->_root->_leftChild->_leftChild->verifyNodeInvariants() 
-			//&& pTree->_root->_leftChild->_leftChild->_leftChild->_leftChild->veifiyNodeInvariants()
-			//&& pTree->_root->_leftChild->_leftChild->_leftChild->_leftChild->_leftChild->veifiyNodeInvariants()
-			)
+//		int flag = pTree->verifyInvariantsRecur();
+		int flag = pTree->verifyInvariantsInUnweightedCase();
+		if (flag == 0)
 		{
 			cout << "============================Case " << cases++ << " passed!" << endl;
 		}

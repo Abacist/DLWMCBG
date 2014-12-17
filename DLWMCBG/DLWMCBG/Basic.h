@@ -58,6 +58,10 @@ struct X
 	{
 		return this->_id == x._id;
 	}
+	bool operator!=(const X& x)
+	{
+		return !(*this == x);
+	}
 };
 
 ostream& operator<<(ostream& os, const X& rhs);

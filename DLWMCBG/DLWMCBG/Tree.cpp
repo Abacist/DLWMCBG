@@ -826,8 +826,8 @@ int TreeNode::verifyNodeInvariants()
 	{
 		return 6;
 	}
-	sort(_Z.begin(), _Z.end(), cmpXWeightInc);
-	sort(tmpZ.begin(), tmpZ.end(), cmpXWeightInc);
+	sort(_Z.begin(), _Z.end(), cmpXID);
+	sort(tmpZ.begin(), tmpZ.end(), cmpXID);
 	for (int i = 0; i < (int)_Z.size(); i++)
 	{
 		if (!(_Z[i] == tmpZ[i]))
@@ -1361,4 +1361,40 @@ int Tree::verifyTreeInvariantsSimple()
 	{
 		return 0;
 	}
+}
+
+int Tree::verifyInvariantsInUnweightedCase()
+{
+	return verifyInvariantsInUnweightedCase(_root);
+}
+
+int Tree::verifyInvariantsInUnweightedCase(TreeNode* curRoot)
+{
+	if (curRoot->_leftChild != NULL)
+	{
+		int flagL = verifyInvariantsInUnweightedCase(curRoot->_leftChild);
+		int flagR = verifyInvariantsInUnweightedCase(curRoot->_rightChild);
+		if (flagL != 0 || flagR != 0)
+		{
+			return 1;
+		}
+		vector<X> PZL = curRoot->_ZL;
+		vector<X> LZ = curRoot->_leftChild->_Z;
+		sort(PZL.begin(), PZL.end(), cmpXID);
+		sort(LZ.begin(), LZ.end(), cmpXID);
+		if (PZL.size() != LZ.size())
+		{
+			return 1;
+		}
+		for (int i = 0; i < PZL.size(); i++)
+		{
+			if (PZL[i] != LZ[i])
+			{
+				return 1;
+			}
+		}
+	}
+
+
+	return 0;
 }
