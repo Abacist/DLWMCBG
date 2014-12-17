@@ -6,10 +6,10 @@
 void generator(char* fileName, int MaxY, int UpdateRange, int WeightRange)
 {
 	ofstream out(fileName);
-	out << MaxY << endl;
-	for (int i = 1; i <= MaxY; i++)
+	out << MaxY+1 << endl;
+	for (int i = 0; i <= MaxY; i++)
 	{
-		out << i << " ";
+		out << i*2 << " ";
 	}
 	out << endl;
 	SYSTEMTIME lpsystime;
@@ -28,7 +28,7 @@ void generator(char* fileName, int MaxY, int UpdateRange, int WeightRange)
 			int diff = rand() % rest;
 			e = s + diff;
 		}
-		out << 1 << " " << i + 1 << " " << s << " " << e << " " << 0/*rand() % WeightRange*/ << endl;
+		out << 1 << " " << i + 1 << " " << s*2 << " " << e*2 << " " << 0/*rand() % WeightRange*/ << endl;
 
 		//out << 1 << " " << i + 1 << " " << 1 << " " << rand() % MaxY + 1 << " " << rand() % MaxY * 10 << endl;;
 		//out << 1 << " " << i + 2 << " " << 3 << " " << rand() % MaxY + 1 << " " << rand() % WeightRange  + 1 << endl;
@@ -108,7 +108,11 @@ bool cmpXEndInc(X x1, X x2)
 	{
 		return true;
 	}
-	if (x1._e == x2._e && x1._id < x2._id)
+	if (x1._e == x2._e && x1._s <x2._s)
+	{
+		return true;
+	}
+	if (x1._e == x2._e && x1._s == x2._s && x1._id < x2._id)
 	{
 		return true;
 	}

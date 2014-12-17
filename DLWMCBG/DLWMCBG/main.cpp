@@ -63,11 +63,7 @@ int main()
 				in >> x._id >> x._s._id >> x._e._id >> x._w;	// divide by Space
 				pTree->adjustXToProper(x);
 				// if x.s or x.e is not in _Y, insert it.	// TBD			
-				if (x._id == 5)
-
-				{
-					int a = 0;
-				}
+				
 				pTree->insertXinTree(x);
 				/*if (pTree->verifyTreeInvariants() != 0)
 				{
@@ -84,8 +80,16 @@ int main()
 			{
 				Y y;
 				in >> y._id;	
-				pTree->insertYinTree(y);
-
+				vector<Y>::iterator it = find(pTree->_root->_Y.begin(), pTree->_root->_Y.end(), y);
+				if (it == pTree->_root->_Y.end())
+				{
+					pTree->insertYinTree(y);
+				}
+				else
+				{
+					cout <<"Y: "<<y._id << "already exists." << endl;
+					//throw new exception();
+				}
 			}break;
 			case '4':
 			{
@@ -129,8 +133,9 @@ int main()
 		out.close();
 		//verify
 //		int flag = pTree->verifyTreeInvariantsSimple();
-//		int flag = pTree->verifyInvariantsRecur();
-		int flag = pTree->verifyInvariantsInUnweightedCase();
+		int flag = pTree->verifyInvariantsRecur();
+		//unweighted case
+//		flag += pTree->verifyInvariantsInUnweightedCase();
 		if (flag == 0)
 		{
 			cout << "============================Case " << cases++ << " passed!" << endl;

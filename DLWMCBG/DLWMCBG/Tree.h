@@ -26,8 +26,12 @@ public:
 
 	
 	Msg insertXintoESinNode(X x);
-	Msg insertYintoESLeaf(Y y);
-	Msg insertYintoESinNode(Y);
+
+	Msg insertYintoLeafW(Y y);
+	Msg insertYintoESinNodeW(Y y);
+
+	Msg insertYintoLeaf(Y y);
+	Msg insertYintoESinNode(Y y);
 	
 	//calculate Replaceable Set and Compensable Set tbd
 	//X findjInES(vector<Y>*, Y);		// return x where x.e is the least tight piont greater than y in ES 
@@ -40,7 +44,13 @@ public:
 	//X determineMinWeightX(X, X, TreeNode*&);
 	//TreeNode * pullBackATransferredXInWeightProcess(TreeNode *, X, Msg, bool&, X&);
 
-	Y leftAlphaTightPoint(Y y, TreeNode * );	// return the tightest point that is less than y; return 0 if there is no such one.
+	Y leftAlphaTightPoint(Y y);	// return the tightest point that is less than y; return 0 if there is no such one.
+	Y rightAlphaTightPoint(Y y);
+	Y leftBetaTightPoint(Y y);
+	Y rightBetaTightPoint(Y y);
+
+
+
 
 	// verification
 	int verifyNodeInvariants();
@@ -63,6 +73,7 @@ public:
 	TreeNode* locateLeaf(X x);	// include split
 	TreeNode* locateLeaf(Y y);	
 	bool insertXinTree(X x);
+	bool insertYinTreeW(Y y);
 	bool insertYinTree(Y y);
 
 	// verification

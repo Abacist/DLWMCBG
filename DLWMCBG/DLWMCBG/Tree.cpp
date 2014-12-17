@@ -9,7 +9,7 @@
 TreeNode::TreeNode(vector<Y> vecY)
 {
 	sort(vecY.begin(), vecY.end(), cmpYInc);
-	if (vecY[0]._id <= 0)
+	if (vecY[0]._id < 0)
 	{
 		__debugbreak();
 	}
@@ -33,13 +33,13 @@ void Tree::adjustXToProper(X x)
 	vector<Y>::iterator it = find(_root->_Y.begin(), _root->_Y.end(), x._s);
 	if (it == _root->_Y.end())
 	{
-		insertYinTree(x._s);
+		insertYinTreeW(x._s);
 	}
 
 	it = find(_root->_Y.begin(), _root->_Y.end(), x._e);
 	if (it == _root->_Y.end())
 	{
-		insertYinTree(x._e);
+		insertYinTreeW(x._e);
 	}
 }
 
@@ -234,11 +234,13 @@ return x1;	// there is no tight point after y
 }*/
 
 // return the tightest point that is less than y; return y with y.id=-1 if there is no such one.
-Y TreeNode::leftAlphaTightPoint(Y y, TreeNode * node)
+Y TreeNode::leftAlphaTightPoint(Y y)
 {
+	TreeNode* node = this;
 	if (node == NULL)
 	{
-		vector<int> t; t.erase(t.begin());
+		//vector<int> t; t.erase(t.begin());
+		throw new exception();
 	}
 	vector<Y> YY = node->_Y;
 	vector<X> ZZ = node->_Z;
@@ -404,13 +406,13 @@ Msg TreeNode::insertXintoESinNode(X x)
 }
 
 // only for the Leaf Node in Tree
-Msg TreeNode::insertYintoESLeaf(Y y)
+Msg TreeNode::insertYintoLeafW(Y y)
 {
 	Msg msg;
 	msg._aY = y;
 	//TreeNode * node = (this->_rightChild != NULL) ? this->_rightChild : this;
 
-	Y lAlphaTP = leftAlphaTightPoint(y, this);
+	Y lAlphaTP = leftAlphaTightPoint(y);
 
 	vector<X> backX;
 	if (y > _Y[(int)_Y.size() - 1])
@@ -428,8 +430,9 @@ Msg TreeNode::insertYintoESLeaf(Y y)
 				}
 				else
 				{
+					throw new exception();//could not have this case;
 					_I.push_back(*it);
-					_T.erase(it);
+					_T.erase(it);//wrong
 				}
 			}
 
@@ -481,12 +484,12 @@ Msg TreeNode::insertYintoESLeaf(Y y)
 }
 
 // only for the internal Node in Tree
-Msg TreeNode::insertYintoESinNode(Y y)
+Msg TreeNode::insertYintoESinNodeW(Y y)
 {
 	Msg msg;
 	msg._aY = y;
 
-	Y lAlphaTP = leftAlphaTightPoint(y, this->_rightChild);
+	Y lAlphaTP = leftAlphaTightPoint(y);//call right child
 	
 	vector<X> backX;
 	if (y > _Y[(int)_Y.size() - 1])
@@ -769,7 +772,7 @@ int TreeNode::verifyNodeInvariants()
 
 	// invariant \phi_4: \nexists x\in I, Z+x-x'\in \I
 	sort(_Z.begin(), _Z.end(), cmpXEndInc);
-	if (!_I.empty() && _Z[_Z.size() - 1]._e > _Y[_Y.size() - 1])
+	if (!_I.empty() &&_Z.size() > 0&& _Z[_Z.size() - 1]._e > _Y[_Y.size() - 1])
 	{
 		vector<X> Z1;
 		for (int i = 0; i < (int)_Z.size(); i++)
@@ -1108,7 +1111,7 @@ bool Tree::insertXinTree(X x)
 	return true;
 }
 
-bool Tree::insertYinTree(Y y)
+bool Tree::insertYinTreeW(Y y)
 {
 	TreeNode* nodeP = locateLeaf(y);	// locate the leaf corresponding to x.begin
 	// if y is in Y, return
@@ -1119,7 +1122,7 @@ bool Tree::insertYinTree(Y y)
 	}
 
 	//below is the whole implemention of the MSG passing rule
-	Msg msg = nodeP->insertYintoESLeaf(y);		// insert the y into the leaf
+	Msg msg = nodeP->insertYintoLeafW(y);		// insert the y into the leaf
 	nodeP->_Y.push_back(y);
 
 	TreeNode* child = nodeP;
@@ -1135,7 +1138,7 @@ bool Tree::insertYinTree(Y y)
 		else
 		{
 			// msg from the right child			
-			nodeP->insertYintoESinNode(y);		// insert the y into the node
+			nodeP->insertYintoESinNodeW(y);		// insert the y into the node
 			nodeP->_Y.push_back(y);
 		}
 		child = nodeP;
@@ -1196,6 +1199,11 @@ TreeNode* Tree::locateLeaf(X x)
 TreeNode* Tree::locateLeaf(Y y)
 {
 	// assume that y with id=0 has been inserted and there is no split needed
+	//sort(_root->_Y.begin(), _root->_Y.end(), cmpYInc);
+	if (_root->_Y[0]._id != 0)
+	{
+		throw new exception();
+	}
 
 	TreeNode* node = _root;
 	// find the node in which y in Y	
