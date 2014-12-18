@@ -233,142 +233,7 @@ X x1;
 x1._id = -1;
 return x1;	// there is no tight point after y
 }*/
-Y TreeNode::rightBetaTightPoint(Y y)
-{
-	vector<X> tempZ;
-	vector<Y> tempY;
-	if (this->_rightChild != NULL)
-	{
-		tempZ = _ZR;
-		tempY = _rightChild->_Y;
-	}
-	else
-	{
-		tempZ = _Z;//equals to _ZR
-		tempY = _Y;
-	}
-	sort(tempY.begin(), tempY.end(), cmpYDec);
-	sort(tempZ.begin(), tempZ.end(), cmpXBeginDec);
-	Y tY;
-	tY._id = -1;
 
-	for (int i = 0; i < tempZ.size(); i++)
-	{
-		if (tempY[i] == tempZ[i]._e && tempY[i] > y)
-		{
-			tY = tempY[i];
-		}
-	}
-	return tY;
-}
-Y TreeNode::leftBetaTightPoint(Y y)
-{
-	vector<X> tempZ;
-	vector<Y> tempY;
-	if (this->_rightChild != NULL)
-	{
-		tempZ = _ZR;
-		tempY = _rightChild->_Y;
-	}
-	else
-	{
-		tempZ = _Z;//equals to _ZR
-		tempY = _Y;
-	}
-	sort(tempY.begin(), tempY.end(), cmpYDec);
-	sort(tempZ.begin(), tempZ.end(), cmpXBeginDec);
-	Y tY;
-	tY._id = -1;
-
-	for (int i = tempZ.size() - 1; i >= 0; i--)
-	{
-		if (tempY[i] == tempZ[i]._e && tempY[i] <= y)
-		{
-			tY = tempY[i];
-		}
-	}
-	return tY;
-}
-Y TreeNode::rightAlphaTightPoint(Y y)
-{
-	vector<X> tempZ;
-	vector<Y> tempY;
-	if (this->_rightChild != NULL)
-	{
-		tempZ = _ZR;
-		tempY = _rightChild->_Y;
-	}
-	else
-	{
-		tempZ = _Z;//equals to _ZR
-		tempY = _Y;
-	}
-	sort(tempY.begin(), tempY.end(), cmpYInc);
-	sort(tempZ.begin(), tempZ.end(), cmpXEndInc);
-	Y tY;
-	tY._id = -1;
-
-	for (int i = tempZ.size()-1; i >= 0; i--)
-	{
-		if (tempY[i] == tempZ[i]._e && tempY[i] >= y)
-		{
-			tY = tempY[i];
-		}
-	}
-	return tY;
-}
-
-// return the tightest point that is less than y; return y with y.id=-1 if there is no such one.
-Y TreeNode::leftAlphaTightPoint(Y y)
-{
-	vector<X> tempZ;
-	vector<Y> tempY;
-	if (this->_rightChild != NULL)
-	{
-		tempZ = _ZR;
-		tempY = _rightChild->_Y;
-	}
-	else
-	{
-		tempZ = _Z;//equals to _ZR
-		tempY = _Y;
-	}
-	sort(tempY.begin(), tempY.end(), cmpYInc);
-	sort(tempZ.begin(), tempZ.end(), cmpXEndInc);
-	Y tY;
-	tY._id = -1;
-	
-	for (int i = 0; i < tempZ.size(); i++)
-	{
-		if (tempY[i] == tempZ[i]._e && tempY[i] < y)
-		{
-			tY = tempY[i];
-		}
-	}
-	return tY;
-	/*TreeNode* node = this;
-	if (node == NULL)
-	{
-		//vector<int> t; t.erase(t.begin());
-		throw new exception();
-	}
-	vector<Y> YY = node->_Y;
-	vector<X> ZZ = node->_Z;
-
-	sort(YY.begin(), YY.end(), cmpYInc);
-	sort(ZZ.begin(), ZZ.end(), cmpXEndInc);
-	for (int i = (int)ZZ.size() - 1; i >= 0; i--)
-	{
-		if (ZZ[i]._e == YY[i] && YY[i] < y)
-		{
-			return YY[i];
-		}
-	}
-
-	Y tmpY;
-	tmpY._id = -1;
-	return tmpY;*/
-}
 
 void TreeNode::determineReachableSetinES(X x, vector<X>& R, bool& isTight)
 {
@@ -1658,13 +1523,221 @@ bool Tree::insertYinTree(Y y)
 	return true;
 }
 
-Msg TreeNode::insertYintoESinNode(Y y)
+X TreeNode::insertYintoESinNode(Y y, X x)
 {
 	Msg msg;
-	return msg;
+	Y raT = rightAlphaTightPoint(y);
+	Y laT = leftAlphaTightPoint(y);
+	if (raT._id == -1)
+	{
+		return x;
+	}
+	else
+	{
+		vector<X> IPmIR = _I;
+		for (int i = 0; i < _rightChild->_I.size(); i++)
+		{
+			vector<X>::iterator it = find(IPmIR.begin(), IPmIR.end(), _rightChild->_I[i]);
+			IPmIR.erase(it);
+		}
+		vector<X> between;
+		for (int i = 0; i < IPmIR.size(); i++)
+		{
+			if (IPmIR[i]._e > laT && IPmIR[i]._s <= raT)
+			{
+				between.push_back(IPmIR[i]);
+			}
+		}
+		if (!between.empty())
+		{
+			X minX = between[0];
+			for (int i = 0; i < between.size(); i++)
+			{
+				if (cmpXEndInc(between[i], minX))
+				{
+					minX = between[i];
+				}
+			}
+			vector<X>::iterator it = find(_I.begin(), _I.end(), minX);
+			_I.erase(it);
+			_Z.push_back(minX);
+			_ZR.push_back(minX);
+			return minX;
+
+		}
+		else
+		{
+			if (raT == _Y[_Y.size() - 1])
+			{
+				Y bT = rightBetaTightPoint(y);
+				vector<X> backT;
+				for (int i = 0; i < _T.size(); i++)
+				{
+					if (_T[i]._s < bT)
+					{
+						backT.push_back(_T[i]);
+					}
+				}
+				X minX = backT[0];
+				for (int i = 0; i < backT.size(); i++)
+				{
+					if (cmpXEndInc(backT[i], minX))
+					{
+						minX = backT[i];
+					}
+				}
+				vector<X>::iterator it = find(_T.begin(), _T.end(), minX);
+				_T.erase(it);
+				_Z.push_back(minX);
+				_ZR.push_back(minX);
+				return minX;
+			}
+			else
+			{
+				X x;
+				x._id = -1;
+				return x;
+			}
+		}
+	}
 }
 
+
+
+
+Y TreeNode::rightBetaTightPoint(Y y)
+{
+	vector<X> tempZ;
+	vector<Y> tempY;
+	if (this->_rightChild != NULL)
+	{
+		tempZ = _ZR;
+		tempY = _rightChild->_Y;
+	}
+	else
+	{
+		tempZ = _Z;//equals to _ZR
+		tempY = _Y;
+	}
+	sort(tempY.begin(), tempY.end(), cmpYDec);
+	sort(tempZ.begin(), tempZ.end(), cmpXBeginDec);
+	Y tY;
+	tY._id = -1;
+
+	for (int i = 0; i < tempZ.size(); i++)
+	{
+		if (tempY[i] == tempZ[i]._e && tempY[i] > y)
+		{
+			tY = tempY[i];
+		}
+	}
+	return tY;
+}
+Y TreeNode::leftBetaTightPoint(Y y)
+{
+	vector<X> tempZ;
+	vector<Y> tempY;
+	if (this->_rightChild != NULL)
+	{
+		tempZ = _ZR;
+		tempY = _rightChild->_Y;
+	}
+	else
+	{
+		tempZ = _Z;//equals to _ZR
+		tempY = _Y;
+	}
+	sort(tempY.begin(), tempY.end(), cmpYDec);
+	sort(tempZ.begin(), tempZ.end(), cmpXBeginDec);
+	Y tY;
+	tY._id = -1;
+
+	for (int i = tempZ.size() - 1; i >= 0; i--)
+	{
+		if (tempY[i] == tempZ[i]._e && tempY[i] <= y)
+		{
+			tY = tempY[i];
+		}
+	}
+	return tY;
+}
 Y TreeNode::rightAlphaTightPoint(Y y)
-{	
-	return y;
+{
+	vector<X> tempZ;
+	vector<Y> tempY;
+	if (this->_rightChild != NULL)
+	{
+		tempZ = _ZR;
+		tempY = _rightChild->_Y;
+	}
+	else
+	{
+		tempZ = _Z;//equals to _ZR
+		tempY = _Y;
+	}
+	sort(tempY.begin(), tempY.end(), cmpYInc);
+	sort(tempZ.begin(), tempZ.end(), cmpXEndInc);
+	Y tY;
+	tY._id = -1;
+
+	for (int i = tempZ.size()-1; i >= 0; i--)
+	{
+		if (tempY[i] == tempZ[i]._e && tempY[i] >= y)
+		{
+			tY = tempY[i];
+		}
+	}
+	return tY;
+}
+
+// return the tightest point that is less than y; return y with y.id=-1 if there is no such one.
+Y TreeNode::leftAlphaTightPoint(Y y)
+{
+	vector<X> tempZ;
+	vector<Y> tempY;
+	if (this->_rightChild != NULL)
+	{
+		tempZ = _ZR;
+		tempY = _rightChild->_Y;
+	}
+	else
+	{
+		tempZ = _Z;//equals to _ZR
+		tempY = _Y;
+	}
+	sort(tempY.begin(), tempY.end(), cmpYInc);
+	sort(tempZ.begin(), tempZ.end(), cmpXEndInc);
+	Y tY;
+	tY._id = -1;
+	
+	for (int i = 0; i < tempZ.size(); i++)
+	{
+		if (tempY[i] == tempZ[i]._e && tempY[i] < y)
+		{
+			tY = tempY[i];
+		}
+	}
+	return tY;
+	/*TreeNode* node = this;
+	if (node == NULL)
+	{
+		//vector<int> t; t.erase(t.begin());
+		throw new exception();
+	}
+	vector<Y> YY = node->_Y;
+	vector<X> ZZ = node->_Z;
+
+	sort(YY.begin(), YY.end(), cmpYInc);
+	sort(ZZ.begin(), ZZ.end(), cmpXEndInc);
+	for (int i = (int)ZZ.size() - 1; i >= 0; i--)
+	{
+		if (ZZ[i]._e == YY[i] && YY[i] < y)
+		{
+			return YY[i];
+		}
+	}
+
+	Y tmpY;
+	tmpY._id = -1;
+	return tmpY;*/
 }
