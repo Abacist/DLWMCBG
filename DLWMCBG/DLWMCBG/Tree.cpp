@@ -1506,7 +1506,7 @@ bool Tree::insertYinTree(Y y)
 				else     // x is in Z_P
 				{
 					// add the x.e in right part of P
-					msg = nodeP->insertYintoESinNode(msg._aZ._e);		// insert the y into the node					
+					msg = nodeP->insertYintoESinNode(msg._aZ._e, *new X);		// insert the y into the node					
 				}
 			}
 			nodeP->_Y.push_back(y);	// add y in Y
@@ -1514,7 +1514,7 @@ bool Tree::insertYinTree(Y y)
 		else
 		{
 			// msg from the right child			
-			msg = nodeP->insertYintoESinNode(y);		// insert the y into the node
+			msg = nodeP->insertYintoESinNode(y, *new X);		// insert the y into the node
 			nodeP->_Y.push_back(y);	// add y in Y
 		}
 		child = nodeP;
@@ -1523,14 +1523,15 @@ bool Tree::insertYinTree(Y y)
 	return true;
 }
 
-X TreeNode::insertYintoESinNode(Y y, X x)
+Msg TreeNode::insertYintoESinNode(Y y, X x)
 {
 	Msg msg;
 	Y raT = rightAlphaTightPoint(y);
 	Y laT = leftAlphaTightPoint(y);
 	if (raT._id == -1)
 	{
-		return x;
+		msg._bI = x;//_bI or _bT?
+		return msg;
 	}
 	else
 	{
@@ -1562,7 +1563,8 @@ X TreeNode::insertYintoESinNode(Y y, X x)
 			_I.erase(it);
 			_Z.push_back(minX);
 			_ZR.push_back(minX);
-			return minX;
+			msg._bI = minX;
+			return msg;
 
 		}
 		else
@@ -1590,13 +1592,14 @@ X TreeNode::insertYintoESinNode(Y y, X x)
 				_T.erase(it);
 				_Z.push_back(minX);
 				_ZR.push_back(minX);
-				return minX;
+				msg._bT = minX;
+				return msg;
 			}
 			else
 			{
 				X x;
 				x._id = -1;
-				return x;
+				return msg;
 			}
 		}
 	}
