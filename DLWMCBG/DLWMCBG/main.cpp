@@ -7,14 +7,14 @@
 
 using namespace std;
 
-void generator(char* fileName = "input.txt", int MaxY = 80, int UpdateRange = 300, int WeightRange = 1000);
+void generator(char* fileName = "input.txt", int MaxY = 10, int UpdateRange = 20, int WeightRange = 1000);
 
 int main()
 {
 	int cases = 1;
 	while (true)
 	{
-		//generator(); //generator need to be fit the format
+		generator(); //generator need to be fit the format
 		ifstream in("input.txt");
 		ofstream out("output.txt");
 
@@ -69,6 +69,13 @@ int main()
 				{
 					int a = 0;
 				}*/
+
+				/*int flag = pTree->verifyInvariantsRecur();
+				if (flag != 0)
+				{
+					throw new exception();
+				}*/
+
 			}break;
 
 
@@ -87,9 +94,16 @@ int main()
 				}
 				else
 				{
-					cout <<"Y: "<<y._id << " already exists." << endl;
+					// cout <<"Y: "<<y._id << " already exists." << endl;
 					//throw new exception();
 				}
+
+				/*int flag = pTree->verifyInvariantsRecur();
+				if (flag != 0)
+				{
+					throw new exception();
+				}*/
+
 			}break;
 			case '4':
 			{

@@ -794,27 +794,35 @@ int TreeNode::verifyNodeInvariants()
 	}
 
 	// invariant \phi_6: Z of the maximum weight w.r.t. X-T
-	tmpZ.clear();
-	tmpX.clear();
+	vector<X> tmpZ2;
+	vector<X> tmpX2;
 	for (int i = 0; i < (int)_Z.size(); i++)
-		tmpX.push_back(_Z[i]);
+		tmpX2.push_back(_Z[i]);
 	for (int i = 0; i < (int)_I.size(); i++)
-		tmpX.push_back(_I[i]);
-	PlaxtonMWM(tmpX, _Y, &tmpZ);
-	if (tmpZ.size() != _Z.size())
+		tmpX2.push_back(_I[i]);
+	PlaxtonMWM(tmpX2, _Y, &tmpZ2);
+	if (tmpZ2.size() != _Z.size())
 	{
 		return 6;
 	}
 	sort(_Z.begin(), _Z.end(), cmpXID);
-	sort(tmpZ.begin(), tmpZ.end(), cmpXID);
+	sort(tmpZ2.begin(), tmpZ2.end(), cmpXID);
 	for (int i = 0; i < (int)_Z.size(); i++)
 	{
-		if (!(_Z[i] == tmpZ[i]))
+		if (!(_Z[i] == tmpZ2[i]))
 		{
 			return 6;
 		}
 	}
 
+	// invariant, for test insertY: |Y_P| = |Y_R| + |Y_L|
+	if (_leftChild != NULL)
+	{
+		if (_Y.size() != _leftChild->_Y.size() + _rightChild->_Y.size())
+		{
+			return 7;
+		}
+	}
 
 
 	return 0;
@@ -1177,11 +1185,11 @@ TreeNode* Tree::locateLeaf(X x)
 TreeNode* Tree::locateLeaf(Y y)
 {
 	// assume that y with id=0 has been inserted and there is no split needed
-	
+
 	// TBD: y.id=0 to be inserted?
 	/*if (_root->_Y[0]._id != 0)
 	{
-		throw new exception();
+	throw new exception();
 	}*/
 
 	TreeNode* node = _root;
@@ -1399,7 +1407,7 @@ Msg TreeNode::insertYintoLeaf(Y y)
 			// select the x in T which has the minimum x.e to compensate
 			sort(_T.begin(), _T.end(), cmpXEndInc);
 			_Z.push_back(_T[0]);
-			_ZR.push_back(_T[0]);			
+			_ZR.push_back(_T[0]);
 			msg._aZ = _T[0];
 			msg._bT = _T[0];
 			_T.erase(_T.begin());
@@ -1451,11 +1459,13 @@ Msg TreeNode::insertYintoLeaf(Y y)
 		if (!_T.empty())
 		{
 			sort(_T.begin(), _T.end(), cmpXEndInc);
-			_Z.push_back(_T[0]);
-			_ZR.push_back(_T[0]);
+			X x1 = _T[0];
+			_Z.push_back(x1);
+			_ZR.push_back(x1);
 			_T.erase(_T.begin());
-			msg._aZ = _T[0];
-			msg._bT = _T[0];
+			msg._aZ = x1;
+			msg._bT = x1;
+			return msg;
 		}
 	}
 
@@ -1487,7 +1497,7 @@ bool Tree::insertYinTree(Y y)
 		{
 			// msg from the left child
 			if (msg._aZ._id == -1)	// there is no change in Z,I,T in L
-			{				
+			{
 				//msg keeps
 			}
 			else if (msg._bI._id != -1)	// x is added from I_L
@@ -1500,7 +1510,7 @@ bool Tree::insertYinTree(Y y)
 				//msg keeps
 			}
 			else    // x is added from T_L
-			{				
+			{
 				vector<X>::iterator itI = find(nodeP->_I.begin(), nodeP->_I.end(), msg._aZ);
 				vector<X>::iterator itT = find(nodeP->_T.begin(), nodeP->_T.end(), msg._aZ);
 				if (itI != nodeP->_I.end() || itT != nodeP->_T.end())	// x is in I_P or T_P
@@ -1509,11 +1519,11 @@ bool Tree::insertYinTree(Y y)
 					nodeP->_Z.push_back(msg._aZ);
 					nodeP->_ZL.push_back(msg._aZ);
 					if (itI != nodeP->_I.end())
-					{						
+					{
 						nodeP->_I.erase(itI);
 					}
 					else
-					{						
+					{
 						nodeP->_T.erase(itT);
 					}
 					//msg keeps
@@ -1522,18 +1532,36 @@ bool Tree::insertYinTree(Y y)
 				{
 					// add the x.e in right part of P
 					X backX = msg._aZ;
-					msg = nodeP->insertYintoESinNode(backX._e);		// insert the y into the node		
-					msg._aY = y;
+					X emptyX;
+					emptyX._id = -1;
+					msg = nodeP->insertYintoESinNode(backX._e, emptyX, msg);		// insert the y into the node							
 					nodeP->_ZL.push_back(backX);
 					vector<X>::iterator itZR = find(nodeP->_ZR.begin(), nodeP->_ZR.end(), backX);
 					nodeP->_ZR.erase(itZR);
 				}
-			}			
+			}
 		}
 		else
 		{
 			// msg from the right child			
-			msg = nodeP->insertYintoESinNode(y);		// insert the y into the node		
+			X tmpX;
+			if (msg._bI._id != -1)
+			{
+				tmpX = msg._bI;
+			}
+			else if (msg._bT._id != -1)
+			{
+				tmpX = msg._bT;
+			}
+			else if (msg._aZ._id == -1)
+			{
+				tmpX._id = -1;
+			}
+			else
+			{
+				throw new exception();
+			}
+			msg = nodeP->insertYintoESinNode(y, tmpX, msg);		// insert the y into the node		
 		}
 		nodeP->_Y.push_back(y);	// add y in Y
 		sort(nodeP->_Y.begin(), nodeP->_Y.end(), cmpYInc);	// sort Y after each _Y augmentation
@@ -1544,10 +1572,11 @@ bool Tree::insertYinTree(Y y)
 	return true;
 }
 
-Msg TreeNode::insertYintoESinNode(Y y)
+// cX is the x vertex to be compensated
+Msg TreeNode::insertYintoESinNode(Y y, X cX, Msg msgOld)
 {
 	Msg msg;
-	msg._aY = y;
+	msg._aY = msgOld._aY;
 	Y raT = rightAlphaTightPoint(y);
 	Y laT = leftAlphaTightPoint(y);
 	if (laT._id == -1)		// if there is no alpha_pre, return the greatest y in L._Y
@@ -1557,8 +1586,36 @@ Msg TreeNode::insertYintoESinNode(Y y)
 
 	if (raT._id == -1)
 	{
-		// msg._bI = x;//_bI or _bT?
-		return msg;
+		if (cX._id == -1)
+		{
+			return msg;
+		}
+		else
+		{
+			if (msgOld._bI._id != -1)
+			{				
+				vector<X>::iterator itI = find(_I.begin(), _I.end(), cX);
+				if (itI == _I.end())
+				{
+					throw new exception();
+				}
+				_I.erase(itI);
+				_Z.push_back(cX);
+				_ZR.push_back(cX);				
+			}
+			else
+			{
+				vector<X>::iterator itT = find(_T.begin(), _T.end(), cX);
+				if (itT == _T.end())
+				{
+					throw new exception();
+				}
+				_T.erase(itT);
+				_Z.push_back(cX);
+				_ZR.push_back(cX);
+			}
+			return msgOld;
+		}
 	}
 	else
 	{
@@ -1590,6 +1647,7 @@ Msg TreeNode::insertYintoESinNode(Y y)
 			_I.erase(it);
 			_Z.push_back(minX);
 			_ZR.push_back(minX);
+			msg._aZ = minX;
 			msg._bI = minX;
 			return msg;
 		}
@@ -1598,6 +1656,10 @@ Msg TreeNode::insertYintoESinNode(Y y)
 			if (raT == _Y[_Y.size() - 1])
 			{
 				Y bT = rightBetaTightPoint(y);
+				if (bT._id == -1)	// if there is no such \beta tightpoint, set it larger than the maximum one
+				{
+					bT._id = _Y[_Y.size() - 1]._id + 1;
+				}
 				vector<X> backT;
 				for (int i = 0; i < _T.size(); i++)
 				{
@@ -1620,6 +1682,7 @@ Msg TreeNode::insertYintoESinNode(Y y)
 					_T.erase(it);
 					_Z.push_back(minX);
 					_ZR.push_back(minX);
+					msg._aZ = minX;
 					msg._bT = minX;
 				}
 				return msg;
@@ -1636,7 +1699,7 @@ Msg TreeNode::insertYintoESinNode(Y y)
 
 
 
-
+// Note: if there is no such tight point, return y with y.id=-1
 Y TreeNode::rightBetaTightPoint(Y y)
 {
 	vector<X> tempZ;
@@ -1645,6 +1708,13 @@ Y TreeNode::rightBetaTightPoint(Y y)
 	{
 		tempZ = _ZR;
 		tempY = _rightChild->_Y;
+		// it cannot be the y exists in P but not in R
+		vector<Y>::iterator itTempY = find(tempY.begin(), tempY.end(), y);
+		vector<Y>::iterator itY = find(_Y.begin(), _Y.end(), y);
+		if (itTempY != tempY.end() && itY == _Y.end())		// msg from R to P case 
+		{
+			tempY.erase(itTempY);
+		}
 	}
 	else
 	{
@@ -1658,13 +1728,15 @@ Y TreeNode::rightBetaTightPoint(Y y)
 
 	for (int i = 0; i < tempZ.size(); i++)
 	{
-		if (tempY[i] == tempZ[i]._e && tempY[i] > y)
+		if (tempY[i] == tempZ[i]._s && tempY[i] > y)
 		{
 			tY = tempY[i];
 		}
 	}
 	return tY;
 }
+
+// Note: if there is no such tight point, return the least y in P._Y
 Y TreeNode::leftBetaTightPoint(Y y)
 {
 	vector<X> tempZ;
@@ -1673,6 +1745,13 @@ Y TreeNode::leftBetaTightPoint(Y y)
 	{
 		tempZ = _ZR;
 		tempY = _rightChild->_Y;
+		// it cannot be the y exists in P but not in R
+		vector<Y>::iterator itTempY = find(tempY.begin(), tempY.end(), y);
+		vector<Y>::iterator itY = find(_Y.begin(), _Y.end(), y);
+		if (itTempY != tempY.end() && itY == _Y.end())		// msg from R to P case 
+		{
+			tempY.erase(itTempY);
+		}
 	}
 	else
 	{
@@ -1684,15 +1763,23 @@ Y TreeNode::leftBetaTightPoint(Y y)
 	Y tY;
 	tY._id = -1;
 
+	// if the ES part is full, return the first one.
+	// Note: in this case, it maybe not a real tight point.
+	if (_ZR.size() == tempY.size())
+	{
+		return tempY[0];
+	}
 	for (int i = tempZ.size() - 1; i >= 0; i--)
 	{
-		if (tempY[i] == tempZ[i]._e && tempY[i] <= y)
+		if (tempY[i] == tempZ[i]._s && tempY[i] <= y)
 		{
 			tY = tempY[i];
 		}
 	}
 	return tY;
 }
+
+// Note: if there is no such tight point, return the greatest y in P._Y
 Y TreeNode::rightAlphaTightPoint(Y y)
 {
 	vector<X> tempZ;
@@ -1701,6 +1788,13 @@ Y TreeNode::rightAlphaTightPoint(Y y)
 	{
 		tempZ = _ZR;
 		tempY = _rightChild->_Y;
+		// it cannot be the y exists in P but not in R
+		vector<Y>::iterator itTempY = find(tempY.begin(), tempY.end(), y);
+		vector<Y>::iterator itY = find(_Y.begin(), _Y.end(), y);
+		if (itTempY != tempY.end() && itY == _Y.end())		// msg from R to P case 
+		{
+			tempY.erase(itTempY);
+		}
 	}
 	else
 	{
@@ -1708,11 +1802,17 @@ Y TreeNode::rightAlphaTightPoint(Y y)
 		tempY = _Y;
 	}
 	sort(tempY.begin(), tempY.end(), cmpYInc);
-	sort(tempZ.begin(), tempZ.end(), cmpXEndInc);
+	sort(tempZ.begin(), tempZ.end(), cmpXEndInc);	
 	Y tY;
 	tY._id = -1;
-
-	for (int i = tempZ.size()-1; i >= 0; i--)
+	
+	// if the ES part is full, return the last one.
+	// Note: in this case, it maybe not a real tight point.
+	if (_ZR.size() == tempY.size())
+	{
+		return tempY[tempY.size() - 1];
+	}
+	for (int i = tempZ.size() - 1; i >= 0; i--)
 	{
 		if (tempY[i] == tempZ[i]._e && tempY[i] >= y)
 		{
@@ -1722,7 +1822,7 @@ Y TreeNode::rightAlphaTightPoint(Y y)
 	return tY;
 }
 
-// return the tightest point that is less than y; return y with y.id=-1 if there is no such one.
+// return the \alpha tightest point that is less than y; return y with y.id=-1 if there is no such one.
 Y TreeNode::leftAlphaTightPoint(Y y)
 {
 	vector<X> tempZ;
@@ -1731,6 +1831,13 @@ Y TreeNode::leftAlphaTightPoint(Y y)
 	{
 		tempZ = _ZR;
 		tempY = _rightChild->_Y;
+		// it cannot be the y exists in P but not in R
+		vector<Y>::iterator itTempY = find(tempY.begin(), tempY.end(), y);
+		vector<Y>::iterator itY = find(_Y.begin(), _Y.end(), y);
+		if (itTempY != tempY.end() && itY == _Y.end())		// msg from R to P case 
+		{
+			tempY.erase(itTempY);
+		}
 	}
 	else
 	{
@@ -1741,7 +1848,7 @@ Y TreeNode::leftAlphaTightPoint(Y y)
 	sort(tempZ.begin(), tempZ.end(), cmpXEndInc);
 	Y tY;
 	tY._id = -1;
-	
+
 	for (int i = 0; i < tempZ.size(); i++)
 	{
 		if (tempY[i] == tempZ[i]._e && tempY[i] < y)
@@ -1753,8 +1860,8 @@ Y TreeNode::leftAlphaTightPoint(Y y)
 	/*TreeNode* node = this;
 	if (node == NULL)
 	{
-		//vector<int> t; t.erase(t.begin());
-		throw new exception();
+	//vector<int> t; t.erase(t.begin());
+	throw new exception();
 	}
 	vector<Y> YY = node->_Y;
 	vector<X> ZZ = node->_Z;
@@ -1763,10 +1870,10 @@ Y TreeNode::leftAlphaTightPoint(Y y)
 	sort(ZZ.begin(), ZZ.end(), cmpXEndInc);
 	for (int i = (int)ZZ.size() - 1; i >= 0; i--)
 	{
-		if (ZZ[i]._e == YY[i] && YY[i] < y)
-		{
-			return YY[i];
-		}
+	if (ZZ[i]._e == YY[i] && YY[i] < y)
+	{
+	return YY[i];
+	}
 	}
 
 	Y tmpY;

@@ -31,7 +31,7 @@ public:
 	Msg insertYintoESinNodeW(Y y);
 
 	Msg insertYintoLeaf(Y y);
-	Msg insertYintoESinNode(Y y);
+	Msg insertYintoESinNode(Y y, X, Msg);
 	
 	//calculate Replaceable Set and Compensable Set tbd
 	//X findjInES(vector<Y>*, Y);		// return x where x.e is the least tight piont greater than y in ES 
