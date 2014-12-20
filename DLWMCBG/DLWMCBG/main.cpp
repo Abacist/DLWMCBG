@@ -7,7 +7,7 @@
 
 using namespace std;
 
-void generator(char* fileName = "input.txt", int MaxY = 10, int UpdateRange = 20, int WeightRange = 1000);
+void generator(char* fileName = "input.txt", int MaxY = 20, int UpdateRange = 30, int WeightRange = 1000);
 
 int main()
 {
@@ -148,6 +148,7 @@ int main()
 		//verify
 //		int flag = pTree->verifyTreeInvariantsSimple();
 		int flag = pTree->verifyInvariantsRecur();
+//		int flag = pTree->_root->_leftChild->verifyNodeInvariants();
 		//unweighted case
 //		flag += pTree->verifyInvariantsInUnweightedCase();
 		if (flag == 0)

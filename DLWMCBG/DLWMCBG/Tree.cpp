@@ -1655,7 +1655,15 @@ Msg TreeNode::insertYintoESinNode(Y y, X cX, Msg msgOld)
 		{
 			if (raT == _Y[_Y.size() - 1])
 			{
-				Y bT = rightBetaTightPoint(y);
+				Y bT;
+				if (msg._aY < _rightChild->getIntervalStart())
+				{
+					bT = rightBetaTightPoint(_rightChild->getIntervalStart());
+				}
+				else
+				{
+					bT = rightBetaTightPoint(y);
+				}
 				if (bT._id == -1)	// if there is no such \beta tightpoint, set it larger than the maximum one
 				{
 					bT._id = _Y[_Y.size() - 1]._id + 1;
