@@ -14,7 +14,7 @@ int main()
 	int cases = 1;
 	while (true)
 	{
-		generator(); //generator need to be fit the format
+		//generator(); //generator need to be fit the format
 		ifstream in("input.txt");
 		ofstream out("output.txt");
 
@@ -87,7 +87,7 @@ int main()
 				}
 				else
 				{
-					cout <<"Y: "<<y._id << "already exists." << endl;
+					cout <<"Y: "<<y._id << " already exists." << endl;
 					//throw new exception();
 				}
 			}break;

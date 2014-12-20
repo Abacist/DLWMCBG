@@ -18,6 +18,7 @@ TreeNode::TreeNode(vector<Y> vecY)
 	{
 		_Y.push_back(vecY[i]);
 	}
+	sort(_Y.begin(), _Y.end(), cmpYInc);	// sort Y after each _Y augmentation
 	_leftChild = NULL;
 	_rightChild = NULL;
 	_parentNode = NULL;
@@ -34,13 +35,13 @@ void Tree::adjustXToProper(X x)
 	vector<Y>::iterator it = find(_root->_Y.begin(), _root->_Y.end(), x._s);
 	if (it == _root->_Y.end())
 	{
-		insertYinTreeW(x._s);
+		insertYinTree(x._s);
 	}
 
 	it = find(_root->_Y.begin(), _root->_Y.end(), x._e);
 	if (it == _root->_Y.end())
 	{
-		insertYinTreeW(x._e);
+		insertYinTree(x._e);
 	}
 }
 
@@ -1099,6 +1100,7 @@ bool Tree::insertYinTreeW(Y y)
 	//below is the whole implemention of the MSG passing rule
 	Msg msg = nodeP->insertYintoLeafW(y);		// insert the y into the leaf
 	nodeP->_Y.push_back(y);
+	sort(nodeP->_Y.begin(), nodeP->_Y.end(), cmpYInc);	// sort Y after each _Y augmentation
 
 	TreeNode* child = nodeP;
 	nodeP = nodeP->_parentNode;
@@ -1115,6 +1117,7 @@ bool Tree::insertYinTreeW(Y y)
 			// msg from the right child			
 			nodeP->insertYintoESinNodeW(y);		// insert the y into the node
 			nodeP->_Y.push_back(y);
+			sort(nodeP->_Y.begin(), nodeP->_Y.end(), cmpYInc);	// sort Y after each _Y augmentation
 		}
 		child = nodeP;
 		nodeP = nodeP->_parentNode;
@@ -1174,11 +1177,12 @@ TreeNode* Tree::locateLeaf(X x)
 TreeNode* Tree::locateLeaf(Y y)
 {
 	// assume that y with id=0 has been inserted and there is no split needed
-	//sort(_root->_Y.begin(), _root->_Y.end(), cmpYInc);
-	if (_root->_Y[0]._id != 0)
+	
+	// TBD: y.id=0 to be inserted?
+	/*if (_root->_Y[0]._id != 0)
 	{
 		throw new exception();
-	}
+	}*/
 
 	TreeNode* node = _root;
 	// find the node in which y in Y	
@@ -1395,10 +1399,10 @@ Msg TreeNode::insertYintoLeaf(Y y)
 			// select the x in T which has the minimum x.e to compensate
 			sort(_T.begin(), _T.end(), cmpXEndInc);
 			_Z.push_back(_T[0]);
-			_ZR.push_back(_T[0]);
-			_T.erase(_T.begin());
+			_ZR.push_back(_T[0]);			
 			msg._aZ = _T[0];
 			msg._bT = _T[0];
+			_T.erase(_T.begin());
 
 			// move the possible infeasible x in T to I
 			for (int i = 1; i < (int)_T.size(); i++)
@@ -1425,7 +1429,7 @@ Msg TreeNode::insertYintoLeaf(Y y)
 	}
 	else
 	{
-		Y lATP = leftAlphaTightPoint(y);
+		Y lATP = leftAlphaTightPoint(y);	// if there is no such one, return the y with y.id=-1
 		//decide the X to be matched;	
 		sort(_I.begin(), _I.end(), cmpXEndInc);
 		for (int j = 0; j < _I.size(); j++)
@@ -1472,6 +1476,7 @@ bool Tree::insertYinTree(Y y)
 	//below is the whole implemention of the MSG passing rule
 	Msg msg = nodeP->insertYintoLeaf(y);		// insert the y into the leaf
 	nodeP->_Y.push_back(y);
+	sort(nodeP->_Y.begin(), nodeP->_Y.end(), cmpYInc);	// sort Y after each _Y augmentation
 
 	TreeNode* child = nodeP;
 	nodeP = nodeP->_parentNode;
@@ -1490,6 +1495,8 @@ bool Tree::insertYinTree(Y y)
 				// add the same x as in L
 				nodeP->_Z.push_back(msg._aZ);
 				nodeP->_ZL.push_back(msg._aZ);
+				vector<X>::iterator it = find(nodeP->_I.begin(), nodeP->_I.end(), msg._aZ);
+				nodeP->_I.erase(it);
 				//msg keeps
 			}
 			else    // x is added from T_L
@@ -1501,36 +1508,56 @@ bool Tree::insertYinTree(Y y)
 					// add the same x as in L
 					nodeP->_Z.push_back(msg._aZ);
 					nodeP->_ZL.push_back(msg._aZ);
+					if (itI != nodeP->_I.end())
+					{						
+						nodeP->_I.erase(itI);
+					}
+					else
+					{						
+						nodeP->_T.erase(itT);
+					}
 					//msg keeps
 				}
 				else     // x is in Z_P
 				{
 					// add the x.e in right part of P
-					msg = nodeP->insertYintoESinNode(msg._aZ._e, *new X);		// insert the y into the node					
+					X backX = msg._aZ;
+					msg = nodeP->insertYintoESinNode(backX._e);		// insert the y into the node		
+					msg._aY = y;
+					nodeP->_ZL.push_back(backX);
+					vector<X>::iterator itZR = find(nodeP->_ZR.begin(), nodeP->_ZR.end(), backX);
+					nodeP->_ZR.erase(itZR);
 				}
-			}
-			nodeP->_Y.push_back(y);	// add y in Y
+			}			
 		}
 		else
 		{
 			// msg from the right child			
-			msg = nodeP->insertYintoESinNode(y, *new X);		// insert the y into the node
-			nodeP->_Y.push_back(y);	// add y in Y
+			msg = nodeP->insertYintoESinNode(y);		// insert the y into the node		
 		}
+		nodeP->_Y.push_back(y);	// add y in Y
+		sort(nodeP->_Y.begin(), nodeP->_Y.end(), cmpYInc);	// sort Y after each _Y augmentation
+
 		child = nodeP;
 		nodeP = nodeP->_parentNode;
 	}
 	return true;
 }
 
-Msg TreeNode::insertYintoESinNode(Y y, X x)
+Msg TreeNode::insertYintoESinNode(Y y)
 {
 	Msg msg;
+	msg._aY = y;
 	Y raT = rightAlphaTightPoint(y);
 	Y laT = leftAlphaTightPoint(y);
+	if (laT._id == -1)		// if there is no alpha_pre, return the greatest y in L._Y
+	{
+		laT = _leftChild->_Y[_leftChild->_Y.size() - 1];
+	}
+
 	if (raT._id == -1)
 	{
-		msg._bI = x;//_bI or _bT?
+		// msg._bI = x;//_bI or _bT?
 		return msg;
 	}
 	else
@@ -1565,7 +1592,6 @@ Msg TreeNode::insertYintoESinNode(Y y, X x)
 			_ZR.push_back(minX);
 			msg._bI = minX;
 			return msg;
-
 		}
 		else
 		{
@@ -1580,25 +1606,28 @@ Msg TreeNode::insertYintoESinNode(Y y, X x)
 						backT.push_back(_T[i]);
 					}
 				}
-				X minX = backT[0];
-				for (int i = 0; i < backT.size(); i++)
+				if (!backT.empty())
 				{
-					if (cmpXEndInc(backT[i], minX))
+					X minX = backT[0];
+					for (int i = 0; i < backT.size(); i++)
 					{
-						minX = backT[i];
+						if (cmpXEndInc(backT[i], minX))
+						{
+							minX = backT[i];
+						}
 					}
+					vector<X>::iterator it = find(_T.begin(), _T.end(), minX);
+					_T.erase(it);
+					_Z.push_back(minX);
+					_ZR.push_back(minX);
+					msg._bT = minX;
 				}
-				vector<X>::iterator it = find(_T.begin(), _T.end(), minX);
-				_T.erase(it);
-				_Z.push_back(minX);
-				_ZR.push_back(minX);
-				msg._bT = minX;
 				return msg;
 			}
 			else
 			{
-				X x;
-				x._id = -1;
+				//X x;
+				//x._id = -1;		//???
 				return msg;
 			}
 		}
