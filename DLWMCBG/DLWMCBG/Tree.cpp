@@ -1578,6 +1578,23 @@ Msg TreeNode::insertYintoESinNode(Y y, X cX, Msg msgOld)
 	Msg msg;
 	msg._aY = msgOld._aY;
 	Y raT = rightAlphaTightPoint(y);
+	
+	if (msgOld._aY >= _rightChild->getIntervalStart())
+	{
+		vector<X> TM;
+		for (int i = 0; i < _ZR.size(); i++)
+		{
+			if (_ZR[i]._s < _rightChild->getIntervalStart() && _ZR[i]._e > y)
+			{
+				TM.push_back(_ZR[i]);
+			}
+		}
+		if (TM.empty() == false)
+		{
+			sort(TM.begin(), TM.end(), cmpXEndInc);
+			raT = rightAlphaTightPoint(TM[TM.size() - 1]._e);
+		}
+	}
 	Y laT = leftAlphaTightPoint(y);
 	if (laT._id == -1)		// if there is no alpha_pre, return the greatest y in L._Y
 	{
@@ -1795,13 +1812,20 @@ Y TreeNode::rightAlphaTightPoint(Y y)
 	if (this->_rightChild != NULL)
 	{
 		tempZ = _ZR;
-		tempY = _rightChild->_Y;
-		// it cannot be the y exists in P but not in R
-		vector<Y>::iterator itTempY = find(tempY.begin(), tempY.end(), y);
-		vector<Y>::iterator itY = find(_Y.begin(), _Y.end(), y);
-		if (itTempY != tempY.end() && itY == _Y.end())		// msg from R to P case 
+		//tempY = _rightChild->_Y;
+		//// it cannot be the y exists in P but not in R
+		//vector<Y>::iterator itTempY = find(tempY.begin(), tempY.end(), y);
+		//vector<Y>::iterator itY = find(_Y.begin(), _Y.end(), y);
+		//if (itTempY != tempY.end() && itY == _Y.end())		// msg from R to P case 
+		//{
+		//	tempY.erase(itTempY);
+		//}
+		for (int i = 0; i < _Y.size(); i++)
 		{
-			tempY.erase(itTempY);
+			if (_Y[i] >= _rightChild->getIntervalStart())
+			{
+				tempY.push_back(_Y[i]);
+			}
 		}
 	}
 	else

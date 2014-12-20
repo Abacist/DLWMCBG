@@ -7,14 +7,14 @@
 
 using namespace std;
 
-void generator(char* fileName = "input.txt", int MaxY = 20, int UpdateRange = 30, int WeightRange = 1000);
+void generator(char* fileName = "input.txt", int MaxY = 10, int UpdateRange = 18, int WeightRange = 1000);
 
 int main()
 {
 	int cases = 1;
 	while (true)
 	{
-		generator(); //generator need to be fit the format
+		//generator(); //generator need to be fit the format
 		ifstream in("input.txt");
 		ofstream out("output.txt");
 
@@ -62,7 +62,8 @@ int main()
 				X x;
 				in >> x._id >> x._s._id >> x._e._id >> x._w;	// divide by Space
 				pTree->adjustXToProper(x);
-				// if x.s or x.e is not in _Y, insert it.	// TBD			
+				// if x.s or x.e is not in _Y, insert it.	// TBD	
+				
 				
 				pTree->insertXinTree(x);
 				/*if (pTree->verifyTreeInvariants() != 0)
@@ -87,6 +88,10 @@ int main()
 			{
 				Y y;
 				in >> y._id;	
+				if (y._id == 6)
+				{
+					int a = 1;
+				}
 				vector<Y>::iterator it = find(pTree->_root->_Y.begin(), pTree->_root->_Y.end(), y);
 				if (it == pTree->_root->_Y.end())
 				{
