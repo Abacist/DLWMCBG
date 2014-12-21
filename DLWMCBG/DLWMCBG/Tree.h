@@ -32,6 +32,8 @@ public:
 
 	Msg insertYintoLeaf(Y y);
 	Msg insertYintoESinNode(Y y, X, Msg);
+	Msg insertYintoESinNodefromL(X, Msg);
+	Msg insertYintoESinNodefromR(Msg);
 	
 	//calculate Replaceable Set and Compensable Set tbd
 	//X findjInES(vector<Y>*, Y);		// return x where x.e is the least tight piont greater than y in ES 
@@ -49,7 +51,7 @@ public:
 	Y leftBetaTightPoint(Y y);
 	Y rightBetaTightPoint(Y y);
 
-
+	Y rightGreatestAlphaTightPoint(Y y);	// return the greatest \alpha tight point
 
 
 	// verification

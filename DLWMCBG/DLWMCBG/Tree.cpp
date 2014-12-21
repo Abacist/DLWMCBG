@@ -746,7 +746,7 @@ int TreeNode::verifyNodeInvariants()
 		}
 	}
 
-	// invariant \phi_4: \nexists x\in I, Z+x-x'\in \I
+	// invariant \phi_4: \nexists x\in I, Z+x-x'\in \I, where x'.e>Y.e
 	sort(_Z.begin(), _Z.end(), cmpXEndInc);
 	if (!_I.empty() && _Z.size() > 0 && _Z[_Z.size() - 1]._e > _Y[_Y.size() - 1])
 	{
@@ -1327,7 +1327,7 @@ int Tree::verifyInvariantsRecur(TreeNode* curRoot)
 		}
 		else
 		{
-			return flagL;
+			return max(flagL,flagR);
 		}
 	}
 }
@@ -1534,7 +1534,8 @@ bool Tree::insertYinTree(Y y)
 					X backX = msg._aZ;
 					X emptyX;
 					emptyX._id = -1;
-					msg = nodeP->insertYintoESinNode(backX._e, emptyX, msg);		// insert the y into the node							
+					//msg = nodeP->insertYintoESinNode(backX._e, emptyX, msg);		// insert the y into the node							
+					msg = nodeP->insertYintoESinNodefromL(backX, msg);		// insert the y into the node							
 					nodeP->_ZL.push_back(backX);
 					vector<X>::iterator itZR = find(nodeP->_ZR.begin(), nodeP->_ZR.end(), backX);
 					nodeP->_ZR.erase(itZR);
@@ -1561,7 +1562,8 @@ bool Tree::insertYinTree(Y y)
 			{
 				throw new exception();
 			}
-			msg = nodeP->insertYintoESinNode(y, tmpX, msg);		// insert the y into the node		
+			//msg = nodeP->insertYintoESinNode(y, tmpX, msg);		// insert the y into the node		
+			msg = nodeP->insertYintoESinNodefromR(msg);		// insert the y into the node		
 		}
 		nodeP->_Y.push_back(y);	// add y in Y
 		sort(nodeP->_Y.begin(), nodeP->_Y.end(), cmpYInc);	// sort Y after each _Y augmentation
@@ -1578,7 +1580,7 @@ Msg TreeNode::insertYintoESinNode(Y y, X cX, Msg msgOld)
 	Msg msg;
 	msg._aY = msgOld._aY;
 	Y raT = rightAlphaTightPoint(y);
-	
+	// if there are some x in T_L and Z_R which has x.e>y, find the greatest such x' and use x'.e as the inserted y
 	if (msgOld._aY >= _rightChild->getIntervalStart())
 	{
 		vector<X> TM;
@@ -1595,6 +1597,7 @@ Msg TreeNode::insertYintoESinNode(Y y, X cX, Msg msgOld)
 			raT = rightAlphaTightPoint(TM[TM.size() - 1]._e);
 		}
 	}
+
 	Y laT = leftAlphaTightPoint(y);
 	if (laT._id == -1)		// if there is no alpha_pre, return the greatest y in L._Y
 	{
@@ -1610,7 +1613,7 @@ Msg TreeNode::insertYintoESinNode(Y y, X cX, Msg msgOld)
 		else
 		{
 			if (msgOld._bI._id != -1)
-			{				
+			{
 				vector<X>::iterator itI = find(_I.begin(), _I.end(), cX);
 				if (itI == _I.end())
 				{
@@ -1618,7 +1621,7 @@ Msg TreeNode::insertYintoESinNode(Y y, X cX, Msg msgOld)
 				}
 				_I.erase(itI);
 				_Z.push_back(cX);
-				_ZR.push_back(cX);				
+				_ZR.push_back(cX);
 			}
 			else
 			{
@@ -1675,6 +1678,7 @@ Msg TreeNode::insertYintoESinNode(Y y, X cX, Msg msgOld)
 				Y bT;
 				if (msg._aY < _rightChild->getIntervalStart())
 				{
+					// if it is the case from L to P, the \beta-post maybe less than x.e since x may match with a y<x.e
 					bT = rightBetaTightPoint(_rightChild->getIntervalStart());
 				}
 				else
@@ -1732,13 +1736,12 @@ Y TreeNode::rightBetaTightPoint(Y y)
 	if (this->_rightChild != NULL)
 	{
 		tempZ = _ZR;
-		tempY = _rightChild->_Y;
-		// it cannot be the y exists in P but not in R
-		vector<Y>::iterator itTempY = find(tempY.begin(), tempY.end(), y);
-		vector<Y>::iterator itY = find(_Y.begin(), _Y.end(), y);
-		if (itTempY != tempY.end() && itY == _Y.end())		// msg from R to P case 
+		for (int i = 0; i < _Y.size(); i++)
 		{
-			tempY.erase(itTempY);
+			if (_Y[i] >= _rightChild->getIntervalStart())
+			{
+				tempY.push_back(_Y[i]);
+			}
 		}
 	}
 	else
@@ -1769,13 +1772,12 @@ Y TreeNode::leftBetaTightPoint(Y y)
 	if (this->_rightChild != NULL)
 	{
 		tempZ = _ZR;
-		tempY = _rightChild->_Y;
-		// it cannot be the y exists in P but not in R
-		vector<Y>::iterator itTempY = find(tempY.begin(), tempY.end(), y);
-		vector<Y>::iterator itY = find(_Y.begin(), _Y.end(), y);
-		if (itTempY != tempY.end() && itY == _Y.end())		// msg from R to P case 
+		for (int i = 0; i < _Y.size(); i++)
 		{
-			tempY.erase(itTempY);
+			if (_Y[i] >= _rightChild->getIntervalStart())
+			{
+				tempY.push_back(_Y[i]);
+			}
 		}
 	}
 	else
@@ -1812,14 +1814,6 @@ Y TreeNode::rightAlphaTightPoint(Y y)
 	if (this->_rightChild != NULL)
 	{
 		tempZ = _ZR;
-		//tempY = _rightChild->_Y;
-		//// it cannot be the y exists in P but not in R
-		//vector<Y>::iterator itTempY = find(tempY.begin(), tempY.end(), y);
-		//vector<Y>::iterator itY = find(_Y.begin(), _Y.end(), y);
-		//if (itTempY != tempY.end() && itY == _Y.end())		// msg from R to P case 
-		//{
-		//	tempY.erase(itTempY);
-		//}
 		for (int i = 0; i < _Y.size(); i++)
 		{
 			if (_Y[i] >= _rightChild->getIntervalStart())
@@ -1834,10 +1828,10 @@ Y TreeNode::rightAlphaTightPoint(Y y)
 		tempY = _Y;
 	}
 	sort(tempY.begin(), tempY.end(), cmpYInc);
-	sort(tempZ.begin(), tempZ.end(), cmpXEndInc);	
+	sort(tempZ.begin(), tempZ.end(), cmpXEndInc);
 	Y tY;
 	tY._id = -1;
-	
+
 	// if the ES part is full, return the last one.
 	// Note: in this case, it maybe not a real tight point.
 	if (_ZR.size() == tempY.size())
@@ -1862,13 +1856,12 @@ Y TreeNode::leftAlphaTightPoint(Y y)
 	if (this->_rightChild != NULL)
 	{
 		tempZ = _ZR;
-		tempY = _rightChild->_Y;
-		// it cannot be the y exists in P but not in R
-		vector<Y>::iterator itTempY = find(tempY.begin(), tempY.end(), y);
-		vector<Y>::iterator itY = find(_Y.begin(), _Y.end(), y);
-		if (itTempY != tempY.end() && itY == _Y.end())		// msg from R to P case 
+		for (int i = 0; i < _Y.size(); i++)
 		{
-			tempY.erase(itTempY);
+			if (_Y[i] >= _rightChild->getIntervalStart())
+			{
+				tempY.push_back(_Y[i]);
+			}
 		}
 	}
 	else
@@ -1911,4 +1904,330 @@ Y TreeNode::leftAlphaTightPoint(Y y)
 	Y tmpY;
 	tmpY._id = -1;
 	return tmpY;*/
+}
+
+
+// Note: if there is no such tight point, return the greatest y in P._Y
+Y TreeNode::rightGreatestAlphaTightPoint(Y y)
+{
+	vector<X> tempZ;
+	vector<Y> tempY;
+	if (this->_rightChild != NULL)
+	{
+		tempZ = _ZR;
+		for (int i = 0; i < _Y.size(); i++)
+		{
+			if (_Y[i] >= _rightChild->getIntervalStart())
+			{
+				tempY.push_back(_Y[i]);
+			}
+		}
+	}
+	else
+	{
+		tempZ = _Z;//equals to _ZR
+		tempY = _Y;
+	}
+	sort(tempY.begin(), tempY.end(), cmpYInc);
+	sort(tempZ.begin(), tempZ.end(), cmpXEndInc);
+	Y tY;
+	tY._id = -1;
+
+	// if the ES part is full, return the last one.
+	// Note: in this case, it maybe not a real tight point.
+	if (_ZR.size() == tempY.size())
+	{
+		return tempY[tempY.size() - 1];
+	}
+	for (int i = tempZ.size() - 1; i >= 0; i--)
+	{
+		if (tempY[i] == tempZ[i]._e && tempY[i] >= y)
+		{
+			tY = tempY[i];
+			break;
+		}
+	}
+	return tY;
+}
+
+// backX is the x vertex in T_L that compensate the y added in L
+Msg TreeNode::insertYintoESinNodefromL(X backX, Msg msgOld)
+{
+	Msg msg;
+	msg._aY = msgOld._aY;
+	Y raT = rightGreatestAlphaTightPoint(backX._e);
+	Y laT = leftAlphaTightPoint(backX._e);
+	// if there is no alpha_pre, return the greatest y in L._Y
+	if (laT._id == -1)
+	{
+		laT = _leftChild->_Y[_leftChild->_Y.size() - 1];
+	}
+
+	// there is no compensable set in the right part of P if raT._id == -1
+	if (raT._id != -1)
+	{
+		vector<X> IPmIR = _I;
+		for (int i = 0; i < _rightChild->_I.size(); i++)
+		{
+			vector<X>::iterator it = find(IPmIR.begin(), IPmIR.end(), _rightChild->_I[i]);
+			IPmIR.erase(it);
+		}
+		vector<X> between;
+		for (int i = 0; i < IPmIR.size(); i++)
+		{
+			if (IPmIR[i]._e > laT && IPmIR[i]._s <= raT)
+			{
+				between.push_back(IPmIR[i]);
+			}
+		}
+
+		if (!between.empty())
+		{
+			X minX = between[0];
+			for (int i = 0; i < between.size(); i++)
+			{
+				if (cmpXEndInc(between[i], minX))
+				{
+					minX = between[i];
+				}
+			}
+			vector<X>::iterator it = find(_I.begin(), _I.end(), minX);
+			_I.erase(it);
+			_Z.push_back(minX);
+			_ZR.push_back(minX);
+			msg._aZ = minX;
+			msg._bI = minX;
+		}
+		else
+		{
+			if (raT == _Y[_Y.size() - 1])
+			{
+				// the \beta-post maybe less than x.e since x may match with a y<x.e
+				Y bT = rightBetaTightPoint(_rightChild->getIntervalStart());
+				if (bT._id == -1)
+				{
+					// if there is no such \beta tightpoint, set it larger than the maximum one
+					bT._id = _Y[_Y.size() - 1]._id + 1;
+				}
+				vector<X> backT;
+				for (int i = 0; i < _T.size(); i++)
+				{
+					if (_T[i]._s < bT)
+					{
+						backT.push_back(_T[i]);
+					}
+				}
+				if (!backT.empty())
+				{
+					X minX = backT[0];
+					for (int i = 0; i < backT.size(); i++)
+					{
+						if (cmpXEndInc(backT[i], minX))
+						{
+							minX = backT[i];
+						}
+					}
+					vector<X>::iterator it = find(_T.begin(), _T.end(), minX);
+					_T.erase(it);
+					_Z.push_back(minX);
+					_ZR.push_back(minX);
+					msg._aZ = minX;
+					msg._bT = minX;
+				}
+			}
+			else
+			{
+				// case of the right part of P is not full
+				// assertion: there should be no x in T or L which can added into Z				
+			}
+		}
+	}
+	else
+	{
+		// case of raT._id == -1
+		// assertion: there should be no x in T or L which can added into Z				
+	}
+
+	return msg;
+}
+
+// cX is the x vertex to be compensated
+Msg TreeNode::insertYintoESinNodefromR(Msg msgOld)
+{
+	Y y = msgOld._aY;
+	// if there are some x in T_L and Z_R which has x.e>y, find the greatest such x' and use x'.e as the inserted y
+	vector<X> TM;
+	for (int i = 0; i < _ZR.size(); i++)
+	{
+		if (_ZR[i]._s < _rightChild->getIntervalStart() && _ZR[i]._e > y)
+		{
+			TM.push_back(_ZR[i]);
+		}
+	}
+	if (!TM.empty())
+	{
+		sort(TM.begin(), TM.end(), cmpXEndInc);
+		// raT = rightAlphaTightPoint(TM[TM.size() - 1]._e);		
+		//return insertYintoESinNodefromL(TM[TM.size() - 1], msgOld);
+		y = TM[TM.size() - 1]._e;
+	}
+
+	Msg msg;
+	msg._aY = msgOld._aY;
+	Y raT = rightGreatestAlphaTightPoint(y);
+	Y laT = leftAlphaTightPoint(msgOld._aY);
+	// if there is no alpha_pre, return the greatest y in L._Y
+	if (laT._id == -1)
+	{
+		laT = _leftChild->_Y[_leftChild->_Y.size() - 1];
+	}
+
+	if (raT._id == -1)
+	{
+		if (msgOld._bI._id != -1)
+		{
+			X cX = msgOld._bI;
+			vector<X>::iterator itI = find(_I.begin(), _I.end(), cX);
+			if (itI == _I.end())
+			{
+				throw new exception();
+			}
+			_I.erase(itI);
+			_Z.push_back(cX);
+			_ZR.push_back(cX);
+		}
+		else if (msgOld._bT._id != -1)
+		{
+			X cX = msgOld._bT;
+			vector<X>::iterator itT = find(_T.begin(), _T.end(), cX);
+			if (itT == _T.end())
+			{
+				throw new exception();
+			}
+			_T.erase(itT);
+			_Z.push_back(cX);
+			_ZR.push_back(cX);
+		}
+		else
+		{
+			// case of no change in R
+			// assertion: msgOld._aT._id == -1
+			if (msgOld._aT._id != -1)
+				throw new exception();
+		}
+		msg = msgOld;
+	}
+	else
+	{
+		vector<X> IPmIR = _I;
+		for (int i = 0; i < _rightChild->_I.size(); i++)
+		{
+			vector<X>::iterator it = find(IPmIR.begin(), IPmIR.end(), _rightChild->_I[i]);
+			IPmIR.erase(it);
+		}
+		vector<X> between;
+		for (int i = 0; i < IPmIR.size(); i++)
+		{
+			if (IPmIR[i]._e > laT && IPmIR[i]._s <= raT)
+			{
+				between.push_back(IPmIR[i]);
+			}
+		}
+		if (!between.empty())
+		{
+			X minX = between[0];
+			for (int i = 0; i < between.size(); i++)
+			{
+				if (cmpXEndInc(between[i], minX))
+				{
+					minX = between[i];
+				}
+			}
+			vector<X>::iterator it = find(_I.begin(), _I.end(), minX);
+			_I.erase(it);
+			_Z.push_back(minX);
+			_ZR.push_back(minX);
+			msg._aZ = minX;
+			msg._bI = minX;
+		}
+		else
+		{
+			// if the right part of P is full, calculate \beta tight point to compute; if not, consult the result from R
+			if (raT == _Y[_Y.size() - 1])
+			{
+				Y bT = rightBetaTightPoint(msgOld._aY);		// ???
+				// if there is no such \beta tightpoint, set it larger than the maximum one
+				if (bT._id == -1)	
+				{
+					bT._id = _Y[_Y.size() - 1]._id + 1;
+				}
+				vector<X> backT;
+				for (int i = 0; i < _T.size(); i++)
+				{
+					if (_T[i]._s < bT)
+					{
+						backT.push_back(_T[i]);
+					}
+				}
+
+				if (!backT.empty())
+				{
+					X minX = backT[0];
+					for (int i = 0; i < backT.size(); i++)
+					{
+						if (cmpXEndInc(backT[i], minX))
+						{
+							minX = backT[i];
+						}
+					}
+					vector<X>::iterator it = find(_T.begin(), _T.end(), minX);
+					_T.erase(it);
+					_Z.push_back(minX);
+					_ZR.push_back(minX);
+					msg._aZ = minX;
+					msg._bT = minX;
+				}
+			}
+			else
+			{
+				// case of I_P-I_L is empty and the right part of P is not full, should consult the result from R,
+				// since it does not introduce new tight point w.r.t. y and the compsensable x of R is valid in P
+				if (msgOld._bI._id != -1)
+				{
+					X cX = msgOld._bI;
+					vector<X>::iterator itI = find(_I.begin(), _I.end(), cX);
+					if (itI == _I.end())
+					{
+						throw new exception();
+					}
+					_I.erase(itI);
+					_Z.push_back(cX);
+					_ZR.push_back(cX);
+				}
+				else if (msgOld._bT._id != -1)
+				{
+					// it should be impossible here, since backT should not be empty.
+					throw new exception();
+					/*X cX = msg._bT;
+					vector<X>::iterator itT = find(_T.begin(), _T.end(), cX);
+					if (itT == _T.end())
+					{
+						throw new exception();
+					}
+					_T.erase(itT);
+					_Z.push_back(cX);
+					_ZR.push_back(cX);*/
+				}
+				else
+				{
+					// case of no change in R
+					// assertion: msgOld._aT._id == -1
+					if (msgOld._aT._id != -1)
+						throw new exception();
+				}
+			}
+		}
+	}
+
+	return msg;
 }
