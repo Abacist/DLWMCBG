@@ -388,7 +388,7 @@ Msg TreeNode::insertYintoLeafW(Y y)
 	msg._aY = y;
 	//TreeNode * node = (this->_rightChild != NULL) ? this->_rightChild : this;
 
-	Y lAlphaTP = leftAlphaTightPoint(y);
+	Y lAlphaTP = leftGreatestAlphaTightPoint(y);
 
 	vector<X> backX;
 	if (y > _Y[(int)_Y.size() - 1])
@@ -465,7 +465,7 @@ Msg TreeNode::insertYintoESinNodeW(Y y)
 	Msg msg;
 	msg._aY = y;
 
-	Y lAlphaTP = leftAlphaTightPoint(y);//call right child
+	Y lAlphaTP = leftGreatestAlphaTightPoint(y);//call right child
 
 	vector<X> backX;
 	if (y > _Y[(int)_Y.size() - 1])
@@ -1246,63 +1246,6 @@ int Tree::verifyTreeInvariants()
 		}
 	} while (stk.empty() != true);
 
-	//// dfs	- inorder	
-	//cout << endl << endl << "inorder" << endl;
-	//node = this->_root;	// assertion: root is not NULL
-	//do
-	//{
-	//	do
-	//	{
-	//		stk.push(node);
-	//		node = node->_leftChild;
-	//	} while (node != NULL);
-
-	//	do
-	//	{
-	//		node = stk.top();
-	//		stk.pop();
-	//		node->testPrintY();
-	//	} while (!stk.empty() && node->_rightChild == NULL);
-
-	//	node = node->_rightChild;
-	//} while (stk.empty() != true || node != NULL);
-
-	//// dfs	- postorder	
-	//cout << endl << endl << "post order" << endl;
-	//node = this->_root;	// assertion: root is not NULL
-
-	//stk.push(node);
-	//do
-	//{
-	//	while (node->_leftChild != NULL)
-	//	{
-	//		node = node->_leftChild;
-	//		stk.push(node);
-	//	}
-
-	//	if (node->_rightChild != NULL)
-	//	{
-	//		node = node->_rightChild;
-	//		stk.push(node);
-	//		continue;
-	//	}
-	//	else
-	//	{
-	//		do
-	//		{
-	//			node = stk.top();
-	//			stk.pop();
-	//			node->testPrintY();
-	//		} while (!stk.empty() && (node == stk.top()->_rightChild || (node == stk.top()->_leftChild && stk.top()->_rightChild == NULL)));
-	//		if (!stk.empty())
-	//		{
-	//			node = stk.top()->_rightChild;
-	//			stk.push(node);
-	//		}
-	//	}
-	//} while (!stk.empty());
-
-
 	return 0;
 }
 
@@ -1430,14 +1373,14 @@ Msg TreeNode::insertYintoLeaf(Y y)
 		return msg;
 	}
 
-	Y rATP = rightAlphaTightPoint(y);
+	Y rATP = rightLeastAlphaTightPoint(y);
 	if (rATP._id == -1)
 	{
 		return msg;
 	}
 	else
 	{
-		Y lATP = leftAlphaTightPoint(y);	// if there is no such one, return the y with y.id=-1
+		Y lATP = leftGreatestAlphaTightPoint(y);	// if there is no such one, return the y with y.id=-1
 		//decide the X to be matched;	
 		sort(_I.begin(), _I.end(), cmpXEndInc);
 		for (int j = 0; j < _I.size(); j++)
@@ -1534,7 +1477,6 @@ bool Tree::insertYinTree(Y y)
 					X backX = msg._aZ;
 					X emptyX;
 					emptyX._id = -1;
-					//msg = nodeP->insertYintoESinNode(backX._e, emptyX, msg);		// insert the y into the node							
 					msg = nodeP->insertYintoESinNodefromL(backX, msg);		// insert the y into the node							
 					nodeP->_ZL.push_back(backX);
 					vector<X>::iterator itZR = find(nodeP->_ZR.begin(), nodeP->_ZR.end(), backX);
@@ -1544,25 +1486,7 @@ bool Tree::insertYinTree(Y y)
 		}
 		else
 		{
-			// msg from the right child			
-			X tmpX;
-			if (msg._bI._id != -1)
-			{
-				tmpX = msg._bI;
-			}
-			else if (msg._bT._id != -1)
-			{
-				tmpX = msg._bT;
-			}
-			else if (msg._aZ._id == -1)
-			{
-				tmpX._id = -1;
-			}
-			else
-			{
-				throw new exception();
-			}
-			//msg = nodeP->insertYintoESinNode(y, tmpX, msg);		// insert the y into the node		
+			// msg from the right child						
 			msg = nodeP->insertYintoESinNodefromR(msg);		// insert the y into the node		
 		}
 		nodeP->_Y.push_back(y);	// add y in Y
@@ -1579,7 +1503,7 @@ Msg TreeNode::insertYintoESinNode(Y y, X cX, Msg msgOld)
 {
 	Msg msg;
 	msg._aY = msgOld._aY;
-	Y raT = rightAlphaTightPoint(y);
+	Y raT = rightLeastAlphaTightPoint(y);
 	// if there are some x in T_L and Z_R which has x.e>y, find the greatest such x' and use x'.e as the inserted y
 	if (msgOld._aY >= _rightChild->getIntervalStart())
 	{
@@ -1594,11 +1518,11 @@ Msg TreeNode::insertYintoESinNode(Y y, X cX, Msg msgOld)
 		if (TM.empty() == false)
 		{
 			sort(TM.begin(), TM.end(), cmpXEndInc);
-			raT = rightAlphaTightPoint(TM[TM.size() - 1]._e);
+			raT = rightLeastAlphaTightPoint(TM[TM.size() - 1]._e);
 		}
 	}
 
-	Y laT = leftAlphaTightPoint(y);
+	Y laT = leftGreatestAlphaTightPoint(y);
 	if (laT._id == -1)		// if there is no alpha_pre, return the greatest y in L._Y
 	{
 		laT = _leftChild->_Y[_leftChild->_Y.size() - 1];
@@ -1679,11 +1603,11 @@ Msg TreeNode::insertYintoESinNode(Y y, X cX, Msg msgOld)
 				if (msg._aY < _rightChild->getIntervalStart())
 				{
 					// if it is the case from L to P, the \beta-post maybe less than x.e since x may match with a y<x.e
-					bT = rightBetaTightPoint(_rightChild->getIntervalStart());
+					bT = rightLeastBetaTightPoint(_rightChild->getIntervalStart());
 				}
 				else
 				{
-					bT = rightBetaTightPoint(y);
+					bT = rightLeastBetaTightPoint(y);
 				}
 				if (bT._id == -1)	// if there is no such \beta tightpoint, set it larger than the maximum one
 				{
@@ -1729,7 +1653,7 @@ Msg TreeNode::insertYintoESinNode(Y y, X cX, Msg msgOld)
 
 
 // Note: if there is no such tight point, return y with y.id=-1
-Y TreeNode::rightBetaTightPoint(Y y)
+Y TreeNode::rightLeastBetaTightPoint(Y y)
 {
 	vector<X> tempZ;
 	vector<Y> tempY;
@@ -1765,7 +1689,7 @@ Y TreeNode::rightBetaTightPoint(Y y)
 }
 
 // Note: if there is no such tight point, return the least y in P._Y
-Y TreeNode::leftBetaTightPoint(Y y)
+Y TreeNode::leftGreatestBetaTightPoint(Y y)
 {
 	vector<X> tempZ;
 	vector<Y> tempY;
@@ -1807,7 +1731,7 @@ Y TreeNode::leftBetaTightPoint(Y y)
 }
 
 // Note: if there is no such tight point, return the greatest y in P._Y
-Y TreeNode::rightAlphaTightPoint(Y y)
+Y TreeNode::rightLeastAlphaTightPoint(Y y)
 {
 	vector<X> tempZ;
 	vector<Y> tempY;
@@ -1849,7 +1773,7 @@ Y TreeNode::rightAlphaTightPoint(Y y)
 }
 
 // return the \alpha tightest point that is less than y; return y with y.id=-1 if there is no such one.
-Y TreeNode::leftAlphaTightPoint(Y y)
+Y TreeNode::leftGreatestAlphaTightPoint(Y y)
 {
 	vector<X> tempZ;
 	vector<Y> tempY;
@@ -1882,30 +1806,7 @@ Y TreeNode::leftAlphaTightPoint(Y y)
 		}
 	}
 	return tY;
-	/*TreeNode* node = this;
-	if (node == NULL)
-	{
-	//vector<int> t; t.erase(t.begin());
-	throw new exception();
-	}
-	vector<Y> YY = node->_Y;
-	vector<X> ZZ = node->_Z;
-
-	sort(YY.begin(), YY.end(), cmpYInc);
-	sort(ZZ.begin(), ZZ.end(), cmpXEndInc);
-	for (int i = (int)ZZ.size() - 1; i >= 0; i--)
-	{
-	if (ZZ[i]._e == YY[i] && YY[i] < y)
-	{
-	return YY[i];
-	}
-	}
-
-	Y tmpY;
-	tmpY._id = -1;
-	return tmpY;*/
 }
-
 
 // Note: if there is no such tight point, return the greatest y in P._Y
 Y TreeNode::rightGreatestAlphaTightPoint(Y y)
@@ -1956,7 +1857,7 @@ Msg TreeNode::insertYintoESinNodefromL(X backX, Msg msgOld)
 	Msg msg;
 	msg._aY = msgOld._aY;
 	Y raT = rightGreatestAlphaTightPoint(backX._e);
-	Y laT = leftAlphaTightPoint(backX._e);
+	Y laT = leftGreatestAlphaTightPoint(backX._e);
 	// if there is no alpha_pre, return the greatest y in L._Y
 	if (laT._id == -1)
 	{
@@ -2003,7 +1904,7 @@ Msg TreeNode::insertYintoESinNodefromL(X backX, Msg msgOld)
 			if (raT == _Y[_Y.size() - 1])
 			{
 				// the \beta-post maybe less than x.e since x may match with a y<x.e
-				Y bT = rightBetaTightPoint(_rightChild->getIntervalStart());
+				Y bT = rightLeastBetaTightPoint(_rightChild->getIntervalStart());
 				if (bT._id == -1)
 				{
 					// if there is no such \beta tightpoint, set it larger than the maximum one
@@ -2054,28 +1955,28 @@ Msg TreeNode::insertYintoESinNodefromL(X backX, Msg msgOld)
 // cX is the x vertex to be compensated
 Msg TreeNode::insertYintoESinNodefromR(Msg msgOld)
 {
-	Y y = msgOld._aY;
-	// if there are some x in T_L and Z_R which has x.e>y, find the greatest such x' and use x'.e as the inserted y
-	vector<X> TM;
-	for (int i = 0; i < _ZR.size(); i++)
-	{
-		if (_ZR[i]._s < _rightChild->getIntervalStart() && _ZR[i]._e > y)
-		{
-			TM.push_back(_ZR[i]);
-		}
-	}
-	if (!TM.empty())
-	{
-		sort(TM.begin(), TM.end(), cmpXEndInc);
-		// raT = rightAlphaTightPoint(TM[TM.size() - 1]._e);		
-		//return insertYintoESinNodefromL(TM[TM.size() - 1], msgOld);
-		y = TM[TM.size() - 1]._e;
-	}
+	//Y y = msgOld._aY;
+	//// if there are some x in T_L and Z_R which has x.e>y, find the greatest such x' and use x'.e as the inserted y
+	//vector<X> TM;
+	//for (int i = 0; i < _ZR.size(); i++)
+	//{
+	//	if (_ZR[i]._s < _rightChild->getIntervalStart() && _ZR[i]._e > y)
+	//	{
+	//		TM.push_back(_ZR[i]);
+	//	}
+	//}
+	//if (!TM.empty())
+	//{
+	//	sort(TM.begin(), TM.end(), cmpXEndInc);
+	//	// raT = rightLeastAlphaTightPoint(TM[TM.size() - 1]._e);		
+	//	//return insertYintoESinNodefromL(TM[TM.size() - 1], msgOld);
+	//	y = TM[TM.size() - 1]._e;
+	//}
 
 	Msg msg;
 	msg._aY = msgOld._aY;
-	Y raT = rightGreatestAlphaTightPoint(y);
-	Y laT = leftAlphaTightPoint(msgOld._aY);
+	Y raT = rightGreatestAlphaTightPoint(msgOld._aY);
+	Y laT = leftGreatestAlphaTightPoint(msgOld._aY);
 	// if there is no alpha_pre, return the greatest y in L._Y
 	if (laT._id == -1)
 	{
@@ -2111,8 +2012,8 @@ Msg TreeNode::insertYintoESinNodefromR(Msg msgOld)
 		else
 		{
 			// case of no change in R
-			// assertion: msgOld._aT._id == -1
-			if (msgOld._aT._id != -1)
+			// assertion: msgOld._aZ._id == -1
+			if (msgOld._aZ._id != -1)
 				throw new exception();
 		}
 		msg = msgOld;
@@ -2155,7 +2056,7 @@ Msg TreeNode::insertYintoESinNodefromR(Msg msgOld)
 			// if the right part of P is full, calculate \beta tight point to compute; if not, consult the result from R
 			if (raT == _Y[_Y.size() - 1])
 			{
-				Y bT = rightBetaTightPoint(msgOld._aY);		// ???
+				Y bT = rightLeastBetaTightPoint(msgOld._aY);		// ???
 				// if there is no such \beta tightpoint, set it larger than the maximum one
 				if (bT._id == -1)	
 				{
@@ -2208,23 +2109,15 @@ Msg TreeNode::insertYintoESinNodefromR(Msg msgOld)
 				{
 					// it should be impossible here, since backT should not be empty.
 					throw new exception();
-					/*X cX = msg._bT;
-					vector<X>::iterator itT = find(_T.begin(), _T.end(), cX);
-					if (itT == _T.end())
-					{
-						throw new exception();
-					}
-					_T.erase(itT);
-					_Z.push_back(cX);
-					_ZR.push_back(cX);*/
 				}
 				else
 				{
 					// case of no change in R
-					// assertion: msgOld._aT._id == -1
-					if (msgOld._aT._id != -1)
+					// assertion: msgOld._aZ._id == -1
+					if (msgOld._aZ._id != -1)
 						throw new exception();
 				}
+				msg = msgOld;
 			}
 		}
 	}

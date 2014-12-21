@@ -46,11 +46,10 @@ public:
 	//X determineMinWeightX(X, X, TreeNode*&);
 	//TreeNode * pullBackATransferredXInWeightProcess(TreeNode *, X, Msg, bool&, X&);
 
-	Y leftAlphaTightPoint(Y y);	// return the tightest point that is less than y; return 0 if there is no such one.
-	Y rightAlphaTightPoint(Y y);
-	Y leftBetaTightPoint(Y y);
-	Y rightBetaTightPoint(Y y);
-
+	Y leftGreatestAlphaTightPoint(Y y);	// return the greatest tight point that is less than y; return 0 if there is no such one.
+	Y rightLeastAlphaTightPoint(Y y);
+	Y leftGreatestBetaTightPoint(Y y);
+	Y rightLeastBetaTightPoint(Y y);
 	Y rightGreatestAlphaTightPoint(Y y);	// return the greatest \alpha tight point
 
 
