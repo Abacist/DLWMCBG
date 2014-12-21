@@ -1413,19 +1413,20 @@ Msg TreeNode::insertYintoLeaf(Y y)
 			_T.erase(_T.begin());
 
 			// move the possible infeasible x in T to I
-			for (int i = 1; i < (int)_T.size(); i++)
-			{
-				if (_T[i]._e == y)
-				{
-					_I.push_back(_T[i]);
-					vector<X>::iterator it = find(_T.begin(), _T.end(), _T[i]);
-					_T.erase(it);
-				}
-				else
-				{
-					break;
-				}
-			}
+			//for (int i = 1; i < (int)_T.size(); i++)
+			//{
+			//	if (_T[i]._e == y)
+			//	{
+			//		throw new exception();//could not happen
+			//		_I.push_back(_T[i]);
+			//		vector<X>::iterator it = find(_T.begin(), _T.end(), _T[i]);
+			//		_T.erase(it);
+			//	}
+			//	else
+			//	{
+			//		break;
+			//	}
+			//}
 		}
 		return msg;
 	}
@@ -1480,6 +1481,7 @@ bool Tree::insertYinTree(Y y)
 	vector<Y>::iterator it = find(nodeP->_Y.begin(), nodeP->_Y.end(), y);
 	if (it != nodeP->_Y.end())
 	{
+		//already inserted
 		return false;
 	}
 
@@ -1545,7 +1547,7 @@ bool Tree::insertYinTree(Y y)
 		else
 		{
 			// msg from the right child			
-			X tmpX;
+			/*X tmpX;
 			if (msg._bI._id != -1)
 			{
 				tmpX = msg._bI;
@@ -1561,7 +1563,7 @@ bool Tree::insertYinTree(Y y)
 			else
 			{
 				throw new exception();
-			}
+			}*/
 			//msg = nodeP->insertYintoESinNode(y, tmpX, msg);		// insert the y into the node		
 			msg = nodeP->insertYintoESinNodefromR(msg);		// insert the y into the node		
 		}
