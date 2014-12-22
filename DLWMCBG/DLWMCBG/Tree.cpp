@@ -1413,20 +1413,20 @@ Msg TreeNode::insertYintoLeaf(Y y)
 			_T.erase(_T.begin());
 
 			// move the possible infeasible x in T to I
-			//for (int i = 1; i < (int)_T.size(); i++)
-			//{
-			//	if (_T[i]._e == y)
-			//	{
-			//		throw new exception();//could not happen
-			//		_I.push_back(_T[i]);
-			//		vector<X>::iterator it = find(_T.begin(), _T.end(), _T[i]);
-			//		_T.erase(it);
-			//	}
-			//	else
-			//	{
-			//		break;
-			//	}
-			//}
+			for (int i = 1; i < (int)_T.size(); i++)
+			{
+				if (_T[i]._e == y)
+				{
+					throw new exception();//could not happen
+					_I.push_back(_T[i]);
+					vector<X>::iterator it = find(_T.begin(), _T.end(), _T[i]);
+					_T.erase(it);
+				}
+				else
+				{
+					break;
+				}
+			}
 		}
 		return msg;
 	}
@@ -1977,7 +1977,7 @@ Msg TreeNode::insertYintoESinNodefromL(X backX, Msg msgOld)
 		vector<X> between;
 		for (int i = 0; i < IPmIR.size(); i++)
 		{
-			if (IPmIR[i]._e > laT && IPmIR[i]._s <= raT)
+			if (IPmIR[i]._e > laT /*&& IPmIR[i]._s <= raT*/)
 			{
 				between.push_back(IPmIR[i]);
 			}
@@ -2130,7 +2130,7 @@ Msg TreeNode::insertYintoESinNodefromR(Msg msgOld)
 		vector<X> between;
 		for (int i = 0; i < IPmIR.size(); i++)
 		{
-			if (IPmIR[i]._e > laT && IPmIR[i]._s <= raT)
+			if (IPmIR[i]._e > laT/* && IPmIR[i]._s <= raT*/)
 			{
 				between.push_back(IPmIR[i]);
 			}
