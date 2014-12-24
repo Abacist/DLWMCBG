@@ -61,7 +61,8 @@ int main()
 			{
 				X x;
 				in >> x._id >> x._s._id >> x._e._id >> x._w;	// divide by Space
-				pTree->adjustXToProper(x);
+				//pTree->adjustXToProper(x);
+
 				// if x.s or x.e is not in _Y, insert it.	// TBD	
 				
 				

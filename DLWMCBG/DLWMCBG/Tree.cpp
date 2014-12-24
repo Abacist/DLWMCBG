@@ -852,13 +852,12 @@ bool Tree::insertXinTree(X x)
 	//below is the whole implemention of the MSG passing rule
 	Msg msg = nodeP->insertXintoESinNode(x);		// insert the x into the leaf
 	nodeP->_X.push_back(x);
-	/*if (msg.flagInsertX() == 2)
-	{
-	//msg._bZ = msg._aI = nodeP->replaceMinWeightX(msg);		// call replaceable algorithm
-	}*/
 	TreeNode* child = nodeP;
 	nodeP = nodeP->_parentNode;
-
+	/*if (nodeP->verifyNodeInvariants() != 0)
+	{
+		throw new exception();
+	}*/
 	while (nodeP != NULL)	//send msg until the root, the msg is from a node to its parent
 	{
 		// leaf is the current node; the msg comes from its own ES-Tree insert operation
@@ -1088,6 +1087,10 @@ bool Tree::insertXinTree(X x)
 			}
 			//break;
 		}
+		/*if (nodeP->verifyNodeInvariants() != 0)
+		{
+			throw new exception();
+		}*/
 		child = nodeP;
 		nodeP = nodeP->_parentNode;
 	}
