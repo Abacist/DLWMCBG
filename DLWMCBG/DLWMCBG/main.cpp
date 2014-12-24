@@ -7,7 +7,7 @@
 
 using namespace std;
 
-void generator(char* fileName = "input.txt", int MaxY = 100, int UpdateRange = 200, int WeightRange = 1000);
+void generator(char* fileName = "input.txt", int MaxY = 50, int UpdateRange = 200, int WeightRange = 1000);
 
 int main()
 {
@@ -63,7 +63,7 @@ int main()
 				in >> x._id >> x._s._id >> x._e._id >> x._w;	// divide by Space
 
 				// if x.s or x.e is not in _Y, insert it.	
-				//pTree->adjustXToProper(x);
+				pTree->adjustXToProper(x);
 				
 				pTree->insertXinTree(x);
 				

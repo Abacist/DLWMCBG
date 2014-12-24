@@ -1,3 +1,4 @@
+#pragma once
 //the definition of the whole Tree
 #include"Basic.h"
 
