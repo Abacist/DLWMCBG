@@ -27,13 +27,13 @@ public:
 	
 	Msg insertXintoESinNode(X x);
 
-	Msg insertYintoLeafW(Y y);
-	Msg insertYintoESinNodeW(Y y);
+	//Msg insertYintoLeafW(Y y);
+	//Msg insertYintoESinNodeW(Y y);
 
 	Msg insertYintoLeaf(Y y);
-	Msg insertYintoESinNode(Y y, X, Msg);
-	Msg insertYintoESinNodefromL(X, Msg);
-	Msg insertYintoESinNodefromR(Msg);
+	//Msg insertYintoESinNode(Y y, X, Msg);
+	//Msg insertYintoESinNodefromL(X, Msg);
+	//Msg insertYintoESinNodefromR(Msg);
 	
 	//calculate Replaceable Set and Compensable Set tbd
 	//X findjInES(vector<Y>*, Y);		// return x where x.e is the least tight piont greater than y in ES 
@@ -51,13 +51,13 @@ public:
 	Y leftBetaTightPoint(Y y);
 	Y rightBetaTightPoint(Y y);
 
-	Y rightGreatestAlphaTightPoint(Y y);	// return the greatest \alpha tight point
+	//Y rightGreatestAlphaTightPoint(Y y);	// return the greatest \alpha tight point
 
 
 	// verification
 	int verifyNodeInvariants();
-	void testInsertXintoNode(X, int);
-	void testPrintY();
+	//void testInsertXintoNode(X, int);
+	//void testPrintY();
 
 };
 
@@ -75,14 +75,14 @@ public:
 	TreeNode* locateLeaf(X x);	// include split
 	TreeNode* locateLeaf(Y y);	
 	bool insertXinTree(X x);
-	bool insertYinTreeW(Y y);
+	//bool insertYinTreeW(Y y);
 	bool insertYinTree(Y y);
 
 	// verification
-	int verifyTreeInvariants();
+	//int verifyTreeInvariants();
 	int verifyInvariantsRecur();
 	int verifyInvariantsRecur(TreeNode* curRoot);
-	int verifyTreeInvariantsSimple();	// only verify the top three nodes
+	//int verifyTreeInvariantsSimple();	// only verify the top three nodes
 	int verifyInvariantsInUnweightedCase();
 	int verifyInvariantsInUnweightedCase(TreeNode* curRoot);
 };

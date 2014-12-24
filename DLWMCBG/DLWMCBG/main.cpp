@@ -61,22 +61,12 @@ int main()
 			{
 				X x;
 				in >> x._id >> x._s._id >> x._e._id >> x._w;	// divide by Space
-				//pTree->adjustXToProper(x);
 
-				// if x.s or x.e is not in _Y, insert it.	// TBD	
-				
+				// if x.s or x.e is not in _Y, insert it.	
+				//pTree->adjustXToProper(x);
 				
 				pTree->insertXinTree(x);
-				/*if (pTree->verifyTreeInvariants() != 0)
-				{
-					int a = 0;
-				}*/
-
-				/*int flag = pTree->verifyInvariantsRecur();
-				if (flag != 0)
-				{
-					throw new exception();
-				}*/
+				
 
 			}break;
 
@@ -103,13 +93,6 @@ int main()
 					// cout <<"Y: "<<y._id << " already exists." << endl;
 					//throw new exception();
 				}
-
-				/*int flag = pTree->verifyInvariantsRecur();
-				if (flag != 0)
-				{
-					throw new exception();
-				}*/
-
 			}break;
 			case '4':
 			{
@@ -138,17 +121,6 @@ int main()
 
 
 		}
-		//output to file
-		//cout << "end" << endl;
-		
-		/*vector<X> Z = pTree->_root->_Z;
-		sort(Z.begin(), Z.end(), cmpXID);
-		for (int i = 0; i < Z.size(); i++)
-		{
-		out << Z[i]._id << endl;
-		}
-		system("Glover.exe");*/
-
 		in.close();
 		out.close();
 		//verify
