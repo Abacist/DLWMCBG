@@ -42,15 +42,21 @@ public:
 
 	void determineReachableSetinES(X x, vector<X>& R, bool& isTight);//no insert, just check
 	void determineReachableSetinEE(X x, vector<X>& R, bool& isTight);
+	void determineNewInfeabileXOfTL(vector<X>& TLI);
+	void determineNewInfeabileXOfLZRZ(Msg curMsg, vector<X>& leftPart, vector<X>& rightPart);
+	//void determineCompensableSetOfPI(Msg curMsg, vector<X>& CS);
+	Msg insertYintoInternalNodeL(Msg curMsg);
+	Msg insertYintoInternalNodeR(Msg curMsg);
 	
 	X replaceMinWeightX(X x);	// compute the replaceable set in this node and do the repalcement
 	//X determineMinWeightX(X, X, TreeNode*&);
 	//TreeNode * pullBackATransferredXInWeightProcess(TreeNode *, X, Msg, bool&, X&);
 
-	Y leftAlphaTightPoint(Y y);	// return the tightest point that is less than y; return 0 if there is no such one.
-	Y rightAlphaTightPoint(Y y);
-	Y leftBetaTightPoint(Y y);
-	Y rightBetaTightPoint(Y y);
+	Y leftAlphaTightPointforZR(Y y);	// return the tightest point that is less than y; return 0 if there is no such one.
+	Y rightAlphaTightPointforZR(Y y);
+	//Y leftBetaTightPoint(Y y);
+	Y rightBetaTightPointforZL(Y y);
+	Y rightBetaTightPointforZR(Y y);
 
 	//Y rightGreatestAlphaTightPoint(Y y);	// return the greatest \alpha tight point
 

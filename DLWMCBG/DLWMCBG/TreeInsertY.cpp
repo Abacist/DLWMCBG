@@ -30,7 +30,7 @@ bool Tree::insertYinTree(Y y)
 		if (child == nodeP->_leftChild)
 		{
 			// msg from the left child
-
+			
 		}
 		else
 		{
@@ -81,7 +81,7 @@ Msg TreeNode::insertYintoLeaf(Y y)
 	Msg msg;
 	msg._aY = y;
 
-	Y laT = leftAlphaTightPoint(y);
+	Y laT = leftAlphaTightPointforZR(y);
 	vector<X> ICS, TCS;
 	for (int i = 0; i < _I.size(); i++)
 	{
@@ -119,4 +119,202 @@ Msg TreeNode::insertYintoLeaf(Y y)
 
 
 	return msg;
+}
+
+void TreeNode::determineNewInfeabileXOfTL(vector<X>& TLinPI)
+{
+	if (_leftChild == NULL)
+	{
+		throw new exception();
+	}
+	else
+	{
+		TLinPI.clear();
+		vector<X> TL = _leftChild->_T;
+		for (int i = 0; i < TL.size(); i++)
+		{
+			vector<X>::iterator it = find(_I.begin(), _I.end(), TL[i]);
+			if (it != _I.end())
+			{
+				TLinPI.push_back(TL[i]);
+			}
+		}
+	}
+}
+
+void TreeNode::determineNewInfeabileXOfLZRZ(Msg curMsg, vector<X>& leftPart, vector<X>& rightPart)
+{
+	if (_leftChild == NULL)
+	{
+		throw new exception();
+	}
+	vector<X>::iterator it;
+	vector<X> LZ = _leftChild->_Z;
+	vector<X> RZ = _rightChild->_Z;
+	leftPart.clear();
+	rightPart.clear();
+	if (curMsg._aY < _rightChild->_Y[0])
+	{
+		//msg from left
+		if (curMsg._aZ._id != -1)
+		{
+			vector<X>::iterator it = find(LZ.begin(), LZ.end(), curMsg._aZ);
+			LZ.erase(it);
+		}
+	}
+	else
+	{
+		//msg from right	
+		if (curMsg._aZ._id != -1)
+		{
+			it = find(RZ.begin(), RZ.end(), curMsg._aZ);
+			RZ.erase(it);
+		}
+	}
+	for (int i = 0; i < LZ.size(); i++)
+	{
+		if (find(_I.begin(), _I.end(), LZ[i]) != _I.end())
+		{
+			leftPart.push_back(LZ[i]);
+		}
+	}
+	for (int i = 0; i < RZ.size(); i++)
+	{
+		if (find(_I.begin(), _I.end(), RZ[i]) != _I.end())
+		{
+			rightPart.push_back(RZ[i]);
+		}
+	}
+}
+
+
+//void TreeNode::determineCompensableSetOfPI(Msg curMsg, vector<X>& CS)
+//{
+//	CS.clear();
+//}
+
+Msg TreeNode::insertYintoInternalNodeL(Msg msg)
+{
+	Msg rMsg;
+	rMsg._aY = msg._aY;
+	if (msg._aZ._id == -1)
+	{
+		//msg keeps
+		return msg;
+	}
+	else if (msg._bT._id != -1 && find(_T.begin(), _T.end(), msg._bT) != _T.end())
+	{
+		return msg;
+	}
+	else
+	{
+		//cx is from T in L and is matched or infeasible in P
+		//cx is from I in L
+		vector<X> TLI, leftI, rightI;
+		determineNewInfeabileXOfTL(TLI);
+		determineNewInfeabileXOfLZRZ(msg, leftI, rightI);
+		Y rbT = rightBetaTightPointforZL(msg._aY);
+		vector<X> cTLI;
+		for (int i = 0; i < TLI.size(); i++)
+		{
+			if (TLI[i]._s < rbT)
+			{
+				cTLI.push_back(TLI[i]);
+			}
+		}
+		if (msg._bI._id != -1)
+		{
+			leftI.push_back(msg._bI);
+		}
+		vector<X> cL;
+		for (int i = 0; i < leftI.size(); i++)
+		{
+			if (leftI[i]._s < rbT)
+			{
+				cL.push_back(leftI[i]);
+			}
+		}
+		vector<X> backX;
+		for (int i = 0; i < _ZR.size(); i++)
+		{
+			if (_ZR[i]._s < _rightChild->_Y[0] && _ZR[i]._s < rbT)
+			{
+				backX.push_back(_ZR[i]);
+			}
+		}
+		sort(backX.begin(), backX.end(), cmpXEndInc);
+		Y laT = leftAlphaTightPointforZR(backX[0]._e);
+		vector<X> cR;
+		for (int i = 0; i < rightI.size(); i++)
+		{
+			if (rightI[i]._e > laT)
+			{
+				cR.push_back(rightI[i]);
+			}
+		}
+		if (cTLI.empty() && cL.empty() && cR.empty())
+		{
+			//find in P.T
+			Y bT = rightBetaTightPointforZR(_rightChild->_Y[0]);
+			vector<X> cTP;
+			for (int i = 0; i < _T.size(); i++)
+			{
+				if (_T[i]._s < bT)
+				{
+					cTP.push_back(_T[i]);
+				}
+			}
+			sort(cTP.begin(), cTP.end(), cmpXEndInc);
+			if (cTP.empty())
+			{
+				return rMsg;
+			}
+			else
+			{
+				//pull the cTP[0] back
+				_ZL.push_back(backX[0]);
+				_ZR.erase(find(_ZR.begin(), _ZR.end(), backX[0]));
+				_ZR.push_back(cTP[0]);
+				_T.erase(find(_I.begin(), _I.end(), cTP[0]));
+				rMsg._bT = cTP[0];
+				rMsg._aZ = cTP[0];
+				return rMsg;
+			}
+		}
+		else
+		{
+			vector<X> cxinI = cTLI;
+			for (int i = 0; i < cL.size(); i++)
+			{
+				cxinI.push_back(cL[i]);
+			}
+			for (int i = 0; i < cR.size(); i++)
+			{
+				cxinI.push_back(cR[i]);
+			}
+			sort(cxinI.begin(), cxinI.end(), cmpXWeightInc);
+			X cx = cxinI[cxinI.size() - 1];
+			if (find(rightI.begin(), rightI.end(), cx) == rightI.end())
+			{
+				//not in right
+				//in TIL or leftI
+				_I.erase(find(_I.begin(), _I.end(), cx));
+				_Z.push_back(cx);
+				_ZL.push_back(cx);
+				rMsg._bI = cx;
+				rMsg._aZ = cx;
+				return rMsg;
+			}
+			else
+			{
+				_ZL.push_back(backX[0]);
+				_ZR.erase(find(_ZR.begin(), _ZR.end(), backX[0]));
+				_ZR.push_back(cx);
+				_I.erase(find(_I.begin(), _I.end(), cx));
+				rMsg._bI = cx;
+				rMsg._aZ = cx;
+				return rMsg;
+			}
+		}
+	}
 }
