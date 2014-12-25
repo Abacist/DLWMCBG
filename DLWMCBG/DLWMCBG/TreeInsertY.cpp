@@ -363,7 +363,7 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 					vector<X> realBackX;
 					for (int i = 0; i < backX.size(); i++)
 					{
-						if (backX[i]._e <= raT)
+						if (backX[i]._e <= raT || raT._id == -1)
 						{
 							realBackX.push_back(backX[i]);
 						}
@@ -387,7 +387,7 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 					vector<X> realBackX;
 					for (int i = 0; i < backX.size(); i++)
 					{
-						if (backX[i]._e <= raT)
+						if (backX[i]._e <= raT || raT._id == -1)
 						{
 							realBackX.push_back(backX[i]);
 						}

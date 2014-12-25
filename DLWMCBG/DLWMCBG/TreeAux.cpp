@@ -567,7 +567,6 @@ Y TreeNode::rightBetaTightPointforZR(Y y)
 	return tY;
 }
 
-// Note: if there is no such tight point, return the least y in P._Y
 Y TreeNode::leftBetaTightPointforZL(Y y)
 {
 	vector<X> tempZ;
@@ -606,7 +605,6 @@ Y TreeNode::leftBetaTightPointforZL(Y y)
 	return tY;
 }
 
-// Note: if there is no such tight point, return the greatest y in P._Y
 Y TreeNode::rightAlphaTightPointforZR(Y y)
 {
 	vector<X> tempZ;
