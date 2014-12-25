@@ -222,7 +222,8 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 		determineNewInfeabileXOfTL(msg, TLI);
 		determineNewInfeabileXOfLZRZ(msg, leftI, rightI);
 		Y rbT = rightBetaTightPointforZL(msg._aY);
-		vector<X> cTLI;
+		vector<X> cTLI;//can add to left part in this case;
+		//add to right part need to be consider
 		for (int i = 0; i < TLI.size(); i++)
 		{
 			if (TLI[i]._s < rbT)
@@ -237,12 +238,21 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 		vector<X> cL;
 		for (int i = 0; i < leftI.size(); i++)
 		{
+			//can add to left part
 			if (leftI[i]._s < rbT)
 			{
 				cL.push_back(leftI[i]);
 			}
 		}
-		vector<X> backX, cR;
+		for (int i = 0; i < rightI.size(); i++)
+		{
+			//can add to left part
+			if (rightI[i]._s < rbT)
+			{
+				cL.push_back(leftI[i]);
+			}
+		}
+		vector<X> backX, cR;//add to right part
 		for (int i = 0; i < _ZR.size(); i++)
 		{
 			if (_ZR[i]._s < _rightChild->_Y[0] && _ZR[i]._s < rbT)
@@ -258,7 +268,21 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 			{
 				if (rightI[i]._e > laT)
 				{
-					cR.push_back(rightI[i]);
+					if (find(cL.begin(), cL.end(), rightI[i]) == cL.end())
+					{
+						cR.push_back(rightI[i]);
+					}
+				}
+			}
+			for (int i = 0; i < leftI.size(); i++)
+			{
+				//may contain elements in TL
+				if (leftI[i]._e >= _rightChild->getIntervalStart() && leftI[i]._e > laT)
+				{
+					if (find(cL.begin(), cL.end(), leftI[i]) == cL.end())
+					{
+						cR.push_back(leftI[i]);
+					}
 				}
 			}
 			for (int i = 0; i < TLI.size(); i++)
@@ -269,7 +293,7 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 					{
 						cR.push_back(TLI[i]);
 					}
-					//cTLI or CL?
+					
 				}
 			}
 		}
@@ -326,48 +350,60 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 			}
 			sort(cxinI.begin(), cxinI.end(), cmpXWeightInc);
 			X cx = cxinI[cxinI.size() - 1];
-			if (find(cR.begin(), cR.end(), cx) == cR.end())
+			/*if (find(cR.begin(), cR.end(), cx) == cR.end())
+			{*/
+			//not in right
+			//in cTIL or cL
+			if (!backX.empty())
 			{
-				//not in right
-				//in TIL or leftI
-				if (!backX.empty())
+				if (cx._s >= rbT)
 				{
-					//a new invariant for ZL and ZR
-					Y laT = leftAlphaTightPointforZR(backX[0]._e);
-					if (find(TLI.begin(), TLI.end(), cx) != TLI.end() && cx._e > laT)
-					{
-						if (cmpXEndInc(backX[0], cx))
-						{
-							_ZL.push_back(backX[0]);
-							_ZR.erase(find(_ZR.begin(), _ZR.end(), backX[0]));
-							_ZR.push_back(cx);
-							_Z.push_back(cx);
-							_I.erase(find(_I.begin(), _I.end(), cx));
-							rMsg._bI = cx;
-							rMsg._aZ = cx;
-							return rMsg;
-						}
-						
-					}
+					//must need backX back
+					_ZL.push_back(backX[0]);
+					_ZR.erase(find(_ZR.begin(), _ZR.end(), backX[0]));
+					_ZR.push_back(cx);
+					_Z.push_back(cx);
+					_I.erase(find(_I.begin(), _I.end(), cx));
+					rMsg._bI = cx;
+					rMsg._aZ = cx;
+					return rMsg;
 				}
-				_I.erase(find(_I.begin(), _I.end(), cx));
-				_Z.push_back(cx);
-				_ZL.push_back(cx);
-				rMsg._bI = cx;
-				rMsg._aZ = cx;
-				return rMsg;
+				//a new invariant for ZL and ZR
+				Y laT = leftAlphaTightPointforZR(backX[0]._e);
+				if (cx._e >= _rightChild->getIntervalStart() && cx._s < _rightChild->getIntervalStart() && cx._e > laT)
+				{
+					if (cmpXEndInc(backX[0], cx))
+					{
+						_ZL.push_back(backX[0]);
+						_ZR.erase(find(_ZR.begin(), _ZR.end(), backX[0]));
+						_ZR.push_back(cx);
+						_Z.push_back(cx);
+						_I.erase(find(_I.begin(), _I.end(), cx));
+						rMsg._bI = cx;
+						rMsg._aZ = cx;
+						return rMsg;
+					}
+
+				}
 			}
+			_I.erase(find(_I.begin(), _I.end(), cx));
+			_Z.push_back(cx);
+			_ZL.push_back(cx);
+			rMsg._bI = cx;
+			rMsg._aZ = cx;
+			return rMsg;
+			/*}
 			else
 			{
-				_ZL.push_back(backX[0]);
-				_ZR.erase(find(_ZR.begin(), _ZR.end(), backX[0]));
-				_ZR.push_back(cx);
-				_Z.push_back(cx);
-				_I.erase(find(_I.begin(), _I.end(), cx));
-				rMsg._bI = cx;
-				rMsg._aZ = cx;
-				return rMsg;
-			}
+			_ZL.push_back(backX[0]);
+			_ZR.erase(find(_ZR.begin(), _ZR.end(), backX[0]));
+			_ZR.push_back(cx);
+			_Z.push_back(cx);
+			_I.erase(find(_I.begin(), _I.end(), cx));
+			rMsg._bI = cx;
+			rMsg._aZ = cx;
+			return rMsg;
+			}*/
 		}
 	}
 }
@@ -402,6 +438,13 @@ Msg TreeNode::insertYintoInternalNodeR(Msg msg)
 			cR.push_back(rightI[i]);
 		}
 	}
+	for (int i = 0; i < leftI.size(); i++)
+	{
+		if (leftI[i]._e > laT)
+		{
+			cR.push_back(leftI[i]);
+		}
+	}
 	vector<X> forwardX, cL;
 	for (int i = 0; i < _ZL.size(); i++)
 	{
@@ -418,7 +461,10 @@ Msg TreeNode::insertYintoInternalNodeR(Msg msg)
 		{
 			if (leftI[i]._s < rbT)
 			{
-				cL.push_back(leftI[i]);
+				if (find(cR.begin(), cR.end(), leftI[i]) == cR.end())
+				{
+					cL.push_back(leftI[i]);
+				}
 			}
 		}
 		for (int i = 0; i < TLI.size(); i++)
@@ -429,7 +475,16 @@ Msg TreeNode::insertYintoInternalNodeR(Msg msg)
 				{
 					cL.push_back(TLI[i]);
 				}
-				//cTLI or CL?
+			}
+		}
+		for (int i = 0; i < rightI.size(); i++)
+		{
+			if (rightI[i]._s < rbT)
+			{
+				if (find(cR.begin(), cR.end(), rightI[i]) == cR.end())
+				{
+					cR.push_back(rightI[i]);
+				}
 			}
 		}
 	}
@@ -474,14 +529,27 @@ Msg TreeNode::insertYintoInternalNodeR(Msg msg)
 		}
 		sort(cxinI.begin(), cxinI.end(), cmpXWeightInc);
 		X cx = cxinI[cxinI.size() - 1];
-		if (find(cL.begin(), cL.end(), cx) == cL.end())
-		{
+		/*if (find(cL.begin(), cL.end(), cx) == cL.end())
+		{*/
 			if (!forwardX.empty())
 			{
+				if (cx._e <= laT)
+				{
+					//must need forwardX forward
+					sort(forwardX.begin(), forwardX.end(), cmpXEndInc);
+					_ZR.push_back(forwardX[forwardX.size() - 1]);
+					_ZL.erase(find(_ZL.begin(), _ZL.end(), forwardX[forwardX.size() - 1]));
+					_ZL.push_back(cx);
+					_Z.push_back(cx);
+					_I.erase(find(_I.begin(), _I.end(), cx));
+					rMsg._bI = cx;
+					rMsg._aZ = cx;
+					return rMsg;
+				}
 				//a new invariant for ZL and ZR
 				sort(forwardX.begin(), forwardX.end(), cmpXBeginDec);
 				Y rbT = rightBetaTightPointforZL(forwardX[0]._s);
-				if (find(TLI.begin(), TLI.end(), cx) != TLI.end() && cx._s < rbT)
+				if (cx._e >= _rightChild->getIntervalStart() && cx._s < _rightChild->getIntervalStart() && cx._s < rbT)
 				{
 					sort(forwardX.begin(), forwardX.end(), cmpXEndInc);
 					if (cmpXEndInc(cx, forwardX[forwardX.size() - 1]))
@@ -506,20 +574,20 @@ Msg TreeNode::insertYintoInternalNodeR(Msg msg)
 			rMsg._bI = cx;
 			rMsg._aZ = cx;
 			return rMsg;
-		}
-		else
-		{
-			//in left
-			sort(forwardX.begin(), forwardX.end(), cmpXEndInc);
-			_ZR.push_back(forwardX[forwardX.size()-1]);
-			_ZL.erase(find(_ZL.begin(), _ZL.end(), forwardX[forwardX.size() - 1]));
-			_ZL.push_back(cx);
-			_Z.push_back(cx);
-			_I.erase(find(_I.begin(), _I.end(), cx));
-			rMsg._bI = cx;
-			rMsg._aZ = cx;
-			return rMsg;
-		}
+		//}
+		//else
+		//{
+		//	//in left
+		//	sort(forwardX.begin(), forwardX.end(), cmpXEndInc);
+		//	_ZR.push_back(forwardX[forwardX.size()-1]);
+		//	_ZL.erase(find(_ZL.begin(), _ZL.end(), forwardX[forwardX.size() - 1]));
+		//	_ZL.push_back(cx);
+		//	_Z.push_back(cx);
+		//	_I.erase(find(_I.begin(), _I.end(), cx));
+		//	rMsg._bI = cx;
+		//	rMsg._aZ = cx;
+		//	return rMsg;
+		//}
 	}
 
 }
