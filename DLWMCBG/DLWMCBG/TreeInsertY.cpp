@@ -326,10 +326,30 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 			}
 			sort(cxinI.begin(), cxinI.end(), cmpXWeightInc);
 			X cx = cxinI[cxinI.size() - 1];
-			if (find(rightI.begin(), rightI.end(), cx) == rightI.end())
+			if (find(cR.begin(), cR.end(), cx) == cR.end())
 			{
 				//not in right
 				//in TIL or leftI
+				if (!backX.empty())
+				{
+					//a new invariant for ZL and ZR
+					Y laT = leftAlphaTightPointforZR(backX[0]._e);
+					if (find(TLI.begin(), TLI.end(), cx) != TLI.end() && cx._e > laT)
+					{
+						if (cmpXEndInc(backX[0], cx))
+						{
+							_ZL.push_back(backX[0]);
+							_ZR.erase(find(_ZR.begin(), _ZR.end(), backX[0]));
+							_ZR.push_back(cx);
+							_Z.push_back(cx);
+							_I.erase(find(_I.begin(), _I.end(), cx));
+							rMsg._bI = cx;
+							rMsg._aZ = cx;
+							return rMsg;
+						}
+						
+					}
+				}
 				_I.erase(find(_I.begin(), _I.end(), cx));
 				_Z.push_back(cx);
 				_ZL.push_back(cx);
@@ -456,6 +476,28 @@ Msg TreeNode::insertYintoInternalNodeR(Msg msg)
 		X cx = cxinI[cxinI.size() - 1];
 		if (find(cL.begin(), cL.end(), cx) == cL.end())
 		{
+			if (!forwardX.empty())
+			{
+				//a new invariant for ZL and ZR
+				sort(forwardX.begin(), forwardX.end(), cmpXBeginDec);
+				Y rbT = rightBetaTightPointforZL(forwardX[0]._s);
+				if (find(TLI.begin(), TLI.end(), cx) != TLI.end() && cx._s < rbT)
+				{
+					sort(forwardX.begin(), forwardX.end(), cmpXEndInc);
+					if (cmpXEndInc(cx, forwardX[forwardX.size() - 1]))
+					{
+						_ZR.push_back(forwardX[forwardX.size() - 1]);
+						_ZL.erase(find(_ZL.begin(), _ZL.end(), forwardX[forwardX.size() - 1]));
+						_ZL.push_back(cx);
+						_Z.push_back(cx);
+						_I.erase(find(_I.begin(), _I.end(), cx));
+						rMsg._bI = cx;
+						rMsg._aZ = cx;
+						return rMsg;
+					}
+					
+				}
+			}
 			//not in left
 			//in TIL or right
 			_I.erase(find(_I.begin(), _I.end(), cx));
