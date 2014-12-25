@@ -372,6 +372,17 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 				Y laT = leftAlphaTightPointforZR(backX[0]._e);
 				if (cx._e >= _rightChild->getIntervalStart() && cx._s < _rightChild->getIntervalStart() && cx._e > laT)
 				{
+					Y raT = rightAlphaTightPointforZR(cx._e);
+					vector<X> realBackX;
+					for (int i = 0; i < backX.size(); i++)
+					{
+						if (backX[i]._e <= raT)
+						{
+							realBackX.push_back(backX[i]);
+						}
+					}
+					backX = realBackX;
+					sort(backX.begin(), backX.end(), cmpXEndInc);
 					if (cmpXEndInc(backX[0], cx))
 					{
 						_ZL.push_back(backX[0]);
@@ -483,7 +494,7 @@ Msg TreeNode::insertYintoInternalNodeR(Msg msg)
 			{
 				if (find(cR.begin(), cR.end(), rightI[i]) == cR.end())
 				{
-					cR.push_back(rightI[i]);
+					cL.push_back(rightI[i]);
 				}
 			}
 		}
@@ -551,6 +562,17 @@ Msg TreeNode::insertYintoInternalNodeR(Msg msg)
 				Y rbT = rightBetaTightPointforZL(forwardX[0]._s);
 				if (cx._e >= _rightChild->getIntervalStart() && cx._s < _rightChild->getIntervalStart() && cx._s < rbT)
 				{
+					//calculate the real forwardX
+					Y lbT = leftBetaTightPointforZL(cx._s);
+					vector<X> realForwardX;
+					for (int i = 0; i < forwardX.size(); i++)
+					{
+						if (forwardX[i]._s >= lbT)
+						{
+							realForwardX.push_back(forwardX[i]);
+						}
+					}
+					forwardX = realForwardX;
 					sort(forwardX.begin(), forwardX.end(), cmpXEndInc);
 					if (cmpXEndInc(cx, forwardX[forwardX.size() - 1]))
 					{

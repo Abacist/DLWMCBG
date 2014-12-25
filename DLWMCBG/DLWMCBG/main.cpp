@@ -65,7 +65,7 @@ int main()
 
 				// if x.s or x.e is not in _Y, insert it.	
 				pTree->adjustXToProper(x);
-				if (x._id == 10)
+				if (x._id == 23)
 				{
 					int a = 1;
 				}
@@ -98,7 +98,7 @@ int main()
 			{
 				Y y;
 				in >> y._id;	
-				if (y._id == 3)
+				if (y._id == 5)
 				{
 					int a = 1;
 				}

@@ -395,6 +395,20 @@ int TreeNode::verifyNodeInvariants()
 		}
 	}
 	
+	//ZL and ZR are nice
+	vector<X> tempZLR;
+	vector<Y> tempY;
+	if (_leftChild != NULL)
+	{
+		tempY = _leftChild->_Y;
+		gloverMatching(_ZL, tempY, &tempZLR);
+		if (tempZLR.size() != _ZL.size())
+			return 11;
+		tempY = _rightChild->_Y;
+		gloverMatching(_ZR, tempY, &tempZLR);
+		if (tempZLR.size() != _ZR.size())
+			return 11;
+	}
 
 
 	return 0;
@@ -554,46 +568,43 @@ Y TreeNode::rightBetaTightPointforZR(Y y)
 }
 
 // Note: if there is no such tight point, return the least y in P._Y
-//Y TreeNode::leftBetaTightPoint(Y y)
-//{
-//	vector<X> tempZ;
-//	vector<Y> tempY;
-//	if (this->_rightChild != NULL)
-//	{
-//		tempZ = _ZR;
-//		for (int i = 0; i < _Y.size(); i++)
-//		{
-//			if (_Y[i] >= _rightChild->getIntervalStart())
-//			{
-//				tempY.push_back(_Y[i]);
-//			}
-//		}
-//	}
-//	else
-//	{
-//		tempZ = _Z;//equals to _ZR
-//		tempY = _Y;
-//	}
-//	sort(tempY.begin(), tempY.end(), cmpYDec);
-//	sort(tempZ.begin(), tempZ.end(), cmpXBeginDec);
-//	Y tY;
-//	tY._id = -1;
-//
-//	// if the ES part is full, return the first one.
-//	// Note: in this case, it maybe not a real tight point.
-//	if (_ZR.size() == tempY.size())
-//	{
-//		return tempY[0];
-//	}
-//	for (int i = tempZ.size() - 1; i >= 0; i--)
-//	{
-//		if (tempY[i] == tempZ[i]._s && tempY[i] <= y)
-//		{
-//			tY = tempY[i];
-//		}
-//	}
-//	return tY;
-//}
+Y TreeNode::leftBetaTightPointforZL(Y y)
+{
+	vector<X> tempZ;
+	vector<Y> tempY;
+	if (this->_rightChild != NULL)
+	{
+		tempZ = _ZL;
+		for (int i = 0; i < _Y.size(); i++)
+		{
+			if (_Y[i] < _rightChild->getIntervalStart())
+			{
+				tempY.push_back(_Y[i]);
+			}
+		}
+	}
+	else
+	{
+		throw new exception();
+	}
+	sort(tempY.begin(), tempY.end(), cmpYDec);
+	sort(tempZ.begin(), tempZ.end(), cmpXBeginDec);
+	Y tY;
+	tY._id = -1;
+	
+	for (int i = tempZ.size() - 1; i >= 0; i--)
+	{
+		if (tempY[i] == tempZ[i]._s && tempY[i] <= y)
+		{
+			tY = tempY[i];
+		}
+	}
+	if (tY._id == -1 && _ZR.size() == tempY.size())
+	{
+		return tempY[0];
+	}
+	return tY;
+}
 
 // Note: if there is no such tight point, return the greatest y in P._Y
 Y TreeNode::rightAlphaTightPointforZR(Y y)

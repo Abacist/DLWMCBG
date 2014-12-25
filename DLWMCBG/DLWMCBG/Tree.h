@@ -54,7 +54,7 @@ public:
 
 	Y leftAlphaTightPointforZR(Y y);	// return the tightest point that is less than y; return 0 if there is no such one.
 	Y rightAlphaTightPointforZR(Y y);
-	//Y leftBetaTightPoint(Y y);
+	Y leftBetaTightPointforZL(Y y);
 	Y rightBetaTightPointforZL(Y y);
 	Y rightBetaTightPointforZR(Y y);
 

@@ -304,7 +304,7 @@ bool cmpXID(X x1, X x2)
 }*/
 
 // return the OIS in the glover mathcing of a CBG
-void gloverMatching(const vector<X>& vX, const vector<Y>& vY, vector<X>* vZ)
+void gloverMatching(const vector<X> vX, const vector<Y> vY, vector<X>* vZ)
 {
 	vector<X> XX = vX;
 	vector<Y> YY = vY;
@@ -351,7 +351,7 @@ void gloverMatching(const vector<X>& vX, const vector<Y>& vY, vector<X>* vZ)
 }
 
 // return the OIS in the plaxton MWM of a LWCBG
-void PlaxtonMWM(const vector<X>& vX, const vector<Y>& vY, vector<X>* vZ)
+void PlaxtonMWM(const vector<X> vX, const vector<Y> vY, vector<X>* vZ)
 {
 	vector<X> XX = vX;
 	vector<Y> YY = vY;
