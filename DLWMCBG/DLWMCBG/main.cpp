@@ -7,11 +7,12 @@
 
 using namespace std;
 
-void generator(char* fileName = "input.txt", int MaxY = 50, int UpdateRange = 200, int WeightRange = 1000);
+void generator(char* fileName = "input.txt", int MaxY = 5, int UpdateRange = 10, int WeightRange = 1000);
 
 int main()
 {
 	int cases = 1;
+	int verifyEachUpdate = 1;//0 not verify, !0 verify
 	while (true)
 	{
 		generator(); //generator need to be fit the format
@@ -62,10 +63,43 @@ int main()
 				X x;
 				in >> x._id >> x._s._id >> x._e._id >> x._w;	// divide by Space
 
+				
+				
+				//int flag = pTree->verifyInvariantsRecur();
+				//if (flag == 0)
+				//{
+				//	//cout << "============================Case " << cases++ << " passed!" << endl;
+				//}
+				//else
+				//{
+				//	cout << endl << endl << endl << endl << "Before InsertX, Not satify, please check! Error code: " << flag << endl
+				//		<< "X id:" << x._id << endl;
+				//	goto End;
+				//}
+				
 				// if x.s or x.e is not in _Y, insert it.	
 				pTree->adjustXToProper(x);
-				
+				if (x._id == 10)
+				{
+					int a = 1;
+				}
 				pTree->insertXinTree(x);
+				
+				if (verifyEachUpdate != 0)
+				{
+					int flag = pTree->verifyInvariantsRecur();
+					if (flag == 0)
+					{
+						//cout << "============================Case " << cases++ << " passed!" << endl;
+						//cout << "Insert X pass, id " << x._id << endl;
+					}
+					else
+					{
+						cout << endl << endl << endl << endl << "After InsertX, Not satify, please check! Error code: " << flag << endl
+							<< "X id:" << x._id << endl;
+						goto End;
+					}
+				}
 				
 
 			}break;
@@ -79,20 +113,52 @@ int main()
 			{
 				Y y;
 				in >> y._id;	
-				if (y._id == 7)
+				if (y._id == 2)
 				{
 					int a = 1;
 				}
 				vector<Y>::iterator it = find(pTree->_root->_Y.begin(), pTree->_root->_Y.end(), y);
 				if (it == pTree->_root->_Y.end())
 				{
+					//int flag = pTree->verifyInvariantsRecur();
+					//if (flag == 0)
+					//{
+					//	//cout << "============================Case " << cases++ << " passed!" << endl;
+					//}
+					//else
+					//{
+					//	cout << endl << endl << endl << endl << "Before InsertY, Not satify, please check! Error code: " << flag << endl
+					//		<< "Y id:" << y._id << endl;
+					//	goto End;
+					//}
+
 					pTree->insertYinTree(y);
+
+					if (verifyEachUpdate != 0)
+					{
+						int flag = pTree->verifyInvariantsRecur();
+						if (flag == 0)
+						{
+							//cout << "============================Case " << cases++ << " passed!" << endl;
+							//cout << "Insert Y pass, id " << y._id << endl;
+						}
+						else
+						{
+							cout << endl << endl << endl << endl << "After InsertY, Not satify, please check! Error code: " << flag << endl
+								<< "Y id:" << y._id << endl;
+							goto End;
+						}
+					}
+					
 				}
 				else
 				{
 					// cout <<"Y: "<<y._id << " already exists." << endl;
 					//throw new exception();
 				}
+
+
+
 			}break;
 			case '4':
 			{

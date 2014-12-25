@@ -30,12 +30,12 @@ bool Tree::insertYinTree(Y y)
 		if (child == nodeP->_leftChild)
 		{
 			// msg from the left child
-			
+			msg = nodeP->insertYintoInternalNodeL(msg);
 		}
 		else
 		{
 			// msg from the right child			
-
+			msg = nodeP->insertYintoInternalNodeR(msg);
 		}
 		nodeP->_Y.push_back(y);	// add y in Y
 		sort(nodeP->_Y.begin(), nodeP->_Y.end(), cmpYInc);	// sort Y after each _Y augmentation
@@ -121,7 +121,7 @@ Msg TreeNode::insertYintoLeaf(Y y)
 	return msg;
 }
 
-void TreeNode::determineNewInfeabileXOfTL(vector<X>& TLinPI)
+void TreeNode::determineNewInfeabileXOfTL(Msg msg, vector<X>& TLinPI)
 {
 	if (_leftChild == NULL)
 	{
@@ -131,6 +131,11 @@ void TreeNode::determineNewInfeabileXOfTL(vector<X>& TLinPI)
 	{
 		TLinPI.clear();
 		vector<X> TL = _leftChild->_T;
+		//roll back
+		if (msg._bT._id != -1&& msg._aY < _rightChild->getIntervalStart())
+		{
+			TL.push_back(msg._bT);
+		}
 		for (int i = 0; i < TL.size(); i++)
 		{
 			vector<X>::iterator it = find(_I.begin(), _I.end(), TL[i]);
@@ -204,6 +209,9 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 	}
 	else if (msg._bT._id != -1 && find(_T.begin(), _T.end(), msg._bT) != _T.end())
 	{
+		_T.erase(find(_T.begin(), _T.end(), msg._bT));
+		_ZL.push_back(msg._bT);
+		_Z.push_back(msg._bT);
 		return msg;
 	}
 	else
@@ -211,7 +219,7 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 		//cx is from T in L and is matched or infeasible in P
 		//cx is from I in L
 		vector<X> TLI, leftI, rightI;
-		determineNewInfeabileXOfTL(TLI);
+		determineNewInfeabileXOfTL(msg, TLI);
 		determineNewInfeabileXOfLZRZ(msg, leftI, rightI);
 		Y rbT = rightBetaTightPointforZL(msg._aY);
 		vector<X> cTLI;
@@ -234,7 +242,7 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 				cL.push_back(leftI[i]);
 			}
 		}
-		vector<X> backX;
+		vector<X> backX, cR;
 		for (int i = 0; i < _ZR.size(); i++)
 		{
 			if (_ZR[i]._s < _rightChild->_Y[0] && _ZR[i]._s < rbT)
@@ -242,20 +250,37 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 				backX.push_back(_ZR[i]);
 			}
 		}
-		sort(backX.begin(), backX.end(), cmpXEndInc);
-		Y laT = leftAlphaTightPointforZR(backX[0]._e);
-		vector<X> cR;
-		for (int i = 0; i < rightI.size(); i++)
+		if (!backX.empty())
 		{
-			if (rightI[i]._e > laT)
+			sort(backX.begin(), backX.end(), cmpXEndInc);
+			Y laT = leftAlphaTightPointforZR(backX[0]._e);
+			for (int i = 0; i < rightI.size(); i++)
 			{
-				cR.push_back(rightI[i]);
+				if (rightI[i]._e > laT)
+				{
+					cR.push_back(rightI[i]);
+				}
+			}
+			for (int i = 0; i < TLI.size(); i++)
+			{
+				if (TLI[i]._e > laT)
+				{
+					if (find(cTLI.begin(), cTLI.end(), TLI[i]) == cTLI.end())
+					{
+						cR.push_back(TLI[i]);
+					}
+					//cTLI or CL?
+				}
 			}
 		}
 		if (cTLI.empty() && cL.empty() && cR.empty())
 		{
 			//find in P.T
-			Y bT = rightBetaTightPointforZR(_rightChild->_Y[0]);
+			if (backX.empty())
+			{
+				return rMsg;//Y bT = rightBetaTightPointforZR(_leftChild->_Y[_leftChild->_Y.size() - 1]);
+			}
+			Y bT = rightBetaTightPointforZR(/*_leftChild->_Y[_leftChild->_Y.size() - 1]);*/_rightChild->_Y[0]);
 			vector<X> cTP;
 			for (int i = 0; i < _T.size(); i++)
 			{
@@ -267,6 +292,12 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 			sort(cTP.begin(), cTP.end(), cmpXEndInc);
 			if (cTP.empty())
 			{
+				vector<X>::iterator it = find(_ZR.begin(), _ZR.end(), msg._bT);
+				if (msg._bT._id != -1 &&  it != _ZR.end())
+				{
+					_ZR.erase(it);
+					_ZL.push_back(msg._bT);
+				}
 				return rMsg;
 			}
 			else
@@ -275,7 +306,8 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 				_ZL.push_back(backX[0]);
 				_ZR.erase(find(_ZR.begin(), _ZR.end(), backX[0]));
 				_ZR.push_back(cTP[0]);
-				_T.erase(find(_I.begin(), _I.end(), cTP[0]));
+				_Z.push_back(cTP[0]);
+				_T.erase(find(_T.begin(), _T.end(), cTP[0]));
 				rMsg._bT = cTP[0];
 				rMsg._aZ = cTP[0];
 				return rMsg;
@@ -310,6 +342,7 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 				_ZL.push_back(backX[0]);
 				_ZR.erase(find(_ZR.begin(), _ZR.end(), backX[0]));
 				_ZR.push_back(cx);
+				_Z.push_back(cx);
 				_I.erase(find(_I.begin(), _I.end(), cx));
 				rMsg._bI = cx;
 				rMsg._aZ = cx;
@@ -317,4 +350,134 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 			}
 		}
 	}
+}
+
+
+Msg TreeNode::insertYintoInternalNodeR(Msg msg)
+{
+	Msg rMsg;
+	rMsg._aY = msg._aY;
+
+	vector<X> TLI, leftI, rightI;
+	determineNewInfeabileXOfTL(msg, TLI);
+	determineNewInfeabileXOfLZRZ(msg, leftI, rightI);
+	Y laT = leftAlphaTightPointforZR(msg._aY);
+	vector<X> cTLI;
+	for (int i = 0; i < TLI.size(); i++)
+	{
+		if (TLI[i]._e > laT)
+		{
+			cTLI.push_back(TLI[i]);
+		}
+	}
+	if (msg._bI._id != -1)
+	{
+		rightI.push_back(msg._bI);
+	}
+	vector<X> cR;
+	for (int i = 0; i < rightI.size(); i++)
+	{
+		if (rightI[i]._e > laT)
+		{
+			cR.push_back(rightI[i]);
+		}
+	}
+	vector<X> forwardX, cL;
+	for (int i = 0; i < _ZL.size(); i++)
+	{
+		if (_ZL[i]._e >= _rightChild->_Y[0] && _ZL[i]._e > laT)
+		{
+			forwardX.push_back(_ZL[i]);
+		}
+	}
+	if (!forwardX.empty())
+	{
+		sort(forwardX.begin(), forwardX.end(), cmpXBeginDec);
+		Y rbT = rightBetaTightPointforZL(forwardX[0]._s);
+		for (int i = 0; i < leftI.size(); i++)
+		{
+			if (leftI[i]._s < rbT)
+			{
+				cL.push_back(leftI[i]);
+			}
+		}
+		for (int i = 0; i < TLI.size(); i++)
+		{
+			if (TLI[i]._s < rbT)
+			{
+				if (find(cTLI.begin(), cTLI.end(), TLI[i]) == cTLI.end())
+				{
+					cL.push_back(TLI[i]);
+				}
+				//cTLI or CL?
+			}
+		}
+	}
+	if (cTLI.empty() && cL.empty() && cR.empty())
+	{
+		//find in P.T
+		Y bT = rightBetaTightPointforZR(msg._aY);/*_leftChild->_Y[_leftChild->_Y.size() - 1]);*/
+		vector<X> cTP;
+		for (int i = 0; i < _T.size(); i++)
+		{
+			if (_T[i]._s < bT)
+			{
+				cTP.push_back(_T[i]);
+			}
+		}
+		sort(cTP.begin(), cTP.end(), cmpXEndInc);
+		if (cTP.empty())
+		{
+			return rMsg;
+		}
+		else
+		{
+			//pull the cTP[0] back
+			_ZR.push_back(cTP[0]);
+			_Z.push_back(cTP[0]);
+			_T.erase(find(_T.begin(), _T.end(), cTP[0]));
+			rMsg._bT = cTP[0];
+			rMsg._aZ = cTP[0];
+			return rMsg;
+		}
+	}
+	else
+	{
+		vector<X> cxinI = cTLI;
+		for (int i = 0; i < cL.size(); i++)
+		{
+			cxinI.push_back(cL[i]);
+		}
+		for (int i = 0; i < cR.size(); i++)
+		{
+			cxinI.push_back(cR[i]);
+		}
+		sort(cxinI.begin(), cxinI.end(), cmpXWeightInc);
+		X cx = cxinI[cxinI.size() - 1];
+		if (find(cL.begin(), cL.end(), cx) == cL.end())
+		{
+			//not in left
+			//in TIL or right
+			_I.erase(find(_I.begin(), _I.end(), cx));
+			_Z.push_back(cx);
+			_ZR.push_back(cx);
+			rMsg._bI = cx;
+			rMsg._aZ = cx;
+			return rMsg;
+		}
+		else
+		{
+			//in left
+			sort(forwardX.begin(), forwardX.end(), cmpXEndInc);
+			_ZR.push_back(forwardX[forwardX.size()-1]);
+			_ZL.erase(find(_ZL.begin(), _ZL.end(), forwardX[forwardX.size() - 1]));
+			_ZL.push_back(cx);
+			_Z.push_back(cx);
+			_I.erase(find(_I.begin(), _I.end(), cx));
+			rMsg._bI = cx;
+			rMsg._aZ = cx;
+			return rMsg;
+		}
+	}
+
 }

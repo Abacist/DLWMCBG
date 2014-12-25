@@ -199,32 +199,7 @@ int TreeNode::verifyNodeInvariants()
 
 	sort(_Y.begin(), _Y.end(), cmpYInc);
 
-	//X = Z+I+T
-	vector<X> ZIT = _Z;
-	for (int i = 0; i < _I.size(); i++)
-	{
-		ZIT.push_back(_I[i]);
-	}
-	for (int i = 0; i < _T.size(); i++)
-	{
-		ZIT.push_back(_T[i]);
-	}
-	if (ZIT.size() != _X.size())
-	{
-		return 7;
-	}
-	else
-	{
-		sort(ZIT.begin(), ZIT.end(), cmpXID);
-		sort(_X.begin(), _X.end(), cmpXID);
-		for (int i = 0; i < ZIT.size(); i++)
-		{
-			if (ZIT[i]._id != _X[i]._id)
-			{
-				return 7;
-			}
-		}
-	}
+	
 
 	// invariant \phi_1: \nexists x\in T, x.e<=Y.e
 	for (int i = 0; i < (int)_T.size(); i++)
@@ -349,14 +324,77 @@ int TreeNode::verifyNodeInvariants()
 		}
 	}
 
+	
+
+	//X = Z+I+T
+	vector<X> ZIT = _Z;
+	for (int i = 0; i < _I.size(); i++)
+	{
+		ZIT.push_back(_I[i]);
+	}
+	for (int i = 0; i < _T.size(); i++)
+	{
+		ZIT.push_back(_T[i]);
+	}
+	if (ZIT.size() != _X.size())
+	{
+		return 7;
+	}
+	else
+	{
+		sort(ZIT.begin(), ZIT.end(), cmpXID);
+		sort(_X.begin(), _X.end(), cmpXID);
+		for (int i = 0; i < ZIT.size(); i++)
+		{
+			if (ZIT[i]._id != _X[i]._id)
+			{
+				return 7;
+			}
+		}
+	}
+
+
 	// invariant, for test insertY: |Y_P| = |Y_R| + |Y_L|
 	if (_leftChild != NULL)
 	{
 		if (_Y.size() != _leftChild->_Y.size() + _rightChild->_Y.size())
 		{
-			return 7;
+			return 8;
 		}
 	}
+
+	if (_leftChild != NULL)
+	{
+		if (_ZL.size() != _leftChild->_Z.size())
+		{
+			return 9;
+		}
+	}
+
+	//Z = ZL + ZR
+	vector<X> Z1 = _Z;
+	vector<X> Z2 = _ZL;
+	for (int i = 0; i < _ZR.size(); i++)
+	{
+		Z2.push_back(_ZR[i]);
+	}
+	if (Z1.size() != Z2.size())
+	{
+		return 10;
+	}
+	else
+	{
+		sort(Z1.begin(), Z1.end(), cmpXID);
+		sort(Z2.begin(), Z2.end(), cmpXID);
+		for (int i = 0; i < Z1.size(); i++)
+		{
+			if (Z1[i] != Z2[i])
+			{
+				return 10;
+			}
+		}
+	}
+	
 
 
 	return 0;

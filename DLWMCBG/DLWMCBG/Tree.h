@@ -42,7 +42,7 @@ public:
 
 	void determineReachableSetinES(X x, vector<X>& R, bool& isTight);//no insert, just check
 	void determineReachableSetinEE(X x, vector<X>& R, bool& isTight);
-	void determineNewInfeabileXOfTL(vector<X>& TLI);
+	void determineNewInfeabileXOfTL(Msg msg, vector<X>& TLI);
 	void determineNewInfeabileXOfLZRZ(Msg curMsg, vector<X>& leftPart, vector<X>& rightPart);
 	//void determineCompensableSetOfPI(Msg curMsg, vector<X>& CS);
 	Msg insertYintoInternalNodeL(Msg curMsg);
