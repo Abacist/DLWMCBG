@@ -359,6 +359,17 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 				if (cx._s >= rbT)
 				{
 					//must need backX back
+					Y raT = rightAlphaTightPointforZR(cx._e);
+					vector<X> realBackX;
+					for (int i = 0; i < backX.size(); i++)
+					{
+						if (backX[i]._e <= raT)
+						{
+							realBackX.push_back(backX[i]);
+						}
+					}
+					backX = realBackX;
+					sort(backX.begin(), backX.end(), cmpXEndInc);
 					_ZL.push_back(backX[0]);
 					_ZR.erase(find(_ZR.begin(), _ZR.end(), backX[0]));
 					_ZR.push_back(cx);
@@ -542,12 +553,50 @@ Msg TreeNode::insertYintoInternalNodeR(Msg msg)
 		X cx = cxinI[cxinI.size() - 1];
 		/*if (find(cL.begin(), cL.end(), cx) == cL.end())
 		{*/
-			if (!forwardX.empty())
+		if (!forwardX.empty())
+		{
+			if (laT._id == -1 && cx._e < _rightChild->getIntervalStart() || laT._id != -1 && cx._e <= laT)
 			{
-				if (laT._id == -1 && cx._e < _rightChild->getIntervalStart() ||laT._id != -1 && cx._e <= laT)
+				//must need forwardX forward
+				Y lbT = leftBetaTightPointforZL(cx._s);
+				vector<X> realForwardX;
+				for (int i = 0; i < forwardX.size(); i++)
 				{
-					//must need forwardX forward
-					sort(forwardX.begin(), forwardX.end(), cmpXEndInc);
+					if (forwardX[i]._s >= lbT)
+					{
+						realForwardX.push_back(forwardX[i]);
+					}
+				}
+				forwardX = realForwardX;
+				sort(forwardX.begin(), forwardX.end(), cmpXEndInc);
+				_ZR.push_back(forwardX[forwardX.size() - 1]);
+				_ZL.erase(find(_ZL.begin(), _ZL.end(), forwardX[forwardX.size() - 1]));
+				_ZL.push_back(cx);
+				_Z.push_back(cx);
+				_I.erase(find(_I.begin(), _I.end(), cx));
+				rMsg._bI = cx;
+				rMsg._aZ = cx;
+				return rMsg;
+			}
+			//a new invariant for ZL and ZR
+			sort(forwardX.begin(), forwardX.end(), cmpXBeginDec);
+			Y rbT = rightBetaTightPointforZL(forwardX[0]._s);
+			if (cx._e >= _rightChild->getIntervalStart() && cx._s < _rightChild->getIntervalStart() && cx._s < rbT)
+			{
+				//calculate the real forwardX
+				Y lbT = leftBetaTightPointforZL(cx._s);
+				vector<X> realForwardX;
+				for (int i = 0; i < forwardX.size(); i++)
+				{
+					if (forwardX[i]._s >= lbT)
+					{
+						realForwardX.push_back(forwardX[i]);
+					}
+				}
+				forwardX = realForwardX;
+				sort(forwardX.begin(), forwardX.end(), cmpXEndInc);
+				if (cmpXEndInc(cx, forwardX[forwardX.size() - 1]))
+				{
 					_ZR.push_back(forwardX[forwardX.size() - 1]);
 					_ZL.erase(find(_ZL.begin(), _ZL.end(), forwardX[forwardX.size() - 1]));
 					_ZL.push_back(cx);
@@ -557,45 +606,17 @@ Msg TreeNode::insertYintoInternalNodeR(Msg msg)
 					rMsg._aZ = cx;
 					return rMsg;
 				}
-				//a new invariant for ZL and ZR
-				sort(forwardX.begin(), forwardX.end(), cmpXBeginDec);
-				Y rbT = rightBetaTightPointforZL(forwardX[0]._s);
-				if (cx._e >= _rightChild->getIntervalStart() && cx._s < _rightChild->getIntervalStart() && cx._s < rbT)
-				{
-					//calculate the real forwardX
-					Y lbT = leftBetaTightPointforZL(cx._s);
-					vector<X> realForwardX;
-					for (int i = 0; i < forwardX.size(); i++)
-					{
-						if (forwardX[i]._s >= lbT)
-						{
-							realForwardX.push_back(forwardX[i]);
-						}
-					}
-					forwardX = realForwardX;
-					sort(forwardX.begin(), forwardX.end(), cmpXEndInc);
-					if (cmpXEndInc(cx, forwardX[forwardX.size() - 1]))
-					{
-						_ZR.push_back(forwardX[forwardX.size() - 1]);
-						_ZL.erase(find(_ZL.begin(), _ZL.end(), forwardX[forwardX.size() - 1]));
-						_ZL.push_back(cx);
-						_Z.push_back(cx);
-						_I.erase(find(_I.begin(), _I.end(), cx));
-						rMsg._bI = cx;
-						rMsg._aZ = cx;
-						return rMsg;
-					}
-					
-				}
+
 			}
-			//not in left
-			//in TIL or right
-			_I.erase(find(_I.begin(), _I.end(), cx));
-			_Z.push_back(cx);
-			_ZR.push_back(cx);
-			rMsg._bI = cx;
-			rMsg._aZ = cx;
-			return rMsg;
+		}
+		//not in left
+		//in TIL or right
+		_I.erase(find(_I.begin(), _I.end(), cx));
+		_Z.push_back(cx);
+		_ZR.push_back(cx);
+		rMsg._bI = cx;
+		rMsg._aZ = cx;
+		return rMsg;
 		//}
 		//else
 		//{
