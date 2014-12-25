@@ -451,7 +451,7 @@ Msg TreeNode::insertYintoInternalNodeR(Msg msg)
 	}
 	for (int i = 0; i < leftI.size(); i++)
 	{
-		if (leftI[i]._e > laT)
+		if (leftI[i]._e > laT && leftI[i]._e >= _rightChild->getIntervalStart())
 		{
 			cR.push_back(leftI[i]);
 		}
@@ -544,7 +544,7 @@ Msg TreeNode::insertYintoInternalNodeR(Msg msg)
 		{*/
 			if (!forwardX.empty())
 			{
-				if (cx._e <= laT)
+				if (laT._id == -1 && cx._e < _rightChild->getIntervalStart() ||laT._id != -1 && cx._e <= laT)
 				{
 					//must need forwardX forward
 					sort(forwardX.begin(), forwardX.end(), cmpXEndInc);
