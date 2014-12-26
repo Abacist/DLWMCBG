@@ -7,9 +7,9 @@
 
 using namespace std;
 
-const int mY =			8;
-const int ur =			30;
-int verifyEachUpdate =	1;//0 not verify, !0 verify
+const int mY =			100;
+const int ur =			500;
+int verifyEachUpdate =	0;//0 not verify, !0 verify
 int gen =				1;
 
 void generator(char* fileName = "input.txt", int MaxY = mY, int UpdateRange = ur, int WeightRange = 1000);

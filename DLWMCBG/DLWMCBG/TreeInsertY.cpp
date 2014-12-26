@@ -219,10 +219,18 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 		//cx is from T in L and is matched or infeasible in P
 		//cx is from I in L
 		Y rbT = rightBetaTightPointforZL(msg._aY);
+		if (rbT == msg._aY)
+		{
+			rbT._id++;
+		}
 		Y rbTBackUp = rbT;
 		vector<X> TLI, leftI, rightI;
 		determineNewInfeabileXOfTL(msg, TLI);
 		determineNewInfeabileXOfLZRZ(msg, leftI, rightI);
+		if (msg._bI._id != -1)
+		{
+			leftI.push_back(msg._bI);
+		}
 		vector<X> CSBase = TLI;
 		for (int i = 0; i < leftI.size(); i++) CSBase.push_back(leftI[i]);
 		for (int i = 0; i < rightI.size(); i++) CSBase.push_back(rightI[i]);
@@ -313,7 +321,7 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 			Y laT = leftAlphaTightPointforZR(backX[0]._e);
 			for (int i = 0; i < CSBase.size(); i++)
 			{
-				if (CSBase[i]._e > _rightChild->getIntervalStart() && CSBase[i]._e > laT &&
+				if (CSBase[i]._e >= _rightChild->getIntervalStart() && CSBase[i]._e > laT &&
 					find(CS.begin(), CS.end(), CSBase[i]) == CS.end())
 				{
 					CS.push_back(CSBase[i]);
@@ -490,6 +498,7 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 										}
 									}
 									sort(realBackX.begin(), realBackX.end(), cmpXEndInc);
+									_Z.push_back(cx);
 									_ZL.push_back(cx);
 									_I.erase(find(_I.begin(), _I.end(), cx));
 									_ZL.erase(find(_ZL.begin(), _ZL.end(), forwardX));
@@ -551,6 +560,7 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 							}
 							sort(realBackX.begin(), realBackX.end(), cmpXEndInc);
 							_ZL.push_back(cx);
+							_Z.push_back(cx);
 							_I.erase(find(_I.begin(), _I.end(), cx));
 							_ZL.erase(find(_ZL.begin(), _ZL.end(), forwardX));
 							_ZR.push_back(forwardX);
