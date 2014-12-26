@@ -411,6 +411,70 @@ int TreeNode::verifyNodeInvariants()
 	}
 
 
+	//new invariant for ZL and ZR
+	if (_rightChild != NULL)
+	{
+		vector<X> TML;
+		vector<X> TMR;
+		vector<Y> YL;
+		vector<Y> YR;
+		for (int i = 0; i < _ZL.size(); i++)
+		{
+			if (_ZL[i]._e >= _rightChild->getIntervalStart())
+			{
+				TML.push_back(_ZL[i]);
+			}
+		}
+		for (int i = 0; i < _ZR.size(); i++)
+		{
+			if (_ZR[i]._s < _rightChild->getIntervalStart())
+			{
+				TMR.push_back(_ZR[i]);
+			}
+		}
+		for (int i = 0; i < _Y.size(); i++)
+		{
+			if (_Y[i] < _rightChild->getIntervalStart())
+			{
+				YL.push_back(_Y[i]);
+			}
+		}
+		for (int i = 0; i < _Y.size(); i++)
+		{
+			if (_Y[i] >= _rightChild->getIntervalStart())
+			{
+				YR.push_back(_Y[i]);
+			}
+		}
+		if (!TML.empty() && !TMR.empty())
+		{
+			for (int i = 0; i < TML.size(); i++)
+			{
+				for (int j = 0; j < TMR.size(); j++)
+				{
+					if (cmpXEndInc(TMR[j], TML[i]))
+					{
+						vector<X> tempZL = _ZL;
+						vector<X> tempZR = _ZR;
+						_ZL.push_back(TMR[j]);
+						_ZR.push_back(TML[i]);
+						_ZR.erase(find(_ZR.begin(), _ZR.end(), TMR[j]));
+						_ZL.erase(find(_ZL.begin(), _ZL.end(), TML[i]));
+						vector<X> ZLNew, ZRNew;
+						gloverMatching(tempZL, YL, &ZLNew);
+						gloverMatching(tempZR, YR, &ZRNew);
+						if (ZLNew.size() == _ZL.size() && ZRNew.size() == _ZR.size())
+						{
+							return 12;
+						}
+					}
+				}
+			}
+		}
+		
+	}
+
+
 	return 0;
 }
 
@@ -605,6 +669,7 @@ Y TreeNode::leftBetaTightPointforZL(Y y)
 	return tY;
 }
 
+//return -1 if not exist
 Y TreeNode::rightAlphaTightPointforZR(Y y)
 {
 	vector<X> tempZ;
@@ -632,15 +697,19 @@ Y TreeNode::rightAlphaTightPointforZR(Y y)
 
 	// if the ES part is full, return the last one.
 	// Note: in this case, it maybe not a real tight point.
-	if (_ZR.size() == tempY.size())
-	{
-		return tempY[tempY.size() - 1];
-	}
+	
 	for (int i = tempZ.size() - 1; i >= 0; i--)
 	{
 		if (tempY[i] == tempZ[i]._e && tempY[i] >= y)
 		{
 			tY = tempY[i];
+		}
+	}
+	if (tY._id == -1)
+	{
+		if (_ZR.size() == tempY.size())
+		{
+			return tempY[tempY.size() - 1];
 		}
 	}
 	return tY;

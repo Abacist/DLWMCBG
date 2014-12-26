@@ -7,15 +7,18 @@
 
 using namespace std;
 
-void generator(char* fileName = "input.txt", int MaxY = 50, int UpdateRange = 300, int WeightRange = 1000);
+const int mY = 10;
+const int ur = 40;
+
+void generator(char* fileName = "input.txt", int MaxY = mY, int UpdateRange = ur, int WeightRange = 1000);
 
 int main()
 {
 	int cases = 1;
-	int verifyEachUpdate = 0;//0 not verify, !0 verify
+	int verifyEachUpdate = 1;//0 not verify, !0 verify
 	while (true)
 	{
-		generator(); //generator need to be fit the format
+		//generator(); //generator need to be fit the format
 		ifstream in("input.txt");
 		//ofstream out("output.txt");
 
@@ -71,7 +74,7 @@ int main()
 				}
 				pTree->insertXinTree(x);
 				
-				if (verifyEachUpdate != 0)
+				if (verifyEachUpdate)
 				{
 					int flag = pTree->verifyInvariantsRecur();
 					if (flag == 0)
@@ -98,7 +101,7 @@ int main()
 			{
 				Y y;
 				in >> y._id;	
-				if (y._id == 7)
+				if (y._id == 3)
 				{
 					int a = 1;
 				}
@@ -109,7 +112,7 @@ int main()
 
 					pTree->insertYinTree(y);
 
-					if (verifyEachUpdate != 0)
+					if (verifyEachUpdate)
 					{
 						int flag = pTree->verifyInvariantsRecur();
 						if (flag == 0)
