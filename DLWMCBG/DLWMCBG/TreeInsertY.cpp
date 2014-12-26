@@ -4,6 +4,8 @@
 #include"Basic.h"
 #pragma warning (disable:4018)
 
+extern int verifyEachUpdate;
+
 
 bool Tree::insertYinTree(Y y)
 {
@@ -39,6 +41,14 @@ bool Tree::insertYinTree(Y y)
 		}
 		nodeP->_Y.push_back(y);	// add y in Y
 		sort(nodeP->_Y.begin(), nodeP->_Y.end(), cmpYInc);	// sort Y after each _Y augmentation
+		/*if (verifyEachUpdate)
+		{
+			int flag = nodeP->verifyNodeInvariants();
+			if (flag != 0)
+			{
+				__debugbreak();
+			}
+		}*/
 
 		child = nodeP;
 		nodeP = nodeP->_parentNode;
@@ -403,12 +413,61 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 				{
 					if (cx._e < _rightChild->getIntervalStart())
 					{
-						_I.erase(find(_I.begin(), _I.end(), cx));
-						_Z.push_back(cx);
-						_ZL.push_back(cx);
-						rMsg._bI = cx;
-						rMsg._aZ = cx;
-						return rMsg;
+						//can only be add to left
+						if (cx._s >= rbTBackUp)
+						{
+							//switch
+							Y lbT = leftBetaTightPointforZL(cx._s);
+							vector<X> cxR;
+							for (int i = 0; i < TML.size(); i++)
+							{
+								if (TML[i]._s >= lbT)
+								{
+									cxR.push_back(TML[i]);
+								}
+							}
+							sort(cxR.begin(), cxR.end(), cmpXEndInc);
+							X forwardX = cxR[cxR.size() - 1];
+							Y raT = rightAlphaTightPointforZR(forwardX._e);
+							vector<X> backXFilter;
+							for (int i = 0; i < backX.size(); i++)
+							{
+								if (raT._id == -1 || raT._id != -1 && backX[i]._e <= raT)
+								{
+									backXFilter.push_back(backX[i]);
+								}
+							}
+							sort(backXFilter.begin(), backXFilter.end(), cmpXBeginDec);
+							Y rbTforcx = rightBetaTightPointforZL(backXFilter[backXFilter.size() - 1]._s);
+							vector<X> realBackX;
+							for (int i = 0; i < backXFilter.size(); i++)
+							{
+								if (backXFilter[i]._s < rbTforcx)
+								{
+									realBackX.push_back(backXFilter[i]);
+								}
+							}
+							sort(realBackX.begin(), realBackX.end(), cmpXEndInc);
+							_ZL.push_back(cx);
+							_Z.push_back(cx);
+							_I.erase(find(_I.begin(), _I.end(), cx));
+							_ZL.erase(find(_ZL.begin(), _ZL.end(), forwardX));
+							_ZR.push_back(forwardX);
+							_ZR.erase(find(_ZR.begin(), _ZR.end(), realBackX[0]));
+							_ZL.push_back(realBackX[0]);
+							rMsg._bI = cx;
+							rMsg._aZ = cx;
+							return rMsg;
+						}
+						else
+						{
+							_I.erase(find(_I.begin(), _I.end(), cx));
+							_Z.push_back(cx);
+							_ZL.push_back(cx);
+							rMsg._bI = cx;
+							rMsg._aZ = cx;
+							return rMsg;
+						}
 					}
 					else
 					{
