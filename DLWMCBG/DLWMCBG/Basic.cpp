@@ -6,20 +6,20 @@
 void generator(char* fileName, int MaxY, int UpdateRange, int WeightRange)
 {
 	ofstream out(fileName);
-	/*out << MaxY+1 << endl;
+	out << MaxY+1 << endl;
 	for (int i = 0; i <= MaxY; i++)
 	{
 		out << i << " ";
 	}
-	out << endl;*/
-	out << 1 << endl << 0 << endl;
+	out << endl;
+	//out << 1 << endl << 0 << endl;
 	SYSTEMTIME lpsystime;
 	GetLocalTime(&lpsystime);
 	srand(lpsystime.wMinute * 1000 + lpsystime.wMilliseconds);
 	int i = 0;
 	for (; i < UpdateRange; i++)
 	{
-		if ((rand() % 2) == 0)		// insert x or insert y
+		//if ((rand() % 2) == 0)		// insert x or insert y
 		{
 			int s = rand() % MaxY + 1;
 			int e = rand() % MaxY + 1;
@@ -32,9 +32,9 @@ void generator(char* fileName, int MaxY, int UpdateRange, int WeightRange)
 			
 			out << 1 << " " << i + 1 << " " << s << " " << e << " " << rand() % WeightRange << endl;
 		}
-		else
+		//else
 		{
-			out << 3 << " " << rand() % MaxY + 1 << endl;
+			//out << 3 << " " << rand() % MaxY + 1 << endl;
 		}
 		
 	}

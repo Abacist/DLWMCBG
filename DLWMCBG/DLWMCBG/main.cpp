@@ -7,21 +7,25 @@
 
 using namespace std;
 
-const int mY = 10;
-const int ur = 40;
+const int mY =			10;
+const int ur =			40;
+int verifyEachUpdate =	1;//0 not verify, !0 verify
+int gen =				1;
 
 void generator(char* fileName = "input.txt", int MaxY = mY, int UpdateRange = ur, int WeightRange = 1000);
 
 int main()
 {
 	int cases = 1;
-	int verifyEachUpdate = 1;//0 not verify, !0 verify
+	
 	while (true)
 	{
-		//generator(); //generator need to be fit the format
+		if (gen)
+		{
+			generator(); //generator need to be fit the format
+		}
 		ifstream in("input.txt");
 		//ofstream out("output.txt");
-
 		if (!in)
 		{
 			cout << "input file open error" << endl;
@@ -68,7 +72,7 @@ int main()
 
 				// if x.s or x.e is not in _Y, insert it.	
 				pTree->adjustXToProper(x);
-				if (x._id == 23)
+				if (x._id == 9)
 				{
 					int a = 1;
 				}

@@ -456,10 +456,10 @@ int TreeNode::verifyNodeInvariants()
 					{
 						vector<X> tempZL = _ZL;
 						vector<X> tempZR = _ZR;
-						_ZL.push_back(TMR[j]);
-						_ZR.push_back(TML[i]);
-						_ZR.erase(find(_ZR.begin(), _ZR.end(), TMR[j]));
-						_ZL.erase(find(_ZL.begin(), _ZL.end(), TML[i]));
+						tempZL.push_back(TMR[j]);
+						tempZR.push_back(TML[i]);
+						tempZR.erase(find(tempZR.begin(), tempZR.end(), TMR[j]));
+						tempZL.erase(find(tempZL.begin(), tempZL.end(), TML[i]));
 						vector<X> ZLNew, ZRNew;
 						gloverMatching(tempZL, YL, &ZLNew);
 						gloverMatching(tempZR, YR, &ZRNew);

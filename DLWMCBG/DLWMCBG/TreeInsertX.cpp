@@ -6,7 +6,7 @@
 #include"Basic.h"
 #pragma warning (disable:4018)
 
-
+extern int verifyEachUpdate;
 
 
 void TreeNode::determineReachableSetinES(X x, vector<X>& R, bool& isTight)
@@ -509,10 +509,14 @@ bool Tree::insertXinTree(X x)
 			}
 			//break;
 		}
-		/*if (nodeP->verifyNodeInvariants() != 0)
+		/*if (verifyEachUpdate)
 		{
-			throw new exception();
+			if (nodeP->verifyNodeInvariants() != 0)
+			{
+				throw new exception();
+			}
 		}*/
+		
 		child = nodeP;
 		nodeP = nodeP->_parentNode;
 	}
