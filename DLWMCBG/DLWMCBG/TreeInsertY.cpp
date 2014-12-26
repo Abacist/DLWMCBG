@@ -474,7 +474,7 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 									vector<X> backXFilter;
 									for (int i = 0; i < backX.size(); i++)
 									{
-										if (backX[i]._e <= raT)
+										if (raT._id  == -1 || raT._id != -1 && backX[i]._e <= raT)
 										{
 											backXFilter.push_back(backX[i]);
 										}
@@ -491,7 +491,7 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 									}
 									sort(realBackX.begin(), realBackX.end(), cmpXEndInc);
 									_ZL.push_back(cx);
-									_I.erase(find(_I.begin(), _T.end(), cx));
+									_I.erase(find(_I.begin(), _I.end(), cx));
 									_ZL.erase(find(_ZL.begin(), _ZL.end(), forwardX));
 									_ZR.push_back(forwardX);
 									_ZR.erase(find(_ZR.begin(), _ZR.end(), realBackX[0]));
@@ -534,7 +534,7 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 							vector<X> backXFilter;
 							for (int i = 0; i < backX.size(); i++)
 							{
-								if (backX[i]._e <= raT)
+								if (raT._id == -1 || raT._id != -1 && backX[i]._e <= raT)
 								{
 									backXFilter.push_back(backX[i]);
 								}
@@ -551,7 +551,7 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 							}
 							sort(realBackX.begin(), realBackX.end(), cmpXEndInc);
 							_ZL.push_back(cx);
-							_I.erase(find(_I.begin(), _T.end(), cx));
+							_I.erase(find(_I.begin(), _I.end(), cx));
 							_ZL.erase(find(_ZL.begin(), _ZL.end(), forwardX));
 							_ZR.push_back(forwardX);
 							_ZR.erase(find(_ZR.begin(), _ZR.end(), realBackX[0]));

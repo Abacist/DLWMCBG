@@ -631,6 +631,7 @@ Y TreeNode::rightBetaTightPointforZR(Y y)
 	return tY;
 }
 
+//-1 if not exist
 Y TreeNode::leftBetaTightPointforZL(Y y)
 {
 	vector<X> tempZ;

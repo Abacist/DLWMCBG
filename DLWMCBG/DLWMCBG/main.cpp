@@ -7,8 +7,8 @@
 
 using namespace std;
 
-const int mY =			10;
-const int ur =			40;
+const int mY =			8;
+const int ur =			30;
 int verifyEachUpdate =	1;//0 not verify, !0 verify
 int gen =				1;
 
