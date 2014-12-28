@@ -438,7 +438,7 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 								}
 							}
 							sort(backXFilter.begin(), backXFilter.end(), cmpXBeginDec);
-							Y rbTforcx = rightBetaTightPointforZL(backXFilter[backXFilter.size() - 1]._s);
+							//Y rbTforcx = rightBetaTightPointforZL(backXFilter[backXFilter.size() - 1]._s);
 							//the rbTBackUp will be removed!
 							vector<X> realBackX = backXFilter;
 							/*for (int i = 0; i < backXFilter.size(); i++)
@@ -548,15 +548,15 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 										}
 									}
 									sort(backXFilter.begin(), backXFilter.end(), cmpXBeginDec);
-									Y rbTforcx = rightBetaTightPointforZL(backXFilter[backXFilter.size() - 1]._s);
-									vector<X> realBackX;
-									for (int i = 0; i < backXFilter.size(); i++)
+									//Y rbTforcx = rightBetaTightPointforZL(backXFilter[backXFilter.size() - 1]._s);
+									vector<X> realBackX = backXFilter;
+									/*for (int i = 0; i < backXFilter.size(); i++)
 									{
 										if (backXFilter[i]._s < rbTforcx)
 										{
 											realBackX.push_back(backXFilter[i]);
 										}
-									}
+									}*/
 									sort(realBackX.begin(), realBackX.end(), cmpXEndInc);
 									_Z.push_back(cx);
 									_ZL.push_back(cx);
@@ -609,15 +609,15 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 								}
 							}
 							sort(backXFilter.begin(), backXFilter.end(), cmpXBeginDec);
-							Y rbTforcx = rightBetaTightPointforZL(backXFilter[backXFilter.size() - 1]._s);
-							vector<X> realBackX;
-							for (int i = 0; i < backXFilter.size(); i++)
+							//Y rbTforcx = rightBetaTightPointforZL(backXFilter[backXFilter.size() - 1]._s);
+							vector<X> realBackX = backXFilter;
+							/*for (int i = 0; i < backXFilter.size(); i++)
 							{
 								if (backXFilter[i]._s < rbTforcx)
 								{
 									realBackX.push_back(backXFilter[i]);
 								}
-							}
+							}*/
 							sort(realBackX.begin(), realBackX.end(), cmpXEndInc);
 							_ZL.push_back(cx);
 							_Z.push_back(cx);
