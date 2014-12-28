@@ -439,14 +439,15 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 							}
 							sort(backXFilter.begin(), backXFilter.end(), cmpXBeginDec);
 							Y rbTforcx = rightBetaTightPointforZL(backXFilter[backXFilter.size() - 1]._s);
-							vector<X> realBackX;
-							for (int i = 0; i < backXFilter.size(); i++)
+							//the rbTBackUp will be removed!
+							vector<X> realBackX = backXFilter;
+							/*for (int i = 0; i < backXFilter.size(); i++)
 							{
 								if (backXFilter[i]._s < rbTforcx)
 								{
 									realBackX.push_back(backXFilter[i]);
 								}
-							}
+							}*/
 							sort(realBackX.begin(), realBackX.end(), cmpXEndInc);
 							_ZL.push_back(cx);
 							_Z.push_back(cx);
@@ -790,10 +791,12 @@ Msg TreeNode::insertYintoInternalNodeR(Msg msg)
 				return rMsg;
 			}
 			//a new invariant for ZL and ZR
+			//not (cx can only be add to left): 1. cx can be add to both 2. cx can only be add to right
 			sort(forwardX.begin(), forwardX.end(), cmpXBeginDec);
 			Y rbT = rightBetaTightPointforZL(forwardX[0]._s);
 			if (cx._e >= _rightChild->getIntervalStart() && cx._s < _rightChild->getIntervalStart() && cx._s < rbT)
 			{
+				//1. cx can be add to both 
 				//calculate the real forwardX
 				Y lbT = leftBetaTightPointforZL(cx._s);
 				vector<X> realForwardX;
