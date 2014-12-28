@@ -22,7 +22,7 @@ void generator(char* fileName, int MaxY, int UpdateRange, int WeightRange)
 		if ((rand() % 2) == 0)		// insert x or insert y
 		{
 			int s = rand() % MaxY + 1;
-			int e = rand() % MaxY + 1;
+			int e = rand() % (MaxY*2) + 1;
 			if (s > e)
 			{
 				int temp = e;
@@ -30,11 +30,11 @@ void generator(char* fileName, int MaxY, int UpdateRange, int WeightRange)
 				s = temp;
 			}
 			
-			out << 1 << " " << i + 1 << " " << s << " " << e << " " << rand() % WeightRange << endl;
+			out << 1 << " " << i + 1 << " " << 0 << " " << e << " " << rand() % WeightRange << endl;
 		}
 		else
 		{
-			out << 3 << " " << rand() % MaxY + 1 << endl;
+			out << 3 << " " << rand() % MaxY + 1 <<" "<<rand()%WeightRange<< endl;
 		}
 		
 	}
@@ -51,34 +51,13 @@ Msg::Msg()
 	Y y;
 	y._id = -1;
 
-	_aZ = _bZ = _aT = _bT = _aI = _bI = _aX = _bX = x;
-	_aY = _bY = y;
-}
-
-// same as the format in FAW, i.e., int _c; //c==0, null; c==1, transferred; c==2, infeasible
-int Msg::flagInsertX()
-{
-	if (_aT._id == -1 && _aI._id == -1)	// Neither T nor I is augmented.
-	{
-		return 0;
-	}
-	else if (_aT._id != -1)	// T is augmented.
-	{
-		return 1;
-	}
-	else if (_aI._id != -1)	// I is augmented.
-	{
-		return 2;
-	}
-	else
-	{
-		return -1;
-	}
+	_aX = _bX = _aMX = _bMX = _aIX = _bIX = _aTX = _bTX = x;
+	_aY = _bY = _aMY = _bMY = _aIY = _bIY = y;
 }
 
 ostream& operator<<(ostream& os, const Y& rhs)
 {
-	os << rhs._id;
+	os << rhs._id<<rhs._w;
 	return os;
 }
 
@@ -91,14 +70,27 @@ ostream& operator<<(ostream& os, const X& rhs)
 
 
 // order y according to its index
-bool cmpYInc(Y y1, Y y2)
+bool cmpYIDInc(Y y1, Y y2)
 {
 	return y1._id < y2._id;
 }
 
-bool cmpYDec(Y y1, Y y2)
+bool cmpYIDDec(Y y1, Y y2)
 {
 	return y1._id > y2._id;
+}
+
+bool cmpYWeightInc(Y y1, Y y2)
+{
+	if (y1._w < y2._w)
+	{
+		return true;
+	}
+	if (y1._w == y2._w && y1._id < y2._id)
+	{
+		return true;
+	}
+	return false;
 }
 
 // priority: increasing end
@@ -134,12 +126,6 @@ bool cmpXBeginDec(X x1, X x2)
 
 }
 
-// increasing start
-/*bool cmpXStartInc(X x1, X x2)
-{
-	return x1._s < x2._s;
-}*/
-
 bool cmpXWeightInc(X x1, X x2)
 {
 	if (x1._w < x2._w)
@@ -158,157 +144,14 @@ bool cmpXID(X x1, X x2)
 	return x1._id < x2._id;
 }
 
-/*bool cmpXEndBeginIdInc(X x1, X x2)
-{
-	if (x1._e < x2._e)
-	{
-		return true;
-	}
-	if (x1._e == x2._e && x1._s < x2._s)
-	{
-		return true;
-	}
-	if (x1._e == x2._e && x1._s == x2._s && x1._id < x2._id)
-	{
-		return true;
-	}
-	return false;
-}*/
 
-// weight decreasing, end increasing, begin decreasing, id increasing
-/*bool cmpXStandard(X x1, X x2)
-{
-	if (x1._w > x2._w)
-	{
-		return true;
-	}
-	else if (x1._w == x2._w && x1._id > x2._id)
-	{
-		return true;
-	}
-	else if (x1._w == x2._w && x1._e < x2._e)
-	{
-	return true;
-	}
-	else if (x1._w == x2._w && x1._e == x2._e && x1._s > x2._s)
-	{
-	return true;
-	}
-	else if (x1._w == x2._w && x1._e == x2._e && x1._s == x2._s && x1._id < x2._id)
-	{
-	return true;
-	}
-	return false;
-}*/
-
-// end increasing, begin decreasing, increasing id
-/*bool cmpXEndIncStartDec(X x1, X x2)
-{
-	if (x1._e < x2._e)
-	{
-		return true;
-	}
-	else if (x1._e == x2._e && x1._s > x2._s)
-	{
-		return true;
-	}
-	else if (x1._e == x2._e && x1._s == x2._s && x1._id < x2._id)
-	{
-		return true;
-	}
-	return false;
-}*/
-
-// For Test
-/*struct TestX
-{
-	X _X;
-	int flag = 0;
-	bool operator==(const TestX& x)
-	{
-		return this->_X._id == x._X._id;
-	}
-};*/
-
-// increasing start
-/*bool testCmpXStartInc(TestX x1, TestX x2)
-{
-	return x1._X._s < x2._X._s;
-}*/
-
-// weight increasing, end increasing, begin decreasing, id increasing
-/*bool testCmpXEndBeg(TestX x1, TestX x2)
-{
-	if (x1._X._e < x2._X._e)
-	{
-		return true;
-	}
-	else if (x1._X._e == x2._X._e && x1._X._s > x2._X._s)
-	{
-		return true;
-	}
-	return false;
-}*/
-
-// weight decreasing, end increasing, begin decreasing, id increasing
-/*bool testCmpXStandard(TestX x1, TestX x2)
-{
-	if (x1._X._w > x2._X._w)
-	{
-	return true;
-	}
-	else if (x1._X._w == x2._X._w && x1._X._e < x2._X._e)
-	{
-	return true;
-	}
-	else if (x1._X._w == x2._X._w && x1._X._e == x2._X._e && x1._X._s > x2._X._s)
-	{
-	return true;
-	}
-	else if (x1._X._w == x2._X._w && x1._X._e == x2._X._e && x1._X._s == x2._X._s && x1._X._id < x2._X._id)
-	{
-	return true;
-	}
-	return false;
-	if (x1._X._w > x2._X._w)
-	{
-		return true;
-	}
-	else if (x1._X._w == x2._X._w && x1._X._id > x2._X._id)
-	{
-		return true;
-	}
-	return false;
-}*/
-
-// weight decreasing, end increasing, begin decreasing, id increasing
-/*bool testCmpXStandard_TEMP(TestX x1, TestX x2)
-{
-	if (x1._X._w > x2._X._w)
-	{
-		return true;
-	}
-	else if (x1._X._w == x2._X._w && x1._X._e < x2._X._e)
-	{
-		return true;
-	}
-	else if (x1._X._w == x2._X._w && x1._X._e == x2._X._e && x1._X._s > x2._X._s)
-	{
-		return true;
-	}
-	else if (x1._X._w == x2._X._w && x1._X._e == x2._X._e && x1._X._s == x2._X._s && x1._X._id < x2._X._id)
-	{
-		return true;
-	}
-	return false;
-}*/
 
 // return the OIS in the glover mathcing of a CBG
-void gloverMatching(const vector<X> vX, const vector<Y> vY, vector<X>* vZ)
+void formGloverMatching(const vector<X> vX, const vector<Y> vY, vector<X>& vZ)
 {
 	vector<X> XX = vX;
 	vector<Y> YY = vY;
-	vZ->clear();
+	vZ.clear();
 
 	for (int i = 0; i < YY.size(); i++)
 	{
@@ -338,10 +181,10 @@ void gloverMatching(const vector<X> vX, const vector<Y> vY, vector<X>* vZ)
 				}
 			}
 
-			vZ->push_back(x);
+			vZ.push_back(x);
 			vector<X>::iterator it = find(XX.begin(),XX.end(), x);
 			XX.erase(it);
-			if (vZ->size() == vX.size() || vZ->size() == vY.size())
+			if (vZ.size() == vX.size() || vZ.size() == vY.size())
 			{
 				return;
 			}
@@ -351,28 +194,45 @@ void gloverMatching(const vector<X> vX, const vector<Y> vY, vector<X>* vZ)
 }
 
 // return the OIS in the plaxton MWM of a LWCBG
-void PlaxtonMWM(const vector<X> vX, const vector<Y> vY, vector<X>* vZ)
+void formPlaxtonMWM(const vector<X> vX, const vector<Y> vY, vector<X>& vZ, vector<Y>& vMY)
 {
 	vector<X> XX = vX;
 	vector<Y> YY = vY;
 	
 	sort(XX.begin(), XX.end(), cmpXWeightInc);
-	sort(YY.begin(), YY.end(), cmpYInc);
+	sort(YY.begin(), YY.end(), cmpYIDInc);
 
-	vZ->clear();
+	vZ.clear();
 	for (int i = XX.size() - 1; i >= 0;  i--)
 	{
 		vector<X> tmpZ;
-		vZ->push_back(XX[i]);
-		gloverMatching(*vZ, YY, &tmpZ);
-		if (tmpZ.size() < vZ->size())
+		vZ.push_back(XX[i]);
+		formGloverMatching(vZ, YY, tmpZ);
+		if (tmpZ.size() < vZ.size())
 		{
-			vector<X>::iterator it = find(vZ->begin(), vZ->end(), XX[i]);
-			vZ->erase(it);
+			vector<X>::iterator it = find(vZ.begin(), vZ.end(), XX[i]);
+			vZ.erase(it);
 		}
-		if (vZ->size() == vX.size() || vZ->size() == vY.size())
+		if (vZ.size() == vX.size() || vZ.size() == vY.size())
 		{
-			return;
+			break;
+		}
+	}
+	//vZ finished
+	vMY.clear();
+	sort(YY.begin(), YY.end(), cmpYWeightInc);
+	for (int i = YY.size() - 1; i >= 0; i--)
+	{
+		vector<X> tempZ;
+		vMY.push_back(YY[i]);
+		formGloverMatching(vZ, vMY, tempZ);
+		if (tempZ.size() < vMY.size())
+		{
+			vMY.erase(find(vMY.begin(), vMY.end(), YY[i]));
+		}
+		if (vMY.size() == vZ.size())
+		{
+			break;
 		}
 	}
 }

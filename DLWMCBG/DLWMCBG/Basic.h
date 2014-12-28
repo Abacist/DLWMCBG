@@ -15,7 +15,10 @@ struct Y
 {
 	int _id;	// id of x, assuming distinctive
 	// Notes: the y vertex with _id=-1 denotes the empty y, which is used in msg transmission.
+	int _w;
 
+
+	//used for determine the edge
 	bool operator<(const Y& y)
 	{
 		return this->_id < y._id;
@@ -72,39 +75,35 @@ class Msg
 public:
 	// (a_Z,b_Z;a_T,b_T;a_I,b_I;a_X,b_X;a_Y,b_Y ); 
 	// if in a itme x.id=-1 or y.id=-1, that means the itme is empty.
-	X _aZ;
-	X _bZ;
-	X _aT;
-	X _bT;
-	X _aI;
-	X _bI;
 	X _aX;
 	X _bX;
 	Y _aY;
 	Y _bY;
 
-	//// the FAW's format 
-	//bool _aEmpty; //true: _a is empty
-	//X _a;
-	//bool _bEmpty;
-	//X _b;
-	//int _c; //c==0, null; c==1, transferred; c==2, infeasible
+	X _aMX;
+	X _bMX;
+	X _aTX;
+	X _bTX;
+	X _aIX;
+	X _bIX;
+	
+	Y _aMY;
+	Y _bMY;
+	Y _aIY;
+	Y _bIY;
 
-	// processes
+	
 	Msg();
-	int flagInsertX();	
+	
 };
 
-bool cmpYInc(Y y1, Y y2);			// in the increasing y._id ording
-bool cmpYDec(Y, Y);
-bool cmpXEndInc(X x1, X x2);	// in the increasing x._e ording
+bool cmpYIDInc(Y y1, Y y2);			
+bool cmpYIDDec(Y, Y);
+bool cmpYWeightInc(Y y1, Y y2);
+bool cmpXEndInc(X x1, X x2);	
 bool cmpXBeginDec(X, X);
-//bool cmpXStartInc(X x1, X x2);	// increasing start
 bool cmpXWeightInc(X x1, X x2);
 bool cmpXID(X x1, X x2);
-//bool cmpXEndBeginIdInc(X x1, X x2);
-//bool cmpXEndIncStartDec(X x1, X x2);	// end increasing, start decreasing
-//bool cmpXStandard(X x1, X x2);	// weight decreasing, end increasing, start decreasing, id increasing
 
-void gloverMatching(const vector<X> vX, const vector<Y> vY, vector<X>* vZ);	// return the OIS in the glover mathcing of a CBG
-void PlaxtonMWM(const vector<X> vX, const vector<Y> vY, vector<X>* vZ);	// return the OIS in the plaxton MWM of a LWCBG
+void formGloverMatching(const vector<X> vX, const vector<Y> vY, vector<X>& vZ);	
+void formPlaxtonMWM(const vector<X> vX, const vector<Y> vY, vector<X>& vZ, vector<Y>& vMY);
