@@ -13,3 +13,15 @@ Tree::Tree(vector<Y> vY)
 {
 	_root = new TreeNode(vY);
 }
+
+Y TreeNode::maxY()
+{
+	sort(_Y.begin(), _Y.end(), cmpYIDDec);
+	return _Y[0];
+}
+
+Y TreeNode::minY()
+{
+	sort(_Y.begin(), _Y.end(), cmpYIDInc);
+	return _Y[0];
+}

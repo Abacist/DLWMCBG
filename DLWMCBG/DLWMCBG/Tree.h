@@ -22,6 +22,12 @@ public:
 	
 	TreeNode(vector<Y>);	//init
 
+	Y maxY();
+	Y minY();
+
+	Y leftATforZR(Y y);
+	Y rightATforZR(Y y);
+
 	
 
 };
@@ -32,5 +38,8 @@ public:
 	TreeNode* _root;
 	
 	Tree(vector<Y>);	// init
+
+	void insertXinTree(X x);
+	void insertYinTree(Y y);
 
 };
