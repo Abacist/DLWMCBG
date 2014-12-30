@@ -1270,7 +1270,7 @@ int Tree::verifyInvariantsRecur(TreeNode* curRoot)
 		}
 		else
 		{
-			return max(flagL,flagR);
+			return max(flagL, flagR);
 		}
 	}
 }
@@ -1387,6 +1387,12 @@ Msg TreeNode::insertYintoLeaf(Y y)
 		{
 			if (_I[j]._e > lATP)
 			{
+
+				//for test
+				if (_I[j]._e <= y)
+					throw new exception();
+
+
 				X x1 = _I[j];
 				_Z.push_back(x1);
 				_ZR.push_back(x1);
@@ -1975,6 +1981,13 @@ Msg TreeNode::insertYintoESinNodefromR(Msg msgOld)
 
 	Msg msg;
 	msg._aY = msgOld._aY;
+
+	////for test
+	//if ()
+	//{
+	//	Y raT = rightLeastAlphaTightPoint(msgOld._aY);
+	//}
+
 	Y raT = rightGreatestAlphaTightPoint(msgOld._aY);
 	Y laT = leftGreatestAlphaTightPoint(msgOld._aY);
 	// if there is no alpha_pre, return the greatest y in L._Y
@@ -2020,12 +2033,54 @@ Msg TreeNode::insertYintoESinNodefromR(Msg msgOld)
 	}
 	else
 	{
+		// for test and verification
+		if (msgOld._bI._id != -1)
+		{
+			if (msgOld._bI._e > laT && msgOld._bI._e <= msgOld._aY)
+			{
+				// it is impossible that x in I_R and x.e > \alpha_pre and x.e <= y
+				throw new exception();
+				//// if x_R in I_R and x.e > \alpha_pre and x.s <= y, then x_P=x_R
+				//X minX = msgOld._bI;
+				//vector<X>::iterator it = find(_I.begin(), _I.end(), minX);
+				//_I.erase(it);
+				//_Z.push_back(minX);
+				//_ZR.push_back(minX);
+				//msg._aZ = minX;
+				//msg._bI = minX;
+				//return msg;
+			}
+			else if (msgOld._bI._e <= msgOld._aY)
+			{
+				// msgOld._bI._e <= laT
+				// in this case, x'_R is not in RS(y,P) and I'(R_) should be disjoint with RS(y,P).
+				for (int i = 0; i < _rightChild->_I.size(); i++)
+				{
+					if (_rightChild->_I[i]._e > laT && _rightChild->_I[i]._s <= raT)
+					{
+						throw new exception();
+					}
+				}
+			}
+		}
+		else if (msgOld._bT._id != -1)
+		{
+			// if x_R in T_R and the \alpha_post exists, |Z_R|=|Y_R| in P.
+			if (raT != _Y[_Y.size() - 1])
+				throw new exception();
+		}
+
+
+
 		vector<X> IPmIR = _I;
+		// need this one or not? the added x in R is included since it does not exists in I_R now.???
+		// it does not delete the compensable x in R
 		for (int i = 0; i < _rightChild->_I.size(); i++)
 		{
 			vector<X>::iterator it = find(IPmIR.begin(), IPmIR.end(), _rightChild->_I[i]);
 			IPmIR.erase(it);
 		}
+
 		vector<X> between;
 		for (int i = 0; i < IPmIR.size(); i++)
 		{
@@ -2044,6 +2099,16 @@ Msg TreeNode::insertYintoESinNodefromR(Msg msgOld)
 					minX = between[i];
 				}
 			}
+
+			//for test
+			if (minX._e <= msgOld._aY)
+				throw new exception();
+			if (msgOld._bI._id != -1 && minX == msgOld._bI)
+			{
+				/*if (between.size()>1)
+					throw new exception();*/
+			}
+
 			vector<X>::iterator it = find(_I.begin(), _I.end(), minX);
 			_I.erase(it);
 			_Z.push_back(minX);
@@ -2058,7 +2123,7 @@ Msg TreeNode::insertYintoESinNodefromR(Msg msgOld)
 			{
 				Y bT = rightLeastBetaTightPoint(msgOld._aY);		// ???
 				// if there is no such \beta tightpoint, set it larger than the maximum one
-				if (bT._id == -1)	
+				if (bT._id == -1)
 				{
 					bT._id = _Y[_Y.size() - 1]._id + 1;
 				}
@@ -2073,6 +2138,11 @@ Msg TreeNode::insertYintoESinNodefromR(Msg msgOld)
 
 				if (!backT.empty())
 				{
+					// to find a case in which cx \in I_R, but here a x in T_P can compensate
+					// it should be not right. the cx in IR is prior to any x in T_P.
+					if (msgOld._bI._id != -1)
+						throw new exception();
+
 					X minX = backT[0];
 					for (int i = 0; i < backT.size(); i++)
 					{
@@ -2095,6 +2165,9 @@ Msg TreeNode::insertYintoESinNodefromR(Msg msgOld)
 				// since it does not introduce new tight point w.r.t. y and the compsensable x of R is valid in P
 				if (msgOld._bI._id != -1)
 				{
+
+					throw new exception();	// for test
+
 					X cX = msgOld._bI;
 					vector<X>::iterator itI = find(_I.begin(), _I.end(), cX);
 					if (itI == _I.end())
