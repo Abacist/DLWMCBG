@@ -1360,6 +1360,7 @@ Msg TreeNode::insertYintoLeaf(Y y)
 			{
 				if (_T[i]._e == y)
 				{
+					throw new exception();//could not happen
 					_I.push_back(_T[i]);
 					vector<X>::iterator it = find(_T.begin(), _T.end(), _T[i]);
 					_T.erase(it);
@@ -1429,6 +1430,7 @@ bool Tree::insertYinTree(Y y)
 	vector<Y>::iterator it = find(nodeP->_Y.begin(), nodeP->_Y.end(), y);
 	if (it != nodeP->_Y.end())
 	{
+		//already inserted
 		return false;
 	}
 
@@ -1492,7 +1494,8 @@ bool Tree::insertYinTree(Y y)
 		}
 		else
 		{
-			// msg from the right child						
+			//msg = nodeP->insertYintoESinNode(y, tmpX, msg);		// insert the y into the node		
+
 			msg = nodeP->insertYintoESinNodefromR(msg);		// insert the y into the node		
 		}
 		nodeP->_Y.push_back(y);	// add y in Y
@@ -1882,7 +1885,7 @@ Msg TreeNode::insertYintoESinNodefromL(X backX, Msg msgOld)
 		vector<X> between;
 		for (int i = 0; i < IPmIR.size(); i++)
 		{
-			if (IPmIR[i]._e > laT && IPmIR[i]._s <= raT)
+			if (IPmIR[i]._e > laT /*&& IPmIR[i]._s <= raT*/)
 			{
 				between.push_back(IPmIR[i]);
 			}
@@ -2084,7 +2087,7 @@ Msg TreeNode::insertYintoESinNodefromR(Msg msgOld)
 		vector<X> between;
 		for (int i = 0; i < IPmIR.size(); i++)
 		{
-			if (IPmIR[i]._e > laT && IPmIR[i]._s <= raT)
+			if (IPmIR[i]._e > laT/* && IPmIR[i]._s <= raT*/)
 			{
 				between.push_back(IPmIR[i]);
 			}
