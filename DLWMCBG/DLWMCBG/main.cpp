@@ -105,7 +105,7 @@ int main()
 			{
 				Y y;
 				in >> y._id;	
-				if (y._id == 12)
+				if (y._id == 6)
 				{
 					int a = 1;
 				}

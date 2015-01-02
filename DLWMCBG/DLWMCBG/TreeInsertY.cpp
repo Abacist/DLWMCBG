@@ -41,14 +41,14 @@ bool Tree::insertYinTree(Y y)
 		}
 		nodeP->_Y.push_back(y);	// add y in Y
 		sort(nodeP->_Y.begin(), nodeP->_Y.end(), cmpYInc);	// sort Y after each _Y augmentation
-		if (verifyEachUpdate)
+		/*if (verifyEachUpdate)
 		{
 			int flag = nodeP->verifyNodeInvariants();
 			if (flag != 0)
 			{
 				__debugbreak();
 			}
-		}
+		}*/
 
 		child = nodeP;
 		nodeP = nodeP->_parentNode;
@@ -212,6 +212,8 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 {
 	Msg rMsg;
 	rMsg._aY = msg._aY;
+	
+	
 	if (msg._aZ._id == -1)
 	{
 		//msg keeps
@@ -298,7 +300,7 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 					Y rbTNew = rightBetaTightPointforZL(msg._aY);
 					if (rbTNew == msg._aY)
 					{
-						rbT._id++;
+						rbTNew._id++;
 					}
 					if (rbT < rbTNew)
 					{
@@ -422,7 +424,7 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 				_ZL.push_back(cx);
 				rMsg._bI = cx;
 				rMsg._aZ = cx;
-				return rMsg;
+				//return rMsg;
 			}
 			else
 			{
@@ -437,7 +439,7 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 					_I.erase(find(_I.begin(), _I.end(), cx));
 					rMsg._bI = cx;
 					rMsg._aZ = cx;
-					return rMsg;
+					//return rMsg;
 				}
 				else
 				{
@@ -488,7 +490,7 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 							_ZL.push_back(backX[0]);
 							rMsg._bI = cx;
 							rMsg._aZ = cx;
-							return rMsg;
+							//return rMsg;
 						}
 						else
 						{
@@ -497,7 +499,7 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 							_ZL.push_back(cx);
 							rMsg._bI = cx;
 							rMsg._aZ = cx;
-							return rMsg;
+							//return rMsg;
 						}
 					}
 					else
@@ -508,7 +510,7 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 						if (cx._e > laT && cx._s < rbTBackUp)
 						{
 							//can be add to both side
-							X cxBackUp = cx;
+							/*X cxBackUp = cx;
 							vector<X> RinZL;
 							determineReachableSetinEE(cx, RinZL, *new bool);
 							RinZL.push_back(cx);
@@ -518,7 +520,7 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 								_ZL.push_back(cx);
 								_ZL.erase(find(_ZL.begin(), _ZL.end(), RinZL[RinZL.size() - 1]));
 								cx = RinZL[RinZL.size() - 1];
-							}
+							}*/
 							_ZR.erase(find(_ZR.begin(), _ZR.end(), backX[0]));
 							if (cmpXEndInc(cx, backX[0]))
 							{
@@ -531,11 +533,11 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 								_ZL.push_back(backX[0]);
 								_ZR.push_back(cx);
 							}
-							_I.erase(find(_I.begin(), _I.end(), cxBackUp));
-							_Z.push_back(cxBackUp);
-							rMsg._bI = cxBackUp;
-							rMsg._aZ = cxBackUp;
-							return rMsg;
+							_I.erase(find(_I.begin(), _I.end(), cx));
+							_Z.push_back(cx);
+							rMsg._bI = cx;
+							rMsg._aZ = cx;
+							//return rMsg;
 						}
 						else if (cx._e <= laT &&  cx._s < rbTBackUp)
 						{
@@ -545,7 +547,7 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 							_ZL.push_back(cx);
 							rMsg._bI = cx;
 							rMsg._aZ = cx;
-							return rMsg;
+							//return rMsg;
 						}
 						else if (cx._e > laT && cx._s >= rbTBackUp)
 						{
@@ -574,7 +576,7 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 									_I.erase(find(_I.begin(), _I.end(), cx));
 									rMsg._bI = cx;
 									rMsg._aZ = cx;
-									return rMsg;
+									//return rMsg;
 								}
 								else
 								{
@@ -608,7 +610,7 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 									_ZL.push_back(backX[0]);
 									rMsg._bI = cx;
 									rMsg._aZ = cx;
-									return rMsg;
+									//return rMsg;
 								}
 							}
 							else
@@ -622,7 +624,7 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 								_I.erase(find(_I.begin(), _I.end(), cx));
 								rMsg._bI = cx;
 								rMsg._aZ = cx;
-								return rMsg;
+								//return rMsg;
 							}
 						}
 						else
@@ -669,12 +671,56 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 							_ZL.push_back(backX[0]);
 							rMsg._bI = cx;
 							rMsg._aZ = cx;
-							return rMsg;
+							//return rMsg;
 						}
 					}
 				}
 			}
 		}
+		//adjust
+		if (msg._bT._id != -1 && find(_ZR.begin(), _ZR.end(), msg._bT) != _ZR.end())
+		{
+			vector<Y> YL;
+			vector<Y> YR;
+			for (int i = 0; i < _Y.size(); i++)
+			{
+				if (_Y[i] < _rightChild->getIntervalStart())
+				{
+					YL.push_back(_Y[i]);
+				}
+			}
+			for (int i = 0; i < _Y.size(); i++)
+			{
+				if (_Y[i] >= _rightChild->getIntervalStart())
+				{
+					YR.push_back(_Y[i]);
+				}
+			}
+			
+			vector<X> RinZL;
+			determineReachableSetinEE(msg._bT, RinZL, *new bool);
+			RinZL.push_back(msg._bT);
+			sort(RinZL.begin(), RinZL.end(), cmpXEndInc);
+			X maxEnd = RinZL[RinZL.size() - 1];
+			vector<X> tempZL = _ZL;
+			vector<X> tempZR = _ZR;
+			tempZL.push_back(msg._bT);
+			tempZR.push_back(maxEnd);
+			tempZR.erase(find(tempZR.begin(), tempZR.end(), msg._bT));
+			tempZL.erase(find(tempZL.begin(), tempZL.end(), maxEnd));
+			vector<X> ZLNew, ZRNew;
+			YL.push_back(msg._aY);
+			gloverMatching(tempZL, YL, &ZLNew);
+			gloverMatching(tempZR, YR, &ZRNew);
+			if (ZLNew.size() == _ZL.size() && ZRNew.size() == _ZR.size())
+			{
+				_ZL.push_back(msg._bT);
+				_ZR.push_back(maxEnd);
+				_ZR.erase(find(_ZR.begin(), _ZR.end(), msg._bT));
+				_ZL.erase(find(_ZL.begin(), _ZL.end(), maxEnd));
+			}
+		}
+		return rMsg;
 		
 	}
 }
