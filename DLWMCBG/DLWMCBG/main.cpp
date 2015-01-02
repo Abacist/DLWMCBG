@@ -7,9 +7,9 @@
 
 using namespace std;
 
-const int mY =			30;
-const int ur =			100;
-int verifyEachUpdate =	0;//0 not verify, !0 verify
+const int mY =			8;
+const int ur =			20;
+int verifyEachUpdate =	1;//0 not verify, !0 verify
 int gen =				1;
 
 void generator(char* fileName = "input.txt", int MaxY = mY, int UpdateRange = ur, int WeightRange = 1000);
@@ -72,7 +72,7 @@ int main()
 
 				// if x.s or x.e is not in _Y, insert it.	
 				pTree->adjustXToProper(x);
-				if (x._id == 9)
+				if (x._id == 1)
 				{
 					int a = 1;
 				}
@@ -105,7 +105,7 @@ int main()
 			{
 				Y y;
 				in >> y._id;	
-				if (y._id == 6)
+				if (y._id == 5)
 				{
 					int a = 1;
 				}

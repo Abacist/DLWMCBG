@@ -678,48 +678,202 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 			}
 		}
 		//adjust
-		if (msg._bT._id != -1 && find(_ZR.begin(), _ZR.end(), msg._bT) != _ZR.end())
+		X testX = rMsg._aZ;
+		if (testX._id != -1 && testX._s < _rightChild->getIntervalStart() && testX._e >= _rightChild->getIntervalStart())
 		{
-			vector<Y> YL;
-			vector<Y> YR;
-			for (int i = 0; i < _Y.size(); i++)
+			//a TL element
+			if (find(_ZL.begin(), _ZL.end(), testX) != _ZL.end())
 			{
-				if (_Y[i] < _rightChild->getIntervalStart())
+				vector<X> R;
+				determineReachableSetinES(testX, R, *new bool);
+				R.push_back(testX);
+				sort(R.begin(), R.end(), cmpXBeginDec);
+				X minBegin = R[R.size() - 1];
+				if (cmpXEndInc(minBegin, testX))
 				{
-					YL.push_back(_Y[i]);
+					vector<Y> YL;
+					vector<Y> YR;
+					for (int i = 0; i < _Y.size(); i++)
+					{
+						if (_Y[i] < _rightChild->getIntervalStart())
+						{
+							YL.push_back(_Y[i]);
+						}
+					}
+					YL.push_back(rMsg._aY);
+					for (int i = 0; i < _Y.size(); i++)
+					{
+						if (_Y[i] >= _rightChild->getIntervalStart())
+						{
+							YR.push_back(_Y[i]);
+						}
+					}
+					vector<X> tempZL = _ZL;
+					vector<X> tempZR = _ZR;
+					tempZL.push_back(minBegin);
+					tempZR.push_back(testX);
+					tempZR.erase(find(tempZR.begin(), tempZR.end(), minBegin));
+					tempZL.erase(find(tempZL.begin(), tempZL.end(), testX));
+					
+					vector<X> ZLNew, ZRNew;
+					gloverMatching(tempZL, YL, &ZLNew);
+					gloverMatching(tempZR, YR, &ZRNew);
+					if (ZLNew.size() == _ZL.size() && ZRNew.size() == _ZR.size())
+					{
+						_ZL.push_back(minBegin);
+						_ZR.push_back(testX);
+						_ZR.erase(find(_ZR.begin(), _ZR.end(), minBegin));
+						_ZL.erase(find(_ZL.begin(), _ZL.end(), testX));
+					}
 				}
 			}
-			for (int i = 0; i < _Y.size(); i++)
+			else
 			{
-				if (_Y[i] >= _rightChild->getIntervalStart())
+				vector<X> R;
+				determineReachableSetinEE(testX, R, *new bool);
+				R.push_back(testX);
+				sort(R.begin(), R.end(), cmpXEndInc);
+				X maxEnd = R[R.size() - 1];
+				if (cmpXEndInc(testX, maxEnd))
 				{
-					YR.push_back(_Y[i]);
+					vector<Y> YL;
+					vector<Y> YR;
+					for (int i = 0; i < _Y.size(); i++)
+					{
+						if (_Y[i] < _rightChild->getIntervalStart())
+						{
+							YL.push_back(_Y[i]);
+						}
+					}
+					YL.push_back(rMsg._aY);
+					for (int i = 0; i < _Y.size(); i++)
+					{
+						if (_Y[i] >= _rightChild->getIntervalStart())
+						{
+							YR.push_back(_Y[i]);
+						}
+					}
+					vector<X> tempZL = _ZL;
+					vector<X> tempZR = _ZR;
+					tempZL.push_back(testX);
+					tempZR.push_back(maxEnd);
+					tempZR.erase(find(tempZR.begin(), tempZR.end(), testX));
+					tempZL.erase(find(tempZL.begin(), tempZL.end(), maxEnd));
+
+					vector<X> ZLNew, ZRNew;
+					gloverMatching(tempZL, YL, &ZLNew);
+					gloverMatching(tempZR, YR, &ZRNew);
+					if (ZLNew.size() == _ZL.size() && ZRNew.size() == _ZR.size())
+					{
+						_ZL.push_back(testX);
+						_ZR.push_back(maxEnd);
+						_ZR.erase(find(_ZR.begin(), _ZR.end(), testX));
+						_ZL.erase(find(_ZL.begin(), _ZL.end(), maxEnd));
+					}
 				}
-			}
-			
-			vector<X> RinZL;
-			determineReachableSetinEE(msg._bT, RinZL, *new bool);
-			RinZL.push_back(msg._bT);
-			sort(RinZL.begin(), RinZL.end(), cmpXEndInc);
-			X maxEnd = RinZL[RinZL.size() - 1];
-			vector<X> tempZL = _ZL;
-			vector<X> tempZR = _ZR;
-			tempZL.push_back(msg._bT);
-			tempZR.push_back(maxEnd);
-			tempZR.erase(find(tempZR.begin(), tempZR.end(), msg._bT));
-			tempZL.erase(find(tempZL.begin(), tempZL.end(), maxEnd));
-			vector<X> ZLNew, ZRNew;
-			YL.push_back(msg._aY);
-			gloverMatching(tempZL, YL, &ZLNew);
-			gloverMatching(tempZR, YR, &ZRNew);
-			if (ZLNew.size() == _ZL.size() && ZRNew.size() == _ZR.size())
-			{
-				_ZL.push_back(msg._bT);
-				_ZR.push_back(maxEnd);
-				_ZR.erase(find(_ZR.begin(), _ZR.end(), msg._bT));
-				_ZL.erase(find(_ZL.begin(), _ZL.end(), maxEnd));
 			}
 		}
+		if (!backX.empty())
+		{
+			//adjust
+			X testX = backX[0];
+			if (testX._id != -1 && testX._s < _rightChild->getIntervalStart() && testX._e >= _rightChild->getIntervalStart())
+			{
+				//a TL element
+				if (find(_ZL.begin(), _ZL.end(), testX) != _ZL.end())
+				{
+					vector<X> R;
+					determineReachableSetinES(testX, R, *new bool);
+					R.push_back(testX);
+					sort(R.begin(), R.end(), cmpXBeginDec);
+					X minBegin = R[R.size() - 1];
+					if (cmpXEndInc(minBegin, testX))
+					{
+						vector<Y> YL;
+						vector<Y> YR;
+						for (int i = 0; i < _Y.size(); i++)
+						{
+							if (_Y[i] < _rightChild->getIntervalStart())
+							{
+								YL.push_back(_Y[i]);
+							}
+						}
+						YL.push_back(rMsg._aY);
+						for (int i = 0; i < _Y.size(); i++)
+						{
+							if (_Y[i] >= _rightChild->getIntervalStart())
+							{
+								YR.push_back(_Y[i]);
+							}
+						}
+						vector<X> tempZL = _ZL;
+						vector<X> tempZR = _ZR;
+						tempZL.push_back(minBegin);
+						tempZR.push_back(testX);
+						tempZR.erase(find(tempZR.begin(), tempZR.end(), minBegin));
+						tempZL.erase(find(tempZL.begin(), tempZL.end(), testX));
+
+						vector<X> ZLNew, ZRNew;
+						gloverMatching(tempZL, YL, &ZLNew);
+						gloverMatching(tempZR, YR, &ZRNew);
+						if (ZLNew.size() == _ZL.size() && ZRNew.size() == _ZR.size())
+						{
+							_ZL.push_back(minBegin);
+							_ZR.push_back(testX);
+							_ZR.erase(find(_ZR.begin(), _ZR.end(), minBegin));
+							_ZL.erase(find(_ZL.begin(), _ZL.end(), testX));
+						}
+					}
+				}
+				else
+				{
+					vector<X> R;
+					determineReachableSetinEE(testX, R, *new bool);
+					R.push_back(testX);
+					sort(R.begin(), R.end(), cmpXEndInc);
+					X maxEnd = R[R.size() - 1];
+					if (cmpXEndInc(testX, maxEnd))
+					{
+						vector<Y> YL;
+						vector<Y> YR;
+						for (int i = 0; i < _Y.size(); i++)
+						{
+							if (_Y[i] < _rightChild->getIntervalStart())
+							{
+								YL.push_back(_Y[i]);
+							}
+						}
+						YL.push_back(rMsg._aY);
+						for (int i = 0; i < _Y.size(); i++)
+						{
+							if (_Y[i] >= _rightChild->getIntervalStart())
+							{
+								YR.push_back(_Y[i]);
+							}
+						}
+						vector<X> tempZL = _ZL;
+						vector<X> tempZR = _ZR;
+						tempZL.push_back(testX);
+						tempZR.push_back(maxEnd);
+						tempZR.erase(find(tempZR.begin(), tempZR.end(), testX));
+						tempZL.erase(find(tempZL.begin(), tempZL.end(), maxEnd));
+
+						vector<X> ZLNew, ZRNew;
+						gloverMatching(tempZL, YL, &ZLNew);
+						gloverMatching(tempZR, YR, &ZRNew);
+						if (ZLNew.size() == _ZL.size() && ZRNew.size() == _ZR.size())
+						{
+							_ZL.push_back(testX);
+							_ZR.push_back(maxEnd);
+							_ZR.erase(find(_ZR.begin(), _ZR.end(), testX));
+							_ZL.erase(find(_ZL.begin(), _ZL.end(), maxEnd));
+						}
+					}
+				}
+			}
+
+		}
+		
 		return rMsg;
 		
 	}
@@ -824,7 +978,7 @@ Msg TreeNode::insertYintoInternalNodeR(Msg msg)
 		sort(cTP.begin(), cTP.end(), cmpXEndInc);
 		if (cTP.empty())
 		{
-			return rMsg;
+			//return rMsg;
 		}
 		else
 		{
@@ -834,7 +988,7 @@ Msg TreeNode::insertYintoInternalNodeR(Msg msg)
 			_T.erase(find(_T.begin(), _T.end(), cTP[0]));
 			rMsg._bT = cTP[0];
 			rMsg._aZ = cTP[0];
-			return rMsg;
+			//return rMsg;
 		}
 	}
 	else
@@ -875,49 +1029,71 @@ Msg TreeNode::insertYintoInternalNodeR(Msg msg)
 				_I.erase(find(_I.begin(), _I.end(), cx));
 				rMsg._bI = cx;
 				rMsg._aZ = cx;
-				return rMsg;
+				//return rMsg;
 			}
-			//a new invariant for ZL and ZR
-			//not (cx can only be add to left): 1. cx can be add to both 2. cx can only be add to right
-			sort(forwardX.begin(), forwardX.end(), cmpXBeginDec);
-			Y rbT = rightBetaTightPointforZL(forwardX[0]._s);
-			if (cx._e >= _rightChild->getIntervalStart() && cx._s < _rightChild->getIntervalStart() && cx._s < rbT)
+			else
 			{
-				//1. cx can be add to both 
-				//calculate the real forwardX
-				Y lbT = leftBetaTightPointforZL(cx._s);
-				vector<X> realForwardX;
-				for (int i = 0; i < forwardX.size(); i++)
+				//a new invariant for ZL and ZR
+				//not (cx can only be add to left): 1. cx can be add to both 2. cx can only be add to right
+				sort(forwardX.begin(), forwardX.end(), cmpXBeginDec);
+				Y rbT = rightBetaTightPointforZL(forwardX[0]._s);
+				if (cx._e >= _rightChild->getIntervalStart() && cx._s < _rightChild->getIntervalStart() && cx._s < rbT)
 				{
-					if (forwardX[i]._s >= lbT)
+					//1. cx can be add to both 
+					//calculate the real forwardX
+					Y lbT = leftBetaTightPointforZL(cx._s);
+					vector<X> realForwardX;
+					for (int i = 0; i < forwardX.size(); i++)
 					{
-						realForwardX.push_back(forwardX[i]);
+						if (forwardX[i]._s >= lbT)
+						{
+							realForwardX.push_back(forwardX[i]);
+						}
 					}
+					forwardX = realForwardX;
+					sort(forwardX.begin(), forwardX.end(), cmpXEndInc);
+					if (cmpXEndInc(cx, forwardX[forwardX.size() - 1]))
+					{
+						_ZR.push_back(forwardX[forwardX.size() - 1]);
+						_ZL.erase(find(_ZL.begin(), _ZL.end(), forwardX[forwardX.size() - 1]));
+						_ZL.push_back(cx);
+						_Z.push_back(cx);
+						_I.erase(find(_I.begin(), _I.end(), cx));
+						rMsg._bI = cx;
+						rMsg._aZ = cx;
+						//return rMsg;
+					}
+					else
+					{
+						_I.erase(find(_I.begin(), _I.end(), cx));
+						_Z.push_back(cx);
+						_ZR.push_back(cx);
+						rMsg._bI = cx;
+						rMsg._aZ = cx;
+					}
+
 				}
-				forwardX = realForwardX;
-				sort(forwardX.begin(), forwardX.end(), cmpXEndInc);
-				if (cmpXEndInc(cx, forwardX[forwardX.size() - 1]))
+				else
 				{
-					_ZR.push_back(forwardX[forwardX.size() - 1]);
-					_ZL.erase(find(_ZL.begin(), _ZL.end(), forwardX[forwardX.size() - 1]));
-					_ZL.push_back(cx);
-					_Z.push_back(cx);
 					_I.erase(find(_I.begin(), _I.end(), cx));
+					_Z.push_back(cx);
+					_ZR.push_back(cx);
 					rMsg._bI = cx;
 					rMsg._aZ = cx;
-					return rMsg;
 				}
-
 			}
+			
 		}
-		//not in left
-		//in TIL or right
-		_I.erase(find(_I.begin(), _I.end(), cx));
-		_Z.push_back(cx);
-		_ZR.push_back(cx);
-		rMsg._bI = cx;
-		rMsg._aZ = cx;
-		return rMsg;
+		else
+		{
+			_I.erase(find(_I.begin(), _I.end(), cx));
+			_Z.push_back(cx);
+			_ZR.push_back(cx);
+			rMsg._bI = cx;
+			rMsg._aZ = cx;
+		}
+		
+		//return rMsg;
 		//}
 		//else
 		//{
@@ -933,5 +1109,104 @@ Msg TreeNode::insertYintoInternalNodeR(Msg msg)
 		//	return rMsg;
 		//}
 	}
+	//adjust
+	//adjust
+	X testX = rMsg._aZ;
+	if (testX._id != -1 && testX._s < _rightChild->getIntervalStart() && testX._e >= _rightChild->getIntervalStart())
+	{
+		//a TL element
+		if (find(_ZL.begin(), _ZL.end(), testX) != _ZL.end())
+		{
+			vector<X> R;
+			determineReachableSetinES(testX, R, *new bool);
+			R.push_back(testX);
+			sort(R.begin(), R.end(), cmpXBeginDec);
+			X minBegin = R[R.size() - 1];
+			if (cmpXEndInc(minBegin, testX))
+			{
+				vector<Y> YL;
+				vector<Y> YR;
+				for (int i = 0; i < _Y.size(); i++)
+				{
+					if (_Y[i] < _rightChild->getIntervalStart())
+					{
+						YL.push_back(_Y[i]);
+					}
+				}
+				YL.push_back(rMsg._aY);
+				for (int i = 0; i < _Y.size(); i++)
+				{
+					if (_Y[i] >= _rightChild->getIntervalStart())
+					{
+						YR.push_back(_Y[i]);
+					}
+				}
+				vector<X> tempZL = _ZL;
+				vector<X> tempZR = _ZR;
+				tempZL.push_back(minBegin);
+				tempZR.push_back(testX);
+				tempZR.erase(find(tempZR.begin(), tempZR.end(), minBegin));
+				tempZL.erase(find(tempZL.begin(), tempZL.end(), testX));
+
+				vector<X> ZLNew, ZRNew;
+				gloverMatching(tempZL, YL, &ZLNew);
+				gloverMatching(tempZR, YR, &ZRNew);
+				if (ZLNew.size() == _ZL.size() && ZRNew.size() == _ZR.size())
+				{
+					_ZL.push_back(minBegin);
+					_ZR.push_back(testX);
+					_ZR.erase(find(_ZR.begin(), _ZR.end(), minBegin));
+					_ZL.erase(find(_ZL.begin(), _ZL.end(), testX));
+				}
+			}
+		}
+		else
+		{
+			vector<X> R;
+			determineReachableSetinEE(testX, R, *new bool);
+			R.push_back(testX);
+			sort(R.begin(), R.end(), cmpXEndInc);
+			X maxEnd = R[R.size() - 1];
+			if (cmpXEndInc(testX, maxEnd))
+			{
+				vector<Y> YL;
+				vector<Y> YR;
+				for (int i = 0; i < _Y.size(); i++)
+				{
+					if (_Y[i] < _rightChild->getIntervalStart())
+					{
+						YL.push_back(_Y[i]);
+					}
+				}
+				YL.push_back(rMsg._aY);
+				for (int i = 0; i < _Y.size(); i++)
+				{
+					if (_Y[i] >= _rightChild->getIntervalStart())
+					{
+						YR.push_back(_Y[i]);
+					}
+				}
+				vector<X> tempZL = _ZL;
+				vector<X> tempZR = _ZR;
+				tempZL.push_back(testX);
+				tempZR.push_back(maxEnd);
+				tempZR.erase(find(tempZR.begin(), tempZR.end(), testX));
+				tempZL.erase(find(tempZL.begin(), tempZL.end(), maxEnd));
+
+				vector<X> ZLNew, ZRNew;
+				gloverMatching(tempZL, YL, &ZLNew);
+				gloverMatching(tempZR, YR, &ZRNew);
+				if (ZLNew.size() == _ZL.size() && ZRNew.size() == _ZR.size())
+				{
+					_ZL.push_back(testX);
+					_ZR.push_back(maxEnd);
+					_ZR.erase(find(_ZR.begin(), _ZR.end(), testX));
+					_ZL.erase(find(_ZL.begin(), _ZL.end(), maxEnd));
+				}
+			}
+		}
+	}
+
+	return rMsg;
 
 }
