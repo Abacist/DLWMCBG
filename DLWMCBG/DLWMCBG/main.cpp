@@ -7,8 +7,8 @@
 
 using namespace std;
 
-const int mY =			100;
-const int ur =			500;
+const int mY =			30;
+const int ur =			100;
 int verifyEachUpdate =	0;//0 not verify, !0 verify
 int gen =				1;
 
@@ -105,7 +105,7 @@ int main()
 			{
 				Y y;
 				in >> y._id;	
-				if (y._id == 6)
+				if (y._id == 12)
 				{
 					int a = 1;
 				}

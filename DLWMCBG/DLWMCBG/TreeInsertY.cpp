@@ -41,14 +41,14 @@ bool Tree::insertYinTree(Y y)
 		}
 		nodeP->_Y.push_back(y);	// add y in Y
 		sort(nodeP->_Y.begin(), nodeP->_Y.end(), cmpYInc);	// sort Y after each _Y augmentation
-		/*if (verifyEachUpdate)
+		if (verifyEachUpdate)
 		{
 			int flag = nodeP->verifyNodeInvariants();
 			if (flag != 0)
 			{
 				__debugbreak();
 			}
-		}*/
+		}
 
 		child = nodeP;
 		nodeP = nodeP->_parentNode;
@@ -277,8 +277,8 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 			//try to remove some b-Tight point in the left part, make the CS correct
 			if (!TML.empty())
 			{
-				Y raTSwitch = rightAlphaTightPointforZR(TML[TML.size() - 1]._e);//by invariant 12
-				Y laTSwitch = leftAlphaTightPointforZR(TML[TML.size() - 1]._e);
+				sort(backX.begin(), backX.end(), cmpXEndInc);
+				Y laTSwitch = leftAlphaTightPointforZR(backX[0]._e);
 				vector<X> forwardSwitch;
 				for (int i = 0; i < TML.size(); i++)
 				{
@@ -287,33 +287,63 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 						forwardSwitch.push_back(TML[i]);
 					}
 				}
-				vector<X> backSwitch;
-				for (int i = 0; i < backX.size(); i++)
+				if (!forwardSwitch.empty())
 				{
-					if (raTSwitch._id == -1 || raTSwitch._id != -1 && backX[i]._e <= raTSwitch)
-					{
-						backSwitch.push_back(backX[i]);
-					}
-				}
-				if (!backSwitch.empty())
-				{
-					X maxBeginXForward, minBeginXBack;
+					X maxBeginXForward;
 					sort(forwardSwitch.begin(), forwardSwitch.end(), cmpXBeginDec);
-					sort(backSwitch.begin(), backSwitch.end(), cmpXBeginDec);
 					maxBeginXForward = forwardSwitch[0];
-					minBeginXBack = backSwitch[backSwitch.size() - 1];
-					if (minBeginXBack._s < maxBeginXForward._s && maxBeginXForward._s >= msg._aY)
+					X XBack = backX[0];
+					_ZL.erase(find(_ZL.begin(), _ZL.end(), maxBeginXForward));
+					_ZL.push_back(XBack);
+					Y rbTNew = rightBetaTightPointforZL(msg._aY);
+					if (rbTNew == msg._aY)
 					{
-						_ZL.erase(find(_ZL.begin(), _ZL.end(), maxBeginXForward));
-						_ZL.push_back(minBeginXBack);
-						Y rbTNew = rightBetaTightPointforZL(msg._aY);
-						if (rbT < rbTNew)
-						{
-							rbT = rbTNew;
-						}
-
+						rbT._id++;
+					}
+					if (rbT < rbTNew)
+					{
+						rbT = rbTNew;
 					}
 				}
+
+
+				//Y raTSwitch = rightAlphaTightPointforZR(TML[TML.size() - 1]._e);//by invariant 12
+				//Y laTSwitch = leftAlphaTightPointforZR(TML[TML.size() - 1]._e);
+				//vector<X> forwardSwitch;
+				//for (int i = 0; i < TML.size(); i++)
+				//{
+				//	if (laTSwitch._id == -1 || laTSwitch._id != -1 && TML[i]._e > laTSwitch)
+				//	{
+				//		forwardSwitch.push_back(TML[i]);
+				//	}
+				//}
+				//vector<X> backSwitch;
+				//for (int i = 0; i < backX.size(); i++)
+				//{
+				//	if (raTSwitch._id == -1 || raTSwitch._id != -1 && backX[i]._e <= raTSwitch)
+				//	{
+				//		backSwitch.push_back(backX[i]);
+				//	}
+				//}
+				//if (!backSwitch.empty())
+				//{
+				//	X maxBeginXForward, minBeginXBack;
+				//	sort(forwardSwitch.begin(), forwardSwitch.end(), cmpXBeginDec);
+				//	sort(backSwitch.begin(), backSwitch.end(), cmpXBeginDec);
+				//	maxBeginXForward = forwardSwitch[0];
+				//	minBeginXBack = backSwitch[backSwitch.size() - 1];
+				//	if (minBeginXBack._s < maxBeginXForward._s && maxBeginXForward._s >= msg._aY)
+				//	{
+				//		_ZL.erase(find(_ZL.begin(), _ZL.end(), maxBeginXForward));
+				//		_ZL.push_back(minBeginXBack);
+				//		Y rbTNew = rightBetaTightPointforZL(msg._aY);
+				//		if (rbT < rbTNew)
+				//		{
+				//			rbT = rbTNew;
+				//		}
+
+				//	}
+				//}
 			}
 		}
 		_ZL = ZLBackUp;
@@ -428,34 +458,34 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 							}
 							sort(cxR.begin(), cxR.end(), cmpXEndInc);
 							X forwardX = cxR[cxR.size() - 1];
-							Y raT = rightAlphaTightPointforZR(forwardX._e);
-							vector<X> backXFilter;
-							for (int i = 0; i < backX.size(); i++)
-							{
-								if (raT._id == -1 || raT._id != -1 && backX[i]._e <= raT)
-								{
-									backXFilter.push_back(backX[i]);
-								}
-							}
-							sort(backXFilter.begin(), backXFilter.end(), cmpXBeginDec);
-							//Y rbTforcx = rightBetaTightPointforZL(backXFilter[backXFilter.size() - 1]._s);
-							//the rbTBackUp will be removed!
-							vector<X> realBackX = backXFilter;
-							/*for (int i = 0; i < backXFilter.size(); i++)
-							{
-								if (backXFilter[i]._s < rbTforcx)
-								{
-									realBackX.push_back(backXFilter[i]);
-								}
-							}*/
-							sort(realBackX.begin(), realBackX.end(), cmpXEndInc);
+							//Y raT = rightAlphaTightPointforZR(forwardX._e);
+							//vector<X> backXFilter;
+							//for (int i = 0; i < backX.size(); i++)
+							//{
+							//	if (raT._id == -1 || raT._id != -1 && backX[i]._e <= raT)
+							//	{
+							//		backXFilter.push_back(backX[i]);
+							//	}
+							//}
+							//sort(backXFilter.begin(), backXFilter.end(), cmpXBeginDec);
+							////Y rbTforcx = rightBetaTightPointforZL(backXFilter[backXFilter.size() - 1]._s);
+							////the rbTBackUp will be removed!
+							//vector<X> realBackX = backXFilter;
+							///*for (int i = 0; i < backXFilter.size(); i++)
+							//{
+							//	if (backXFilter[i]._s < rbTforcx)
+							//	{
+							//		realBackX.push_back(backXFilter[i]);
+							//	}
+							//}*/
+							//sort(realBackX.begin(), realBackX.end(), cmpXEndInc);
 							_ZL.push_back(cx);
 							_Z.push_back(cx);
 							_I.erase(find(_I.begin(), _I.end(), cx));
 							_ZL.erase(find(_ZL.begin(), _ZL.end(), forwardX));
 							_ZR.push_back(forwardX);
-							_ZR.erase(find(_ZR.begin(), _ZR.end(), realBackX[0]));
-							_ZL.push_back(realBackX[0]);
+							_ZR.erase(find(_ZR.begin(), _ZR.end(), backX[0]));
+							_ZL.push_back(backX[0]);
 							rMsg._bI = cx;
 							rMsg._aZ = cx;
 							return rMsg;
@@ -478,6 +508,17 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 						if (cx._e > laT && cx._s < rbTBackUp)
 						{
 							//can be add to both side
+							X cxBackUp = cx;
+							vector<X> RinZL;
+							determineReachableSetinEE(cx, RinZL, *new bool);
+							RinZL.push_back(cx);
+							sort(RinZL.begin(), RinZL.end(), cmpXEndInc);
+							if (cmpXEndInc(cx, RinZL[RinZL.size() - 1]))
+							{
+								_ZL.push_back(cx);
+								_ZL.erase(find(_ZL.begin(), _ZL.end(), RinZL[RinZL.size() - 1]));
+								cx = RinZL[RinZL.size() - 1];
+							}
 							_ZR.erase(find(_ZR.begin(), _ZR.end(), backX[0]));
 							if (cmpXEndInc(cx, backX[0]))
 							{
@@ -490,10 +531,10 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 								_ZL.push_back(backX[0]);
 								_ZR.push_back(cx);
 							}
-							_I.erase(find(_I.begin(), _I.end(), cx));
-							_Z.push_back(cx);
-							rMsg._bI = cx;
-							rMsg._aZ = cx;
+							_I.erase(find(_I.begin(), _I.end(), cxBackUp));
+							_Z.push_back(cxBackUp);
+							rMsg._bI = cxBackUp;
+							rMsg._aZ = cxBackUp;
 							return rMsg;
 						}
 						else if (cx._e <= laT &&  cx._s < rbTBackUp)
@@ -538,33 +579,33 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 								else
 								{
 									//switch
-									Y raT = rightAlphaTightPointforZR(forwardX._e);
-									vector<X> backXFilter;
-									for (int i = 0; i < backX.size(); i++)
-									{
-										if (raT._id  == -1 || raT._id != -1 && backX[i]._e <= raT)
-										{
-											backXFilter.push_back(backX[i]);
-										}
-									}
-									sort(backXFilter.begin(), backXFilter.end(), cmpXBeginDec);
-									//Y rbTforcx = rightBetaTightPointforZL(backXFilter[backXFilter.size() - 1]._s);
-									vector<X> realBackX = backXFilter;
-									/*for (int i = 0; i < backXFilter.size(); i++)
-									{
-										if (backXFilter[i]._s < rbTforcx)
-										{
-											realBackX.push_back(backXFilter[i]);
-										}
-									}*/
-									sort(realBackX.begin(), realBackX.end(), cmpXEndInc);
+									//Y raT = rightAlphaTightPointforZR(forwardX._e);
+									//vector<X> backXFilter;
+									//for (int i = 0; i < backX.size(); i++)
+									//{
+									//	if (raT._id  == -1 || raT._id != -1 && backX[i]._e <= raT)
+									//	{
+									//		backXFilter.push_back(backX[i]);
+									//	}
+									//}
+									//sort(backXFilter.begin(), backXFilter.end(), cmpXBeginDec);
+									////Y rbTforcx = rightBetaTightPointforZL(backXFilter[backXFilter.size() - 1]._s);
+									//vector<X> realBackX = backXFilter;
+									///*for (int i = 0; i < backXFilter.size(); i++)
+									//{
+									//	if (backXFilter[i]._s < rbTforcx)
+									//	{
+									//		realBackX.push_back(backXFilter[i]);
+									//	}
+									//}*/
+									//sort(realBackX.begin(), realBackX.end(), cmpXEndInc);
 									_Z.push_back(cx);
 									_ZL.push_back(cx);
 									_I.erase(find(_I.begin(), _I.end(), cx));
 									_ZL.erase(find(_ZL.begin(), _ZL.end(), forwardX));
 									_ZR.push_back(forwardX);
-									_ZR.erase(find(_ZR.begin(), _ZR.end(), realBackX[0]));
-									_ZL.push_back(realBackX[0]);
+									_ZR.erase(find(_ZR.begin(), _ZR.end(), backX[0]));
+									_ZL.push_back(backX[0]);
 									rMsg._bI = cx;
 									rMsg._aZ = cx;
 									return rMsg;
@@ -599,33 +640,33 @@ Msg TreeNode::insertYintoInternalNodeL(Msg msg)
 							}
 							sort(cxR.begin(), cxR.end(), cmpXEndInc);
 							X forwardX = cxR[cxR.size() - 1];
-							Y raT = rightAlphaTightPointforZR(forwardX._e);
-							vector<X> backXFilter;
-							for (int i = 0; i < backX.size(); i++)
-							{
-								if (raT._id == -1 || raT._id != -1 && backX[i]._e <= raT)
-								{
-									backXFilter.push_back(backX[i]);
-								}
-							}
-							sort(backXFilter.begin(), backXFilter.end(), cmpXBeginDec);
-							//Y rbTforcx = rightBetaTightPointforZL(backXFilter[backXFilter.size() - 1]._s);
-							vector<X> realBackX = backXFilter;
-							/*for (int i = 0; i < backXFilter.size(); i++)
-							{
-								if (backXFilter[i]._s < rbTforcx)
-								{
-									realBackX.push_back(backXFilter[i]);
-								}
-							}*/
-							sort(realBackX.begin(), realBackX.end(), cmpXEndInc);
+							//Y raT = rightAlphaTightPointforZR(forwardX._e);
+							//vector<X> backXFilter;
+							//for (int i = 0; i < backX.size(); i++)
+							//{
+							//	if (raT._id == -1 || raT._id != -1 && backX[i]._e <= raT)
+							//	{
+							//		backXFilter.push_back(backX[i]);
+							//	}
+							//}
+							//sort(backXFilter.begin(), backXFilter.end(), cmpXBeginDec);
+							////Y rbTforcx = rightBetaTightPointforZL(backXFilter[backXFilter.size() - 1]._s);
+							//vector<X> realBackX = backXFilter;
+							///*for (int i = 0; i < backXFilter.size(); i++)
+							//{
+							//	if (backXFilter[i]._s < rbTforcx)
+							//	{
+							//		realBackX.push_back(backXFilter[i]);
+							//	}
+							//}*/
+							//sort(realBackX.begin(), realBackX.end(), cmpXEndInc);
 							_ZL.push_back(cx);
 							_Z.push_back(cx);
 							_I.erase(find(_I.begin(), _I.end(), cx));
 							_ZL.erase(find(_ZL.begin(), _ZL.end(), forwardX));
 							_ZR.push_back(forwardX);
-							_ZR.erase(find(_ZR.begin(), _ZR.end(), realBackX[0]));
-							_ZL.push_back(realBackX[0]);
+							_ZR.erase(find(_ZR.begin(), _ZR.end(), backX[0]));
+							_ZL.push_back(backX[0]);
 							rMsg._bI = cx;
 							rMsg._aZ = cx;
 							return rMsg;
